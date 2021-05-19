@@ -3,16 +3,20 @@
 import sys
 import netifaces
 
-def get_interface_ip(interface):
-    """ Uses module netifaces to get obtain the IP address information for the specified interface
+
+def get_interface_ip(interface: str):
     """
-    if not interface in netifaces.interfaces():
+    Uses module netifaces to get obtain the IP
+    address information for the specified interface
+    """
+    if interface not in netifaces.interfaces():
         return '', False
     addrs = netifaces.ifaddresses(interface)
     if netifaces.AF_INET in addrs:
         ipinfo = addrs[netifaces.AF_INET][0]
         return ipinfo['addr'], True
     return '', False
+
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
