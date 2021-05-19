@@ -10,6 +10,9 @@ def getMAC():
     else:
         new_c_string = sys.argv[1]
         c_type, input_bool = determine_c_type(new_c_string, input_bool)
+        if not input_bool:
+          print("Error entering connection type.")
+          sys.exit(1)
         
     try:
             str = open('/sys/class/net/'+c_type+'/address').read()
