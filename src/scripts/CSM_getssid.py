@@ -7,6 +7,8 @@ import sys
 def get_ssid(interface: str = 'wlan0'):
     """
     Get wireless SSID for specified interface
+    Return ssid,status
+    status false if interface nonexistent or no SSID
     """
     result = subprocess.run(['iwgetid', interface, '-r'], capture_output=True)
     if result.returncode != 0:
