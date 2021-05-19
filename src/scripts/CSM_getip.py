@@ -28,6 +28,7 @@ if __name__ == '__main__':
 			print('Interface:',sys.argv[1],'--', 'IP:',ip)
 		else:
 			print('Interface inactive')
+                        sys.exit(1)
 	else:
 		wlanip,wstatus=GetInterfaceIp('wlan0')
 		ethip,estatus=GetInterfaceIp('eth0')
@@ -37,3 +38,4 @@ if __name__ == '__main__':
 			print('Interface: eth0 -- IP:',wlanip)
 		else:
 			print('No active interface')
+                        sys.exit(1)
