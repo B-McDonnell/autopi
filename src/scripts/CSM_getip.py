@@ -1,28 +1,18 @@
 #!/usr/bin/env python3
 
-import subprocess
 import sys
-
-
-def parse_output_ip(output):
-    """ parse ifconfig output and get the ip
-    """
-    arr = output.split(b'\n')
-    if not arr[0].find(b'RUNNING') != -1:
-        return '', False
-    ipline = arr[1].decode('utf-8').strip()
-    iparg = ipline.split(' ')[1]
-    return iparg, True
-
+import netifaces
 
 def get_interface_ip(interface):
-    """  run ifconfig, check status code, and parse
+    """ Uses module netifaces to get obtain the IP address information for the specified interface
     """
-    result = subprocess.run(['ifconfig', interface], capture_output=True)
-    if result.returncode != 0:
+    if not interface in netifaces.interfaces():
         return '', False
-    return parse_output_ip(result.stdout)
-
+    addrs = netifaces.ifaddresses(interface)
+    if netifaces.AF_INET in addrs:
+        ipinfo = addrs[netifaces.AF_INET][0]
+        return ipinfo['addr'], True
+    return '', False
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -39,7 +29,7 @@ if __name__ == '__main__':
         if wstatus:
             print('Interface: wlan0 -- IP:', wlanip)
         elif estatus:
-            print('Interface: eth0 -- IP:', wlanip)
+            print('Interface: eth0 -- IP:', ethip)
         else:
             print('No active interface')
             sys.exit(1)
