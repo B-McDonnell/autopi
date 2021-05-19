@@ -16,6 +16,6 @@ Script requires python 3.7 (possibly 3.4)
 
 It has two python functions: 
 - `get_interface_ip(interface)` which gets the ip address of the specified 'interface' (string) if the interface is available. Returns 'ipaddress,status' (string, boolean respectively). Status (if 'True') indicates that the interface is active (has an ipaddress), ipaddress will be blank if status is 'False'.
-- `parse_output_ip(output)` is a helper function for `GetInterfaceIp(...)`, it expects that output will be the output of running `ifconfig INTERFACE_NAME`. output is a bytes object. The functions returns the same thing as `GetInterfaceIp(...)`
+- `parse_output_ip(output)` is a helper function for `get_interface_ip(...)`, it expects that output will be the output of running `ifconfig INTERFACE_NAME`. output is a bytes object. The functions returns the same thing as `get_interface_ip(...)`
 
 The script can be used as a python module `import CSM_getipaddr` if desired with no ill effects, as long as the script is in the module path.
