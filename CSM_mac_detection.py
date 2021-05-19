@@ -17,7 +17,8 @@ def getMAC():
     try:
             str = open('/sys/class/net/'+c_type+'/address').read()
     except:
-        str = "00:00:00:00:00:00"
+        print("Error")
+        sys.exit(1)
     return str[0:17]
 
 def determine_c_type(input_string, input_bool):
