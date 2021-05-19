@@ -7,8 +7,7 @@ def getMAC():
     input_bool = False
     if len(sys.argv) == 1:
         while not input_bool:
-            connection =
-            input("What is your connection type? (ethernet, wireless)\n")
+            connection = input("What is your connection type? (ethernet, wireless)\n")
             c_type, input_bool = determine_c_type(connection, input_bool)
     else:
         new_c_string = sys.argv[1]
