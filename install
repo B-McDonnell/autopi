@@ -1,2 +1,2 @@
 cp ./src/scripts/CSM_getip.py /usr/bin/CSM_getip
-chmod /usr/bin/CSM_getip
+chmod +x /usr/bin/CSM_getip
