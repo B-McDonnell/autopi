@@ -1,1 +1,3 @@
-# autopi
+# Installation instructions
+
+# Usage instructions
