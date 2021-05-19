@@ -4,10 +4,10 @@
 By default, the script will fetch the IP address of the active network interface (either eth0 or wlan0). If both eth0 and wlan0 are active, it will favor wlan0.
 
 # Output Format
-It will output "Interface: IFTERFACE\_NAME -- IP: x.x.x.x" on success.
+It will output "Interface: INTERFACE\_NAME -- IP: x.x.x.x" on success.
 
 # Implementation Notes
-The script internally uses netifaces to fetch the interface information, and parses the output.
+The script internally uses netifaces to fetch the interface information.
 
 # DETAILED IMPLEMENTATION
 Script requires python 3.7
