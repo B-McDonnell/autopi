@@ -7,3 +7,7 @@ chmod +x /usr/bin/CSM_getip
 
 cp ./src/scripts/CSM_getssid.py /usr/bin/CSM_getssid
 chmod +x /usr/bin/CSM_getssid
+
+cp ./src/scripts/CSM_get_mac.py /usr/bin/CSM_get_mac
+chmod +x /usr/bin/CSM_get_mac
+
