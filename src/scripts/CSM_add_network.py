@@ -4,45 +4,84 @@ import sys
 import subprocess
 
 
-def wpa_passphrase(ssid: str, passphrase: str) -> bytes:
+def wpa_passphrase(ssid: str, passphrase: str) -> str:
+    """Create an encrypted network config information for an ssid/passphrase pair.
+
+    Args:
+        ssid (str): ssid name of the network.
+        passphrase (str): password of the network.
+
+    Raises:
+        ValueError: passwork does not meet wpa length requirements.
+        subprocess.CalledProcessError: wpa_passphrase failed.
+
+    Returns:
+        str: wpa network configuration.
+    """
     if len(passphrase) < 8 or len(passphrase) > 63:
         raise ValueError(
             "Passphrase must be between 8 and 64 characters, inclusive")
     result = subprocess.run(
         ['wpa_passphrase', ssid, passphrase], capture_output=True, check=True)
-    return result.stdout
+    return str(result.stdout, encoding='utf8')
 
 
-def strip_comments(wpa_config: bytes) -> bytes:
-    lines = wpa_config.split(b'\n')
+def strip_comment_lines(wpa_config: str) -> str:
+    """Remove any lines starting with '#'.
+
+    Args:
+        wpa_config (str): config to remove comments from.
+
+    Returns:
+        str: config with commented lines removed.
+    """
+    lines = wpa_config.split('\n')
     commentless_lines = [
-        line for line in lines if not line.strip().startswith(b'#')]
-    return b'\n'.join(commentless_lines)
+        line for line in lines if not line.strip().startswith('#')]
+    return '\n'.join(commentless_lines)
 
 
-def wpa_no_passphrase(ssid: str) -> bytes:
+def wpa_no_passphrase(ssid: str) -> str:
+    """Generate a wpa network config for an unprotected network.
+
+    Args:
+        ssid (str): ssid of the network.
+
+    Returns:
+        str: generated network config.
+    """
     config = 'network={\n'
     config += f'\tssid="{ssid}"\n'
     config += '\tkey_mgmt=NONE\n'
     config += '}\n'
-    return bytes(config, encoding='utf8')
+    return config
 
 
-def add_priority(wpa_config: bytes, priority: int) -> bytes:
-    lines = wpa_config.split(b'\n')
+def add_priority(wpa_config: str, priority: int) -> str:
+    """Add a priority level to a wpa network config.
+
+    Args:
+        wpa_config (str): wpa network config to modify.
+        priority (int): priority level.
+
+    Returns:
+        str: modified wpa network config.
+    """
+    lines = wpa_config.split('\n')
     for i, line in enumerate(lines):
-        if line.strip() == b'}':
+        if line.strip() == '}':
             closing_index = i
-    lines.insert(closing_index, bytes(
-        f'\tpriority={priority}', encoding='utf8'))
-    return b'\n'.join(lines)
-
-
-def print_config(wpa_config: bytes):
-    print(str(wpa_config, encoding='utf8'))
+    lines.insert(closing_index, f'\tpriority={priority}')
+    return '\n'.join(lines)
 
 
 def add_country(config_filename: str, /, country: str):
+    """Add country information to the wpa config file.
+
+    Args:
+        config_filename (str): path to the wpa config file
+        country (str): ISO 3166-1 country code.
+    """
     with open(config_filename, 'r') as fin:
         lines = fin.readlines()
     for line in lines:
@@ -56,8 +95,14 @@ def add_country(config_filename: str, /, country: str):
         fout.writelines(lines)
 
 
-def update_config(wpa_config: bytes, config_filename: str):
-    with open(config_filename, 'ba') as fout:
+def update_config(wpa_config: str, config_filename: str):
+    """Update the wpa config file and reconfigure the network via wpa_cli.
+
+    Args:
+        wpa_config (str): wpa_network config to append to the wpa config.
+        config_filename (str): path to wpa config.
+    """
+    with open(config_filename, 'a') as fout:
         fout.write(wpa_config)
     # subprocess.run(['wpa_cli', '-i', 'wlan0', 'reconfigure'], check=True)
 
@@ -67,7 +112,7 @@ def main(args: argparse.ArgumentParser):
     if not args.no_password:
         try:
             config = wpa_passphrase(args.SSID, args.password)
-            config = strip_comments(config)
+            config = strip_comment_lines(config)
         except subprocess.CalledProcessError as e:
             print(e.stdout, file=sys.stderr)
             sys.exit(1)
@@ -83,12 +128,12 @@ def main(args: argparse.ArgumentParser):
 
     # update config or print network config
     if args.dry_run:
-        print_config(config)
+        print(config)
     else:
         if args.std_out:
-            print_config(config)
+            print(config)
 
-        config_filename = 'temp'
+        config_filename = '/etc/wpa_supplicant/wpa_supplicant.conf'
         add_country(config_filename, args.country)
         update_config(config, config_filename)
 
