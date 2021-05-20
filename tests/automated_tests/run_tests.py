@@ -13,11 +13,16 @@ def get_dirs(p: Path):
     """
     Get all subdirectories under a directory
     Assumes that p is a directory
+    Returns a list of Path objects for each directory
     """
     return [x for x in p.iterdir() if x.is_dir() and x.name != '__pycache__']
 
 
 def get_test_files(p: Path):
+    """
+    Get all files named according to the pattern *_test.py in the specified folder (non-recursive).
+    Returns a list of Path objects for each test file
+    """
     flist = [x for x in p.iterdir() if x.is_file()]
     return [x for x in flist if x.name.endswith('_test.py')]
 
@@ -31,6 +36,8 @@ nerrors = 0
 nfailures = 0
 nskipped = 0
 for p in test_dirs:
+    # Load all scripts under directory p, run tests in them
+
     print("===================================")
     print("Running tests for script:", p.name)
     print("===================================")
@@ -43,6 +50,8 @@ for p in test_dirs:
     modules = [import_module(p.name + '.' + x.stem) for x in testfiles]
     os.chdir(str(p))
     for i,module in enumerate(modules):
+        # Run all unittest tests in each file
+
         print("-----------------------------------")
         print("Running tests for script:", testfiles[i].name)
         print("-----------------------------------")
@@ -57,6 +66,7 @@ for p in test_dirs:
     print()
     print()
 
+# Print results
 print("------------------------------------------------")
 print("================================================")
 print()
