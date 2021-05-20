@@ -10,11 +10,7 @@ def getMAC():
             connection = input("What is your connection type? (ethernet, wireless)\n")
             c_type, input_bool = determine_c_type(connection, input_bool)
     else:
-        new_c_string = sys.argv[1]
-        c_type, input_bool = determine_c_type(new_c_string, input_bool)
-        if not input_bool:
-            print("Error entering connection type.")
-            sys.exit(1)
+        c_type = sys.argv[1]
     try:
             # str = open('/sys/class/net/'+c_type+'/address').read()
             str = netifaces.ifaddresses(c_type)[netifaces.AF_LINK][0]['addr']
@@ -34,4 +30,5 @@ def determine_c_type(input_string, input_bool):
     else:
         c_type = ''
     return c_type, input_bool
-print(getMAC())
+if __name__ == "__main__":
+    print(getMAC())
