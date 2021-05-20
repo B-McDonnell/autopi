@@ -4,3 +4,6 @@ pip3 install -r requirements.txt
 # Copy scripts to /usr/bin and give them execute permissions
 cp ./src/scripts/CSM_getip.py /usr/bin/CSM_getip
 chmod +x /usr/bin/CSM_getip
+
+cp ./src/scripts/CSM_getssid.py /usr/bin/CSM_getssid
+chmod +x /usr/bin/CSM_getssid
