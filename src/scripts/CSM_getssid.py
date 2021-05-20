@@ -11,7 +11,7 @@ def get_ssid(interface: str):
     Returns:
         ssid: str, status: bool
     If status is true, then the ssid was successfully obtained and returned in 'ssid', otherwise ssid is empty. 
-    Status false if interface nonexistent or no SSID
+    Status false if interface nonexistent, interface is not wireless, or currently has no SSID
     """
     result = subprocess.run(['iwgetid', interface, '-r'], capture_output=True)
     if result.returncode != 0:
