@@ -353,3 +353,6 @@ MigrationBackup/
 # VIM temporary files
 *~
 *.swp
+
+# RStudio
+.Rhistory
