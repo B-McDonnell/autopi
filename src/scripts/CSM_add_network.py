@@ -77,9 +77,15 @@ def add_priority(wpa_config: str, priority: int) -> str:
 
 
 def fix_header(config_filename: str, country: str = None):
+    """Forces configuration header to match Raspberry Pi documentation.
+
+    Args:
+        config_filename (str): path to wpa configuration file.
+        country (str, optional): ISO 3166-1 country code for the network. Defaults to None.
+    """
     with open(config_filename) as fin:
         lines = fin.readlines()
-    
+
     # build header
     # https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md
     # QUESTION: are there other valid header configurations on the RasPi?
@@ -116,9 +122,16 @@ def fix_header(config_filename: str, country: str = None):
     with open(config_filename, 'w') as fout:
         fout.write(''.join(contents))
 
+
 def run_reconfigure():
-    return
-    subprocess.run(['wpa_cli', '-i', 'wlan0', 'reconfigure'], check=True)
+    """Use wpa_cli to reconfigure wpa. Exits program if wpa_cli fails.
+    """
+    response = subprocess.run(
+        ['wpa_cli', '-i', 'wlan0', 'reconfigure'], check=True, capture_output=True)
+    if response.stdout != b'OK':
+        print('wpa_cli: reconfiguration failed', file=sys.stderr)
+        sys.exit(1)
+
 
 def update_config(wpa_config: str, config_filename: str):
     """Update the wpa config file and reconfigure the network via wpa_cli.
@@ -157,27 +170,29 @@ def main(args: argparse.ArgumentParser):
     if args.priority:
         config = add_priority(config, args.priority)
 
+
+    # set up config file
+    config_filename = '/etc/wpa_supplicant/wpa_supplicant.conf'
+    if args.config_file:
+        config_filename = args.config_file
+    if not os.path.isfile(config_filename):
+        print(f'"{config_filename}" is not a valid file', file=sys.stderr)
+        sys.exit(1)
+    
     # update config or print network config
     if args.dry_run:
+        print(f'To be added to "{config_filename}":\n')
         print(config)
     else:
         if args.std_out:
             print(config)
-
-        # set up config file
-        config_filename = 'test'
-        if args.config_file:
-            config_filename = args.config_file
-        if not os.path.isfile(config_filename):
-            print(f'{config_filename} is not a valid file', file=sys.stderr)
-            sys.exit(1)
 
         # fix config file
         if args.country:
             fix_header(config_filename, args.country)
         else:
             fix_header(config_filename)
-        
+
         # add network
         update_config(config, config_filename)
 
@@ -189,7 +204,8 @@ if __name__ == '__main__':
                         help="write network configuration to stdout")
     parser.add_argument("--dry-run", action="store_true",
                         help="do not update network configuration. --std-out is assumed")
-    parser.add_argument("-f", "--config-file", type=str, required=False, help="path to the configuration file. Only for advanced users")
+    parser.add_argument("-f", "--config-file", type=str, required=False,
+                        help="path to the configuration file. Only for advanced users")
     parser.add_argument("--priority", type=int,
                         help="priority level for the network. Networks with a higher priority network will be joined first")
     parser.add_argument("-c", "--country", type=str, required=False,
