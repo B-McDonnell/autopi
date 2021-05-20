@@ -49,7 +49,7 @@ for p in test_dirs:
     os.chdir(save_dir)
     modules = [import_module(p.name + '.' + x.stem) for x in testfiles]
     os.chdir(str(p))
-    for i,module in enumerate(modules):
+    for i, module in enumerate(modules):
         # Run all unittest tests in each file
 
         print("-----------------------------------")

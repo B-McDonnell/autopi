@@ -23,3 +23,5 @@ The current working directory will be the test's folder. So, to access the corre
 `python3 ../../../src/scripts/SCRIPT`
 
 No execution order for test files or tests in a file is guaranteed.
+
+Test folders should be named with the stem of the script name. That is, 'CSM_getip.py' test folder should be named 'CSM_getip'. Non-compliance will be punished severely...
