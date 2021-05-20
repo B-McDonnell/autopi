@@ -13,7 +13,7 @@ def wpa_passphrase(ssid: str, passphrase: str) -> str:
         passphrase (str): password of the network.
 
     Raises:
-        ValueError: passwork does not meet wpa length requirements.
+        ValueError: password does not meet wpa length requirements.
         subprocess.CalledProcessError: wpa_passphrase failed.
 
     Returns:
@@ -21,7 +21,7 @@ def wpa_passphrase(ssid: str, passphrase: str) -> str:
     """
     if len(passphrase) < 8 or len(passphrase) > 63:
         raise ValueError(
-            "Passphrase must be between 8 and 64 characters, inclusive")
+            "Passphrase must be from 8 to 63 characters (inclusive)")
     result = subprocess.run(
         ['wpa_passphrase', ssid, passphrase], capture_output=True, check=True)
     return str(result.stdout, encoding='utf8')
