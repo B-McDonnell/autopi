@@ -2,6 +2,7 @@
 import argparse
 import sys
 import subprocess
+import os
 
 
 def wpa_passphrase(ssid: str, passphrase: str) -> str:
@@ -75,24 +76,45 @@ def add_priority(wpa_config: str, priority: int) -> str:
     return '\n'.join(lines)
 
 
-def add_country(config_filename: str, /, country: str):
-    """Add country information to the wpa config file.
-
-    Args:
-        config_filename (str): path to the wpa config file
-        country (str): ISO 3166-1 country code.
-    """
-    with open(config_filename, 'r') as fin:
+def fix_header(config_filename: str, country: str = None):
+    with open(config_filename) as fin:
         lines = fin.readlines()
+    
+    # build header
+    # https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md
+    # QUESTION: are there other valid header configurations on the RasPi?
+    header = [
+        'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n',
+        'update_config=1\n'
+    ]
+    if country is None:
+        # default country to US
+        country_line = 'country=US\n'
+
+        # if country already exists, keep it
+        for line in lines:
+            if line.strip().startswith('country='):
+                country_line = line
+                break
+    else:
+        # set country to argument
+        country_line = f'country={country}\n'
+    header.append(country_line)
+    header.append('\n')
+
+    # build network configs
+    networks = []
+    found_networks = False
     for line in lines:
-        if line.strip().startswith('country'):
-            return
-    for i, line in enumerate(lines):
-        if line.strip().startswith('network={') or i == len(lines) - 1:
-            lines.insert(i, f'country={country}\n')
-            break
+        if not found_networks and line.strip().startswith('network={'):
+            found_networks = True
+        if found_networks:
+            networks.append(line)
+
+    # write output
+    contents = header + networks
     with open(config_filename, 'w') as fout:
-        fout.writelines(lines)
+        fout.write(''.join(contents))
 
 
 def update_config(wpa_config: str, config_filename: str):
@@ -133,8 +155,21 @@ def main(args: argparse.ArgumentParser):
         if args.std_out:
             print(config)
 
-        config_filename = '/etc/wpa_supplicant/wpa_supplicant.conf'
-        add_country(config_filename, args.country)
+        # set up config file
+        config_filename = 'test'
+        if args.config_file:
+            config_filename = args.config_file
+        if not os.path.isfile(config_filename):
+            print(f'{config_filename} is not a valid file', file=sys.stderr)
+            sys.exit(1)
+
+        # fix config file
+        if args.country:
+            fix_header(config_filename, args.country)
+        else:
+            fix_header(config_filename)
+        
+        # add network
         update_config(config, config_filename)
 
 
@@ -145,9 +180,10 @@ if __name__ == '__main__':
                         help="write network configuration to stdout")
     parser.add_argument("--dry-run", action="store_true",
                         help="do not update network configuration. --std-out is assumed")
+    parser.add_argument("-f", "--config-file", type=str, required=False, help="path to the configuration file. Only for advanced users")
     parser.add_argument("--priority", type=int,
                         help="priority level for the network. Networks with a higher priority network will be joined first")
-    parser.add_argument("-c", "--country", type=str, required=False, default="US",
+    parser.add_argument("-c", "--country", type=str, required=False,
                         help="ISO 3166-1 country code for network country. Defaults to US")
     auth_group = parser.add_argument_group()
 
