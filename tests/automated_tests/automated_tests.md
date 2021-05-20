@@ -3,6 +3,8 @@
 Each subfolder under the current folder will be searched for python files of the form '\*\_test.py'. Each such file will be treated as containing unit tests as expected by the 'unittest' framework. These have the following form:
 
 ```
+import unittest
+
 class REPLACEWITHGROUPTESTNAME(unittest.TestCase):
     def TESTFUNCTION(self):
         ... # test code
