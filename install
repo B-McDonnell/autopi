@@ -1,2 +1,2 @@
 cp ./src/scripts/CSM_mac_detection.py /usr/bin/CSM_mac_detection
-chmod /usr/bin/CSM_mac_detection
+chmod +x /usr/bin/CSM_mac_detection
