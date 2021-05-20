@@ -116,6 +116,9 @@ def fix_header(config_filename: str, country: str = None):
     with open(config_filename, 'w') as fout:
         fout.write(''.join(contents))
 
+def run_reconfigure():
+    return
+    subprocess.run(['wpa_cli', '-i', 'wlan0', 'reconfigure'], check=True)
 
 def update_config(wpa_config: str, config_filename: str):
     """Update the wpa config file and reconfigure the network via wpa_cli.
@@ -124,9 +127,15 @@ def update_config(wpa_config: str, config_filename: str):
         wpa_config (str): wpa_network config to append to the wpa config.
         config_filename (str): path to wpa config.
     """
+    # exit if exact matching config exists
+    with open(config_filename) as fin:
+        if wpa_config in fin.read():
+            run_reconfigure()
+            return
+
     with open(config_filename, 'a') as fout:
         fout.write(wpa_config)
-    # subprocess.run(['wpa_cli', '-i', 'wlan0', 'reconfigure'], check=True)
+    run_reconfigure()
 
 
 def main(args: argparse.ArgumentParser):
