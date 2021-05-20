@@ -128,8 +128,8 @@ def run_reconfigure():
     """
     response = subprocess.run(
         ['wpa_cli', '-i', 'wlan0', 'reconfigure'], check=True, capture_output=True)
-    if response.stdout != b'OK':
-        print('wpa_cli: reconfiguration failed', file=sys.stderr)
+    if response.stdout != b'OK\n':
+        print('wpa_cli reconfiguration failed', file=sys.stderr)
         sys.exit(1)
 
 
