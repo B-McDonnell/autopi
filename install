@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+cp ./src/scripts/CSM_add_network.py /usr/bin/CSM_add_network
+chmod +x /usr/bin/CSM_add_network
