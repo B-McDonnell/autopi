@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
 
+# ============================
+#   move scripts to /usr/bin
+# ============================
 cp ./src/scripts/CSM_add_network.py /usr/bin/CSM_add_network
 chmod +x /usr/bin/CSM_add_network
+
+# ============================
+#      run initial setup
+# ============================
+# add guest network by default
+CSM_add_network --no-password --priority=1 CSMguest
