@@ -27,6 +27,9 @@ chmod +x /usr/bin/CSM_add_network
 cp ./src/scripts/CSM_wpa_country.py /usr/bin/CSM_wpa_country
 chmod +x /usr/bin/CSM_wpa_country
 
+cp ./src/scripts/CSM_setup_home_network.py /usr/bin/CSM_setup_home_network
+chmod +x /usr/bin/CSM_setup_home_network
+
 
 # ============================
 #      run initial setup
