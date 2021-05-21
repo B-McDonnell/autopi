@@ -3,6 +3,7 @@
 import subprocess
 import sys
 import os
+from subprocess import check_output
 
 def set_home_network():
   
@@ -52,7 +53,11 @@ def set_home_network():
               else:
                   print("Error! Re-enter input using (low, medium, high)")
        
-  
+  is_country = subprocess.call(["CSM_wpa_country", "get"], stdout = subprocess.DEVNULL, stderr = subprocess.STDOUT)
+  if is_country is not 0:
+      items.append("-c")
+      items.append("US")
+    
   if is_there_password:
       items.append("-p")
       items.append(password)
