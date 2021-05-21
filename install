@@ -6,8 +6,16 @@
 cp ./src/scripts/CSM_add_network.py /usr/bin/CSM_add_network
 chmod +x /usr/bin/CSM_add_network
 
+cp ./src/scripts/CSM_wpa_country.py /usr/bin/CSM_wpa_country
+chmod +x /usr/bin/CSM_wpa_country
+
 # ============================
 #      run initial setup
 # ============================
+# add country information to network discovery system
+CSM_wpa_country get 1>/dev/null
+if [ $? -ne 0 ]; then
+    CSM_wpa_country update US
+fi
 # add guest network by default
 CSM_add_network --no-password --priority=1 CSMguest
