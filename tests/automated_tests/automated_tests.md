@@ -16,10 +16,10 @@ The following is an example of good practice directory structure:
 
 ```
 tests/automated_tests/
-- CSM_script1/
--- input/          # Optional; use this directory for input files needed by a test
--- output/         # Optional; use this directory for any output examples needed by a test
--- script_test.py  # This is the only required file, note the '*_test.py' name.
+  - CSM_script1/
+    - input/          # Optional; use this directory for input files needed by a test
+    - output/         # Optional; use this directory for any output examples needed by a test
+    - script_test.py  # This is the only required file, note the '*_test.py' name.
 ```
 
 Each test file will be treated as containing unit tests as expected by the 'unittest' framework. These have the following form:
