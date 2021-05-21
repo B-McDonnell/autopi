@@ -1,6 +1,6 @@
 # Usage
 ```
-usage: CSM_add_network [-h] [-o] [--dry-run] [--priority PRIORITY] [-c COUNTRY] (-n | -p PASSWORD) SSID
+usage: CSM_add_network.py [-h] [-o] [--dry-run] [-f CONFIG_FILE] [--priority PRIORITY] (-n | -p PASSWORD) SSID
 
 positional arguments:
   SSID                  SSID of the network
@@ -9,9 +9,9 @@ optional arguments:
   -h, --help            show this help message and exit
   -o, --std-out         write network configuration to stdout
   --dry-run             do not update network configuration. --std-out is assumed
+  -f CONFIG_FILE, --config-file CONFIG_FILE
+                        path to the configuration file. Only for advanced users
   --priority PRIORITY   priority level for the network. Networks with a higher priority network will be joined first
-  -c COUNTRY, --country COUNTRY
-                        ISO 3166-1 country code for network country. Defaults to US
   -n, --no-password     network does not require a password
   -p PASSWORD, --password PASSWORD
                         password for network. If not specified, will read from stdin

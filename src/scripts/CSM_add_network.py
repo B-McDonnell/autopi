@@ -163,8 +163,6 @@ if __name__ == '__main__':
                         help="path to the configuration file. Only for advanced users")
     parser.add_argument("--priority", type=int,
                         help="priority level for the network. Networks with a higher priority network will be joined first")
-    parser.add_argument("-c", "--country", type=str, required=False,
-                        help="ISO 3166-1 country code for network country. Defaults to US")
     auth_group = parser.add_argument_group()
 
     pass_group = parser.add_mutually_exclusive_group(required=True)
