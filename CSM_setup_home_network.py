@@ -53,10 +53,13 @@ def set_home_network():
               else:
                   print("Error! Re-enter input using (low, medium, high)")
        
-  is_country = subprocess.call(["CSM_wpa_country", "get"], stdout = subprocess.DEVNULL, stderr = subprocess.STDOUT)
-  if is_country is not 0:
+ 
+  try:
+    response = subprocess.run(["CSM_wpa_country","get"], capture_output = True, check = True)
+  except subprocess.CalledProcessError as e:
       items.append("-c")
       items.append("US")
+      
     
   if is_there_password:
       items.append("-p")
@@ -72,3 +75,4 @@ if __name__ == "__main__":
       print("Permission Denied: Must be run as super user!")
       sys.exit(1)
     set_home_network()
+
