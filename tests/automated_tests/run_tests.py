@@ -68,10 +68,9 @@ def main():
         print()
 
     # Print results
-    print("------------------------------------------------")
-    print("================================================")
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
     print()
-    print_header("Tests completed")
+    print_header("Tests completed", character='^')
     if nfailures > 0:
         print(nfailures, "Failed Tests")
     if nerrors > 0:

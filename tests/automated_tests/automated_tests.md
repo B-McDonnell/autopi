@@ -4,12 +4,12 @@ Each subfolder under the current folder will be searched for python files of the
 
 ```
 tests/automated_tests/
-- CSM_script1/
--- input/           # Directories are optional and are ignored by the test framework
--- output/          # However, the directories can be accessed by test files if desired...
--- scripty_test.py  # This is the only required file, note the '*_test.py' name.
--- testscript.py    # This is not a test and will not be treated as such.
--- random_file      # Arbitrary files will not disrupt the test framework
+  - CSM_script1/
+    - input/           # Directories are optional and are ignored by the test framework
+    - output/          # However, the directories can be accessed by test files if desired...
+    - scripty_test.py  # This is the only required file, note the '*_test.py' name.
+    - testscript.py    # This is not a test and will not be treated as such.
+    - random_file      # Arbitrary files will not disrupt the test framework
 ```
 
 The following is an example of good practice directory structure:
