@@ -80,7 +80,7 @@ def main():
         print(nskipped, "Skipped Tests")
     print()
 
-    if nfailures > 0 and nerrors > 0:
+    if nfailures > 0 or nerrors > 0:
         sys.exit(1)
 
 if __name__ == '__main__':
