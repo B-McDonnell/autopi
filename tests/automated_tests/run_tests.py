@@ -30,7 +30,6 @@ def get_test_files(p: Path):
 abs_path = Path(sys.argv[0]).absolute().parent
 
 test_dirs = get_dirs(abs_path)
-save_dir = os.getcwd()
 runner = unittest.TextTestRunner()
 nerrors = 0
 nfailures = 0
@@ -46,9 +45,9 @@ for p in test_dirs:
     if len(testfiles) == 0:
         continue
 
-    os.chdir(save_dir)
+    os.chdir(abs_path)
     modules = [import_module(p.name + '.' + x.stem) for x in testfiles]
-    os.chdir(str(p))
+    os.chdir(p)
     for i, module in enumerate(modules):
         # Run all unittest tests in each file
 
