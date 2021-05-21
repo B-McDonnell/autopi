@@ -76,60 +76,21 @@ def add_priority(wpa_config: str, priority: int) -> str:
     return '\n'.join(lines)
 
 
-def fix_header(config_filename: str, country: str = None):
-    """Forces configuration header to match Raspberry Pi documentation.
-
-    Args:
-        config_filename (str): path to wpa configuration file.
-        country (str, optional): ISO 3166-1 country code for the network. Defaults to None.
-    """
-    with open(config_filename) as fin:
-        lines = fin.readlines()
-
-    # build header
-    # https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md
-    # QUESTION: are there other valid header configurations on the RasPi?
-    header = [
-        'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n',
-        'update_config=1\n'
-    ]
-    if country is None:
-        # default country to US
-        country_line = 'country=US\n'
-
-        # if country already exists, keep it
-        for line in lines:
-            if line.strip().startswith('country='):
-                country_line = line
-                break
-    else:
-        # set country to argument
-        country_line = f'country={country}\n'
-    header.append(country_line)
-    header.append('\n')
-
-    # build network configs
-    networks = []
-    found_networks = False
-    for line in lines:
-        if not found_networks and line.strip().startswith('network={'):
-            found_networks = True
-        if found_networks:
-            networks.append(line)
-
-    # write output
-    contents = header + networks
-    with open(config_filename, 'w') as fout:
-        fout.write(''.join(contents))
-
-
 def run_reconfigure():
     """Use wpa_cli to reconfigure wpa. Exits program if wpa_cli fails.
     """
-    response = subprocess.run(
-        ['wpa_cli', '-i', 'wlan0', 'reconfigure'], check=True, capture_output=True)
-    if response.stdout != b'OK\n':
-        print('wpa_cli reconfiguration failed', file=sys.stderr)
+    try:
+        response = subprocess.run(
+            ['wpa_cli', '-i', 'wlan0', 'reconfigure'], check=True, capture_output=True)
+        if response.stdout != b'OK\n':
+            print('wpa_cli reconfiguration failed', file=sys.stderr)
+            sys.exit(1)
+    except subprocess.CalledProcessError as e:
+        print(f"\"{' '.join(e.cmd)}\" returned non-zero exit status {e.returncode}", end='')
+        if len(e.output) > 0:
+            print(f': {e.output}')
+        else:
+            print()
         sys.exit(1)
 
 
@@ -186,12 +147,6 @@ def main(args: argparse.ArgumentParser):
     else:
         if args.std_out:
             print(config)
-
-        # fix config file
-        if args.country:
-            fix_header(config_filename, args.country)
-        else:
-            fix_header(config_filename)
 
         # add network
         update_config(config, config_filename)
