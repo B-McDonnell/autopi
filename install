@@ -1,5 +1,11 @@
+id=`id -u`
+if test $id != 0; then
+    echo "Run this script as root"
+    exit 1
+fi
+
 # miscellaneous actions
-touch /boot/ssh
+touch /boot/ssh # enable ssh
 
 # Install any necessary python packages
 pip3 install -r requirements.txt
