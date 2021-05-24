@@ -1,3 +1,6 @@
+# miscellaneous actions
+touch /boot/ssh
+
 # Install any necessary python packages
 pip3 install -r requirements.txt
 
@@ -10,4 +13,3 @@ chmod +x /usr/bin/CSM_getssid
 
 cp ./src/scripts/CSM_get_mac.py /usr/bin/CSM_get_mac
 chmod +x /usr/bin/CSM_get_mac
-
