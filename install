@@ -1,17 +1,35 @@
-# Check for root privileges, prompt and exit if standard user
+#!/usr/bin/env bash
+
+# ============================
+#  Check for root privileges
+# ============================
+
 id=`id -u`
 if test $id != 0; then
-    echo "Run this script as root"
+    echo "Run this script as root" # prompt and exit if standard user
     exit 1
 fi
 
-# miscellaneous actions
+
+# ============================
+#  Perform miscellaneous setup
+# ============================
+
 touch /boot/ssh # enable ssh
+
+
+# ============================
+#     install dependencies
+# ============================
 
 # Install any necessary python packages
 pip3 install -r requirements.txt
 
-# Copy scripts to /usr/bin and give them execute permissions
+
+# ============================
+#   move scripts to /usr/bin
+# ============================
+
 cp ./src/scripts/CSM_getip.py /usr/bin/CSM_getip
 chmod +x /usr/bin/CSM_getip
 
@@ -20,3 +38,25 @@ chmod +x /usr/bin/CSM_getssid
 
 cp ./src/scripts/CSM_get_mac.py /usr/bin/CSM_get_mac
 chmod +x /usr/bin/CSM_get_mac
+
+cp ./src/scripts/CSM_add_network.py /usr/bin/CSM_add_network
+chmod +x /usr/bin/CSM_add_network
+
+cp ./src/scripts/CSM_wpa_country.py /usr/bin/CSM_wpa_country
+chmod +x /usr/bin/CSM_wpa_country
+
+cp ./src/scripts/CSM_setup_home_network.py /usr/bin/CSM_setup_home_network
+chmod +x /usr/bin/CSM_setup_home_network
+
+
+# ============================
+#      run initial setup
+# ============================
+
+# add country information to network discovery system
+CSM_wpa_country get 1>/dev/null
+if [ $? -ne 0 ]; then
+    CSM_wpa_country update US
+fi
+# add guest network by default
+CSM_add_network --no-password --priority=1 CSMguest
