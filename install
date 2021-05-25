@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
 
 # ============================
+#  Check for root privileges
+# ============================
+
+id=`id -u`
+if test $id != 0; then
+    echo "Run this script as root" # prompt and exit if standard user
+    exit 1
+fi
+
+
+# ============================
+#  Perform miscellaneous setup
+# ============================
+
+touch /boot/ssh # enable ssh
+
+
+# ============================
 #     install dependencies
 # ============================
 
