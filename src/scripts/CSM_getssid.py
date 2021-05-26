@@ -18,6 +18,7 @@ def is_wireless_active(interface: str):
         return False
     return True
 
+
 def get_ssid(interface: str):
     """
     Get wireless SSID for specified interface
