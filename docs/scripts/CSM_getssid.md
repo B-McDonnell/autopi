@@ -7,11 +7,10 @@
 The script will simply return the SSID for the specified wireless interface (or `wlan0` by default) or indicate that no SSID is connected. Failure can also occur due to an invalid interface name.
 
 # Implementation Notes
-Uses netifaces to check the existence of the interface. If it exists, the script calls `iwgetid INTERFACE_NAME -r` internally. If the call fails or the result is blank the interface is not connected to WIFI, otherwise the result is printed as the SSID.
+Uses `iwconfig` to check if the interface is wireless. If so, the script calls `iwgetid INTERFACE_NAME -r` internally. If the call fails or the result is blank the interface is not connected to WIFI, otherwise the result is printed as the SSID.
 
 # Dependencies
-- Libraries:
-    - `netifaces`
 - Technologies
     - `iwgetid`
+    - `iwconfig`
     - `Python 3`
