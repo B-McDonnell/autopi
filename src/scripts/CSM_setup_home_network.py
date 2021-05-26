@@ -3,6 +3,7 @@
 import subprocess
 import sys
 import os
+import stdiomask
 
 def set_home_network():
   
@@ -13,7 +14,7 @@ def set_home_network():
   while not password_bool:
       want_password = input("Does this network have a password? (y/n)\n")
       if want_password.lower() == 'y':
-          password = input("What is the password to this network? (It will be encrypted)\n")
+          password = stdiomask.getpass(prompt ="What is the password to this network? (It will be encrypted)\n")
           password_bool = True
           is_there_password = True
       elif want_password.lower() == 'n':
@@ -52,7 +53,14 @@ def set_home_network():
               else:
                   print("Error! Re-enter input using (low, medium, high)")
        
-  
+ 
+  try:
+    response = subprocess.run(["CSM_wpa_country","get"], capture_output = True, check = True)
+  except subprocess.CalledProcessError as e:
+      items.append("-c")
+      items.append("US")
+      
+    
   if is_there_password:
       items.append("-p")
       items.append(password)
