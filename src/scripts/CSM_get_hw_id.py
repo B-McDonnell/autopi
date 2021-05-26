@@ -13,7 +13,7 @@ def get_hw_info():
     return lines[-4:]
 
 
-def get_hwid():
+def get_hw_id():
     """
     Returns standard hardware ID
     
@@ -25,4 +25,4 @@ def get_hwid():
     return sha256(raw).hexdigest()
 
 if __name__ == "__main__":
-    print(get_hwid())
+    print(get_hw_id())
