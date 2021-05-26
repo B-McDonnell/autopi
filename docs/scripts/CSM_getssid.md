@@ -11,7 +11,7 @@ Uses netifaces to check the existence of the interface. If it exists, the script
 
 # Dependencies
 - Libraries:
--- netifaces
+    - `netifaces`
 - Technologies
--- iwgetid
--- Python 3
+    - `iwgetid`
+    - `Python 3`

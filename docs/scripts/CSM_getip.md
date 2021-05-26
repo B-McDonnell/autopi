@@ -12,6 +12,7 @@ It will output "Interface: INTERFACE\_NAME -- IP: x.x.x.x" on success.
 The script internally uses netifaces to fetch the interface information, and ensure that the interface exists.
 
 # Dependencies
-netifaces
-
-Python 3.7
+- Libraries
+    - netifaces
+- Technologies
+    - Python 3.7
