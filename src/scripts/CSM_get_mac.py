@@ -4,10 +4,10 @@ import netifaces
 
 
 def getMAC(c_type):
-    """Returns MAC address using connection type as a parameter.
+    """Returns MAC address using network interface as a parameter.
 
     Args:
-        c_type (str): Connection Type (wlan0 or eth0)
+        c_type (str): Interface (wlan0 or eth0)
 
     Returns:
         str: MAC address
@@ -21,10 +21,10 @@ def getMAC(c_type):
 
 
 def user_input():
-    """Function to allow for user to input connection type.
+    """Function to allow for user to input network interface.
 
     Returns:
-        str: Connection type (wlan0 or eth0)
+        str: Network interface (wlan0 or eth0)
     """
     input_bool = False
     while not input_bool:
