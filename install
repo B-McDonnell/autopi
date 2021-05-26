@@ -48,6 +48,9 @@ chmod +x /usr/bin/CSM_wpa_country
 cp ./src/scripts/CSM_setup_home_network.py /usr/bin/CSM_setup_home_network
 chmod +x /usr/bin/CSM_setup_home_network
 
+cp ./src/scripts/CSM_get_hw_id.py /usr/bin/CSM_get_hw_id
+chmod +x /usr/bin/CSM_get_hw_id
+
 
 # ============================
 #      run initial setup
@@ -60,6 +63,7 @@ if [ $? -ne 0 ]; then
 fi
 # add guest network by default
 CSM_add_network --no-password --priority=2 CSMwireless
+
 
 # ===================================================
 #      write MAC address to boot (CSM_mac.txt)
