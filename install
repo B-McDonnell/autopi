@@ -60,3 +60,17 @@ if [ $? -ne 0 ]; then
 fi
 # add guest network by default
 CSM_add_network --no-password --priority=1 CSMguest
+
+# ===================================================
+#      write MAC address to boot (CSM_mac.txt)
+# ===================================================
+
+# adds mac address to file in boot called "CSM_mac.txt"
+WRITE_MAC_COMMAND="CSM_get_mac wlan0 > /boot/CSM_mac.txt"
+WRITE_MAC_CRON="@reboot $WRITE_MAC_COMMAND"
+crontab -l >/tmp/crontab_r 2>/dev/null
+grep -Fx "$WRITE_MAC_CRON" /tmp/crontab_r >/dev/null
+if [ "$?" -ne 0 ]; then
+    echo "$WRITE_MAC_CRON">>/tmp/crontab_r
+fi
+crontab /tmp/crontab_r
