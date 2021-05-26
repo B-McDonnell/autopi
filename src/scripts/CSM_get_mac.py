@@ -3,7 +3,7 @@ import sys
 import netifaces
 
 
-def getMAC(c_type):
+def getMAC(c_type) -> str:
     """Returns MAC address using network interface as a parameter.
 
     Args:
@@ -20,7 +20,7 @@ def getMAC(c_type):
     return str[0:17]
 
 
-def user_input():
+def user_input() -> str:
     """Function to allow for user to input network interface.
 
     Returns:
@@ -39,8 +39,7 @@ def user_input():
     return c_type
 
 
-
-def main():
+def main() -> str:
     """If there is not an argument in the call, ask for user input.
 
     Returns:
@@ -55,4 +54,3 @@ def main():
 
 if __name__ == "__main__":
     print(main())
-
