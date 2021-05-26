@@ -14,7 +14,10 @@ import CSM_getssid
 import CSM_get_mac
 
 
-def get_interfaces():
+def get_interfaces() -> list:
+    """
+    Obtain a list of available interfaces
+    """
     ifaces = ['wlan0', 'eth0']
     ref_ifaces = netifaces.interfaces()
     present = []
@@ -24,7 +27,7 @@ def get_interfaces():
     return present
 
 
-def select_interface(interfaces: list):
+def select_interface(interfaces: list) -> (bool, str, str):
     """
     Select first interface available and get its ip address
     Parameters:
@@ -74,11 +77,11 @@ def get_service_status(service: str) -> str:
         return 'down'
 
 
-def get_ssh_status():
+def get_ssh_status() -> str:
     return get_service_status('sshd')
 
 
-def get_vnc_status():
+def get_vnc_status() -> str:
     # Currently, there are two services, I'm uncertain which one matters
     return get_service_status('vncserver-virtuald')
     #return get_service_status('vncserver-x11-systemd')
@@ -90,7 +93,7 @@ def generate_general_request() -> dict:
     """
     available, int_name, ip = select_interface(get_interfaces())
     if not available:  # can't send message
-        # raise exceptiontype
+        # raise exceptiontype maybe?
         sys.exit(1)  # TODO there should *maybe* be logging here...
 
     mac = get_mac(int_name)
@@ -112,7 +115,7 @@ def get_id_fields() -> dict:
     """
     Return dev and hardware IDs
     """
-    hwid = CSM_get_hw_id.get_hw_id()
+    hwid = 'abc123'  # CSM_get_hw_id.get_hw_id()
     devid = CSM_get_dev_id.get_dev_id()
     return {'hwid': hwid, 'devid': devid}
 
@@ -120,6 +123,7 @@ def get_id_fields() -> dict:
 def load_request(request_path: Path) -> str:
     """
     Load request JSON file as string
+    If file read fails, a blank string is returned.
     """
     try:
         with open(request_path) as f:
@@ -130,6 +134,7 @@ def load_request(request_path: Path) -> str:
 def save_request(request_path: Path, request: str):
     """
     Save request JSON file
+    If file open fails, the failure is ignored as it is not critical.
     """
     try:
         with open(request_path, "w") as f:
