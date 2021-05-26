@@ -1,6 +1,6 @@
 # Usage
 ```
-usage: CSM_add_network.py [-h] [-o] [--dry-run] [-f CONFIG_FILE] [--priority PRIORITY] (-n | -p PASSWORD) SSID
+usage: CSM_add_network [-h] [-o] [--dry-run] [-f CONFIG_FILE] [--priority PRIORITY] (-n | -p PASSWORD) SSID
 
 positional arguments:
   SSID                  SSID of the network
@@ -16,7 +16,7 @@ optional arguments:
   -p PASSWORD, --password PASSWORD
                         password for network. If not specified, will read from stdin
 ```
-Add a network to be automatically connected to.
+Add a network to be automatically connected to. Allows for standard SSID/password and SSID-only networks.
 
 # Implementation
 `CSM_add_network` automatically generates `wpa_supplicant` configurations, adds them to their appropriate location, and reconfigures `wpa` to allow for automatic connections using `wpa_cli`
@@ -24,3 +24,6 @@ Add a network to be automatically connected to.
 # Dependencies
 - `wpa_cli`
 - `wpa_supplicant`
+
+# Technical considerations
+- `CSM_add_network` does not account for a country being set in the `wpa_supplicant` configuration file, as is required by RasPis. `CSM_wpa_country` accounts for this.

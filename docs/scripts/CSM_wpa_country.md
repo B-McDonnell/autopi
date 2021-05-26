@@ -32,9 +32,13 @@ positional arguments:
 optional arguments:
   -h, --help    show this help message and exit
 ```
+Retrieves and updates country code information in `wpa_supplicant` configuration files.
 
 # Implementation
-`CSM_wpa_country` allows for the detection, retrieval, and update of the country code in a `wpa_supplicant` configuration file
+Configuration file is parsed and managed in pure Python.
 
 # Dependencies
 None
+
+# Technical considerations
+`CSM_wpa_country` does not validate the country code used. The country code must be in ISO 3166-1 format.
