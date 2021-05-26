@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-from pathlib import Path
 from hashlib import sha256
 
 
-def get_hw_info():
+def get_hw_info() -> list:
     """
     Returns 4 lines of cpu serial and hardware data
     """
-    path = Path('/proc/cpuinfo')
-    with open(path) as f:
-        lines=f.readlines()
+    with open('/proc/cpuinfo') as f:
+        lines = f.readlines()
     return lines[-4:]
 
 
-def get_hw_id():
+def get_hw_id() -> str:
     """
     Returns standard hardware ID
     
