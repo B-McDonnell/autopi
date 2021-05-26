@@ -5,16 +5,15 @@ import sys
 
 
 def is_wireless_active(interface: str) -> bool:
-    """
-    Check if the interface is an active wireless interface.
-
-    Parameters:
-        interface: str -- the name of an interface
-
-    Returns:
-        active: bool
+    """Check if the interface is an active wireless interface.
 
     Internally uses iwconfig return code to determine if the interface is wireless.
+
+    Args:
+        interface (str): the name of an interface.
+
+    Returns:
+        bool: Interface is wireless and active.
     """
     result = subprocess.run(['iwconfig', interface], capture_output=True)
     if result.returncode != 0:
@@ -25,15 +24,13 @@ def is_wireless_active(interface: str) -> bool:
 def get_ssid(interface: str) -> (str, bool):
     """
     Gets wireless SSID for specified interface.
-    It will return 'ssid,status' (string,boolean respectively). 
 
     Parameters:
-        interface: str -- the name of an interface
+        interface (str): the name of an interface.
 
     Returns:
-        ssid: str, status: bool
-    If status is true, then the ssid was successfully obtained and returned in 'ssid', otherwise ssid is empty. 
-    Status false if interface nonexistent, interface is not wireless, or currently has no SSID.
+        str: ssid of the network interface.
+        bool: status -- If true, ssid was successfully obtained and returned in 'ssid', otherwise ssid is empty. If false interface nonexistent, interface is not wireless, or currently has no SSID.
     """
     result = subprocess.run(['iwgetid', interface, '-r'], capture_output=True)
     if result.returncode != 0:
