@@ -13,11 +13,11 @@ def getMAC(c_type) -> str:
         str: MAC address
     """
     try:
-        str = netifaces.ifaddresses(c_type)[netifaces.AF_LINK][0]['addr']
+        mac = netifaces.ifaddresses(c_type)[netifaces.AF_LINK][0]['addr']
     except:
         print("Error")
         sys.exit(1)
-    return str[0:17]
+    return mac
 
 
 def user_input() -> str:
@@ -32,10 +32,10 @@ def user_input() -> str:
             "What is your connection type? (ethernet, wireless)\n")
         if connection.lower() == 'ethernet':
             c_type = 'eth0'
-            input_bool = True
+            break
         elif connection.lower() == 'wifi' or connection.lower() == 'wireless':
             c_type = 'wlan0'
-            input_bool = True
+            break
     return c_type
 
 
