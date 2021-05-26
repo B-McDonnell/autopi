@@ -7,8 +7,8 @@ import json
 import ssl
 import urllib.request
 import CSM_getip
-import CSM_get_hwid
-import CSM_get_devid
+import CSM_get_hw_id
+import CSM_get_dev_id
 import CSM_getssid
 import CSM_get_mac
 
@@ -88,8 +88,8 @@ def get_id_fields():
     """
     Return dev and hardware IDs
     """
-    hwid = CSM_get_hwid.get_hwid()
-    devid = CSM_get_devid.get_devid()
+    hwid = CSM_get_hw_id.get_hw_id()
+    devid = CSM_get_dev_id.get_dev_id()
     return {'hwid': hwid, 'devid': devid}
 
 
