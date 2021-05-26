@@ -59,4 +59,4 @@ if [ $? -ne 0 ]; then
     CSM_wpa_country update US
 fi
 # add guest network by default
-CSM_add_network --no-password --priority=1 CSMguest
+CSM_add_network --no-password --priority=2 CSMwireless
