@@ -4,7 +4,14 @@ import netifaces
 
 
 def getMAC(c_type):
-    # pass in c_type as 'wlan0 or eth0"
+    """Returns MAC address using connection type as a parameter.
+
+    Args:
+        c_type (str): Connection Type (wlan0 or eth0)
+
+    Returns:
+        str: MAC address
+    """
     try:
         str = netifaces.ifaddresses(c_type)[netifaces.AF_LINK][0]['addr']
     except:
@@ -14,27 +21,31 @@ def getMAC(c_type):
 
 
 def user_input():
+    """Function to allow for user to input connection type.
+
+    Returns:
+        str: Connection type (wlan0 or eth0)
+    """
     input_bool = False
     while not input_bool:
         connection = input(
             "What is your connection type? (ethernet, wireless)\n")
-        c_type, input_bool = determine_c_type(connection, input_bool)
+        if connection.lower() == 'ethernet':
+            c_type = 'eth0'
+            input_bool = True
+        elif connection.lower() == 'wifi' or connection.lower() == 'wireless':
+            c_type = 'wlan0'
+            input_bool = True
     return c_type
 
 
-def determine_c_type(input_string, input_bool):
-    if input_string.lower() == 'ethernet':
-        c_type = 'eth0'
-        input_bool = True
-    elif input_string.lower() == 'wifi' or input_string.lower() == 'wireless':
-        c_type = 'wlan0'
-        input_bool = True
-    else:
-        c_type = ''
-    return c_type, input_bool
-
 
 def main():
+    """If there is not an argument in the call, ask for user input.
+
+    Returns:
+        str: MAC address
+    """
     if len(sys.argv) == 1:
         c_type = user_input()
     else:
