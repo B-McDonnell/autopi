@@ -25,12 +25,12 @@ def get_ssid(interface: str) -> (str, bool):
     """
     Gets wireless SSID for specified interface.
 
-    Parameters:
+    Args:
         interface (str): the name of an interface.
 
     Returns:
         str: ssid of the network interface.
-        bool: status -- If true, ssid was successfully obtained and returned in 'ssid', otherwise ssid is empty. If false interface nonexistent, interface is not wireless, or currently has no SSID.
+        bool: status. If true, ssid was successfully obtained and returned in 'ssid', otherwise ssid is empty. If false interface nonexistent, interface is not wireless, or currently has no SSID.
     """
     result = subprocess.run(['iwgetid', interface, '-r'], capture_output=True)
     if result.returncode != 0:
