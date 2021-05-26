@@ -66,4 +66,4 @@ CSM_add_network --no-password --priority=1 CSMguest
 # ===================================================
 
 #adds mac address to file in boot called "CSM_mac.txt"
-sh -c "CSM_get_mac wlan0 > /boot/CSM_mac.txt"
+CSM_get_mac wlan0 > /boot/CSM_mac.txt
