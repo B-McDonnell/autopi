@@ -14,14 +14,25 @@ def set_home_network():
   while not password_bool:
       want_password = input("Does this network have a password? (y/n)\n")
       if want_password.lower() == 'y':
-          password = stdiomask.getpass(prompt ="What is the password to this network? (It will be encrypted)\n")
-          password_bool = True
-          is_there_password = True
+          password_confirm_bool = False
+          while not password_confirm_bool:
+            password = stdiomask.getpass(prompt ="What is the password to this network? (It will be encrypted)\n")
+            password_reentered = stdiomask.getpass(prompt ="Re-enter password.\n")
+            if password == password_reentered:
+                password_confirm_bool = True
+                password_bool = True
+                is_there_password = True
+            else:
+                print ('-'*50)    
+                print("Passwords do not match! Re-enter.")
+                print ('-'*50)  
       elif want_password.lower() == 'n':
           password_bool = True
           password = ""
       else:
+          print ('-'*50)  
           print("Error! Re-enter input using (y/n)")
+          print ('-'*50)  
   #print(ssid)
   want_priority = False
   priority_bool = True
@@ -35,7 +46,9 @@ def set_home_network():
           want_priority = True
           items.append("--priority")
       else:
+          print ('-'*50)
           print("Error! Re-enter input using (y/n)")
+          print ('-'*50)  
       while  not priority_bool:
               priority_level = input("Would you like low, medium, or high priority? (CSMwireless is set to medium)\n")
               if priority_level.lower() == "low":
@@ -51,7 +64,9 @@ def set_home_network():
                   priority_bool = True
                   items.append(str(priority))
               else:
+                  print ('-'*50)  
                   print("Error! Re-enter input using (low, medium, high)")
+                  print ('-'*50)  
        
  
   try:
