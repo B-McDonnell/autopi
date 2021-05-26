@@ -6,6 +6,7 @@ import netifaces
 import json
 import ssl
 import urllib.request
+import subprocess
 import CSM_getip
 import CSM_get_hw_id
 import CSM_get_dev_id
@@ -46,7 +47,7 @@ def select_interface(interfaces: list):
     return has_ip, interface, ip
 
 
-def generate_shutdown_request():
+def generate_shutdown_request() -> dict:
     """
     Return field(s) needed for the request
     In this case, 'event: shutdown'
@@ -54,11 +55,36 @@ def generate_shutdown_request():
     return {'event': 'shutdown'}
 
 
-def get_mac(interface: str):
+def get_mac(interface: str) -> str:
     return netifaces.ifaddresses(interface)[netifaces.AF_LINK][0]['addr']
 
 
-def generate_general_request():
+def get_service_status(service: str) -> str:
+    """
+    Returns a string to be used as the service status. 
+    Obtains status from 'service sshd status' return code. 
+    0 => UP, else => DOWN
+    The return codes are different per-service, but 0 should always imply UP.
+    """
+    result = subprocess.run(['service', service, 'status'], capture_output=True)
+    code = result.returncode
+    if code == 0:
+        return 'up'
+    else:
+        return 'down'
+
+
+def get_ssh_status():
+    return get_service_status('sshd')
+
+
+def get_vnc_status():
+    # Currently, there are two services, I'm uncertain which one matters
+    return get_service_status('vncserver-virtuald')
+    #return get_service_status('vncserver-x11-systemd')
+
+
+def generate_general_request() -> dict:
     """
     Returns fields needed for request
     """
@@ -76,15 +102,13 @@ def generate_general_request():
     ssid,status = CSM_getssid.get_ssid(int_name)
     if status:  # ensures ssid available for interface
         fields['ssid'] = ssid
-    ssh_status = 'up'  # FIXME do this right...
-    fields['ssh'] = ssh_status
-    vnc_status = 'up'  # FIXME do this right...
-    fields['vnc'] = vnc_status
+    fields['ssh'] = get_ssh_status()
+    fields['vnc'] = get_vnc_status()
 
     return fields
 
 
-def get_id_fields():
+def get_id_fields() -> dict:
     """
     Return dev and hardware IDs
     """
@@ -93,9 +117,9 @@ def get_id_fields():
     return {'hwid': hwid, 'devid': devid}
 
 
-def load_request(request_path: Path):
+def load_request(request_path: Path) -> str:
     """
-    Load request JSON file
+    Load request JSON file as string
     """
     try:
         with open(request_path) as f:
@@ -107,30 +131,53 @@ def save_request(request_path: Path, request: str):
     """
     Save request JSON file
     """
-    with open(request_path, "w") as f:
-        f.write(request)  # TODO add return behavior
+    try:
+        with open(request_path, "w") as f:
+            f.write(request)
+    except:
+        pass  # TODO log the event
 
 
 def send_request(request: dict):
     API_URL = 'http://localhost:8000/'
     req_json = json.dumps(request).encode('utf-8')
-    ctxt = ssl.create_default_context()
     req = urllib.request.Request(API_URL, data=req_json)
     req.add_header('Content-Type', 'application/json')
-    resp = urllib.request.urlopen(req)
-    # resp = request.urlopen(req, context=ctxt)  # uncomment for SSL
+    resp = None
+    try: 
+        resp = urllib.request.urlopen(req)  # comment for SSL
+        # ctxt = ssl.create_default_context()  # uncomment for SSL
+        # resp = request.urlopen(req, context=ctxt)  # uncomment for SSL
+    except(urllib.error.URLError):
+        print("Connection failed")
+        # TODO handle error better?
     return resp  # FIXME determine return type
+
+
+def parse_commandline(*args):
+    """
+    Parse the command line and return flags, just two at the moment.
+    Returns:
+        shutdown_req: bool, force_req: bool
+    """
+    if len(args) == 0:
+        return False, False
+
+    valid = ['SHUTDOWN', 'START']
+    if len(args) > 1 or args[0] not in valid:
+        print("Invalid commandline arguments")  # TODO proper logging?
+        sys.exit(1)
+
+    shutdown_req = args[0] == 'SHUTDOWN'
+    return shutdown_req, True
 
 
 def main(*args):
     CSM_ROOT = Path('/var/csm/')
     OLD_REQ = Path(CSM_ROOT) / 'old_request.json'
 
-    shutdown_req = len(args) > 0 and args[0] == 'SHUTDOWN'
-    force_req = True
-    if not shutdown_req:
-        force_req = len(args) > 0 and args[0] == 'START'
-
+    shutdown_req, force_req = parse_commandline(*args)
+        
     if shutdown_req:
         request_fields = generate_shutdown_request()
     else:
@@ -152,8 +199,9 @@ def main(*args):
 
     print(request)
     resp = send_request(request)
-    print(resp.status)
-    print(resp.readlines())
+    if resp:
+        print(resp.status)
+        print(resp.readlines())
 
 
 if __name__ == '__main__':
