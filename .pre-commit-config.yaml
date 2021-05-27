@@ -3,12 +3,14 @@ repos:
           rev: 5.8.0
           hooks:
                   - id: isort
+                    name: isort (run `git add -u` on failure)
                     description: Sort Python imports.
                     types: ["python"]
         - repo: https://github.com/psf/black
           rev: 21.5b1
           hooks:
                   - id: black
+                    name: black (run `git add -u` on failure)
                     description: Format Python files.
                     types: ["python"]
         - repo: https://github.com/PyCQA/flake8
