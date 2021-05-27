@@ -14,7 +14,7 @@ jobs:
           python-version: '3.7.x'
       - name: Install dependencies
         run: |
-          python -m pip3 install --upgrade pip setuptools wheel
+          python -m pip install --upgrade pip setuptools wheel
           pip install isort black flake8 pydocstyle
           pip install -r requirements.txt
       - name: Check import order with isort
