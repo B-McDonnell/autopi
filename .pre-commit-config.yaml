@@ -3,17 +3,23 @@ repos:
           rev: 5.8.0
           hooks:
                   - id: isort
-                    entry: bash -c 'isort "$@"; git add --update --verbose'
+                    description: Sort Python imports.
+                    types: ["python"]
         - repo: https://github.com/psf/black
           rev: 21.5b1
           hooks:
                   - id: black
-                    entry: bash -c 'black "$@"; git add --update --verbose'
+                    description: Format Python files.
+                    types: ["python"]
         - repo: https://github.com/PyCQA/flake8
           rev: 3.9.2
           hooks:
                   - id: flake8
+                    description: Analyze Python style and complexity.
+                    types: ["python"]
         - repo: https://github.com/PyCQA/pydocstyle
           rev: 6.1.1
           hooks:
                   - id: pydocstyle
+                    description: Ensure Python docstring best practices.
+                    types: ["python"]
