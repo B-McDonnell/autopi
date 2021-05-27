@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""This is a docstring."""
+"""This script generates IP discovery requests and send them as JSON via POST."""
 import json
 import ssl
 import subprocess
@@ -11,6 +11,7 @@ from typing import Optional
 
 import CSM_get_dev_id
 import CSM_get_hw_id
+import CSM_get_mac
 import CSM_getip
 import CSM_getssid
 import netifaces
@@ -74,13 +75,13 @@ def get_mac(interface: str) -> str:
 def get_service_status(service: str) -> str:
     """Return a string to be used as the service status.
 
-    Obtains status from 'service sshd status' return code. The return codes are different per-service, but 0 should always imply UP.
+    Obtains status from 'service sshd status' return code. The return codes are different per-service, but 0 should always imply UP. 0 => UP, not 0 => DOWN.
 
     Args:
         service (str): service name.
 
     Returns:
-        str: service status. 0 => UP, not 0 => DOWN.
+        str: service status.
     """
     result = subprocess.run(["service", service, "status"], capture_output=True)
     code = result.returncode
@@ -91,12 +92,12 @@ def get_service_status(service: str) -> str:
 
 
 def get_ssh_status() -> str:
-    """Hi, I'm a docstring."""
+    """Get SSH status as 'up' or 'down'."""
     return get_service_status("sshd")
 
 
 def get_vnc_status() -> str:
-    """Hi, I'm a docstring."""
+    """Get VNC status as 'up' or 'down'."""
     # TODO Currently, there are two services, I'm uncertain which one matters
     return get_service_status("vncserver-virtuald")
     # return get_service_status('vncserver-x11-systemd')
@@ -107,13 +108,16 @@ def generate_general_request() -> dict:
 
     Returns:
         dict: dictionary of field(s).
+
+    Raises:
+        RuntimeError: if no interface can be found
     """
     available, int_name, ip = select_interface(get_interfaces())
     if not available:  # can't send message
-        # raise exceptiontype maybe?
-        sys.exit(1)  # TODO there should *maybe* be logging here...
+        # TODO there should *maybe* be logging here...
+        raise RuntimeError from None
 
-    mac = get_mac(int_name)
+    mac = CSM_get_mac.getMAC(int_name)
     fields = {
         "ip": ip,
         "mac": mac,
@@ -251,8 +255,15 @@ def main(*args):
         print(resp.status)
         print(resp.readlines())
     else:
-        print("Connection failed")
+        raise RuntimeError from None
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    try:
+        main(*sys.argv[1:])
+    except RuntimeError:
+        print("No network interface connected")
+        sys.exit(1)
+    except ConnectionError:
+        print("Connection failed")
+        sys.exit(1)
