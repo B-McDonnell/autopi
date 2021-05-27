@@ -3,7 +3,7 @@ name: Python quality check
 on: [push]
 
 jobs:
-  - check-python:
+  - check_python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions.checkout@v2
