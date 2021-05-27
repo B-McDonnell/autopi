@@ -7,7 +7,7 @@ import sys
 import urllib.request
 from http.client import HTTPResponse
 from pathlib import Path
-from typing import Optional
+from urllib.error import URLError
 
 import CSM_get_dev_id
 import CSM_get_hw_id
@@ -177,7 +177,7 @@ def save_request(request_path: Path, request: str):
         pass  # TODO log the event
 
 
-def send_request(api_url: str, request) -> Optional[HTTPResponse]:
+def send_request(api_url: str, request) -> HTTPResponse:
     """Send a POST request with JSON data to the specified url.
 
     Args:
@@ -185,18 +185,17 @@ def send_request(api_url: str, request) -> Optional[HTTPResponse]:
         request: Anything that json.dumps(request) can convert to a JSON string.
 
     Returns:
-        Optional[HTTPResponse]: None if request fails for any reason, otherwise, returns the response from the server.
+        HTTPResponse: the response from the server.
+
+    Raises:
+        URLError on connection failure.
     """
     req_json = json.dumps(request).encode("utf-8")
     req = urllib.request.Request(api_url, data=req_json)
     req.add_header("Content-Type", "application/json")
-    try:
-        ctxt = ssl.create_default_context()
-        resp = urllib.request.urlopen(req, context=ctxt)
-        return resp
-    except (urllib.error.URLError):
-        # TODO handle error better? as in, better logging
-        return None
+    ctxt = ssl.create_default_context()
+    resp = urllib.request.urlopen(req, context=ctxt)
+    return resp
 
 
 def parse_commandline(*args) -> (bool, bool):
@@ -251,11 +250,8 @@ def main(*args):
 
     print(request)
     resp = send_request(API_URL, request)
-    if resp:
-        print(resp.status)
-        print(resp.readlines())
-    else:
-        raise RuntimeError from None
+    print(resp.status)
+    print(resp.readlines())
 
 
 if __name__ == "__main__":
@@ -264,6 +260,6 @@ if __name__ == "__main__":
     except RuntimeError:
         print("No network interface connected")
         sys.exit(1)
-    except ConnectionError:
+    except URLError:
         print("Connection failed")
         sys.exit(1)
