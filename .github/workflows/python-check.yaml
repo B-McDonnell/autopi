@@ -3,7 +3,7 @@ name: "Python quality check"
 on: [push]
 
 jobs:
-  - analyze:
+  analyze:
     name: Analyze Python code
     runs-on: ubuntu-latest
     steps:
