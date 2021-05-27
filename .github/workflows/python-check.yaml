@@ -19,7 +19,7 @@ jobs:
           pip install -r requirements.txt
       - name: Check import order with isort
         run: |
-          isort --diff --check-only
+          isort --diff --check-only .
       - name: Check code style with black
         run: |
           black --diff --check .
