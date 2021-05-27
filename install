@@ -51,6 +51,9 @@ chmod +x /usr/bin/CSM_setup_home_network
 cp ./src/scripts/CSM_get_hw_id.py /usr/bin/CSM_get_hw_id
 chmod +x /usr/bin/CSM_get_hw_id
 
+cp ./src/scripts/CSM_generate_request.py /usr/bin/CSM_generate_request
+chmod +x /usr/bin/CSM_generate_request
+
 
 # ============================
 #      run initial setup
