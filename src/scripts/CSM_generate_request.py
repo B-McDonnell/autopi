@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
-import sys
-import os
-from pathlib import Path
-import netifaces
+"""This is a docstring."""
 import json
 import ssl
+import subprocess
+import sys
 import urllib.request
 from http.client import HTTPResponse
-import subprocess
-import CSM_getip
-import CSM_get_hw_id
-import CSM_get_dev_id
-import CSM_getssid
+from pathlib import Path
 from typing import Optional
+
+import CSM_get_dev_id
+import CSM_get_hw_id
+import CSM_getip
+import CSM_getssid
+import netifaces
 
 
 def get_interfaces() -> list:
-    """
-    Obtain a list of available interfaces.
+    """Obtain a list of available interfaces.
 
     Returns:
         list: list of interface name strings.
     """
-    ifaces = ['wlan0', 'eth0']
+    ifaces = ["wlan0", "eth0"]
     ref_ifaces = netifaces.interfaces()
     present = []
     for i in ifaces:
@@ -32,10 +32,10 @@ def get_interfaces() -> list:
 
 
 def select_interface(interfaces: list) -> (bool, str, str):
-    """
-    Select first interface available and get its ip address
+    """Select first interface available and get its ip address.
+
     Note:
-    To properly select the interface, you have to get its ip, so the ip is returned as well
+    To properly select the interface, you have to get its ip, so the ip is returned as well.
 
     Args:
         interfaces (list): list of interface names, the first entry that has an ip will be selected.
@@ -44,9 +44,8 @@ def select_interface(interfaces: list) -> (bool, str, str):
         bool: interface_available
         str: interface_name
         str: ip_addr
-
     """
-    interface = ''
+    interface = ""
     has_ip = False
     for i in interfaces:
         int_ip, status = CSM_getip.get_interface_ip(i)
@@ -59,25 +58,23 @@ def select_interface(interfaces: list) -> (bool, str, str):
 
 
 def generate_shutdown_request() -> dict:
-    """
-    Get field(s) needed for the request
-    In this case, 'event: shutdown'.
+    """Get field(s) needed for the request, in this case: 'event: shutdown'.
 
     Returns:
         dict: Dictionary of field(s)
     """
-    return {'event': 'shutdown'}
+    return {"event": "shutdown"}
 
 
 def get_mac(interface: str) -> str:
-    return netifaces.ifaddresses(interface)[netifaces.AF_LINK][0]['addr']
+    """Return MAC address for specified interface."""
+    return netifaces.ifaddresses(interface)[netifaces.AF_LINK][0]["addr"]
 
 
 def get_service_status(service: str) -> str:
-    """
-    Returns a string to be used as the service status.
-    Obtains status from 'service sshd status' return code.
-    The return codes are different per-service, but 0 should always imply UP.
+    """Return a string to be used as the service status.
+
+    Obtains status from 'service sshd status' return code. The return codes are different per-service, but 0 should always imply UP.
 
     Args:
         service (str): service name.
@@ -85,28 +82,28 @@ def get_service_status(service: str) -> str:
     Returns:
         str: service status. 0 => UP, not 0 => DOWN.
     """
-    result = subprocess.run(['service', service, 'status'],
-                            capture_output=True)
+    result = subprocess.run(["service", service, "status"], capture_output=True)
     code = result.returncode
     if code == 0:
-        return 'up'
+        return "up"
     else:
-        return 'down'
+        return "down"
 
 
 def get_ssh_status() -> str:
-    return get_service_status('sshd')
+    """Hi, I'm a docstring."""
+    return get_service_status("sshd")
 
 
 def get_vnc_status() -> str:
+    """Hi, I'm a docstring."""
     # TODO Currently, there are two services, I'm uncertain which one matters
-    return get_service_status('vncserver-virtuald')
+    return get_service_status("vncserver-virtuald")
     # return get_service_status('vncserver-x11-systemd')
 
 
 def generate_general_request() -> dict:
-    """
-    Returns fields needed for request.
+    """Return fields needed for request.
 
     Returns:
         dict: dictionary of field(s).
@@ -118,34 +115,33 @@ def generate_general_request() -> dict:
 
     mac = get_mac(int_name)
     fields = {
-                'ip': ip,
-                'mac': mac,
-             }
+        "ip": ip,
+        "mac": mac,
+    }
 
     ssid, status = CSM_getssid.get_ssid(int_name)
     if status:  # ensures ssid available for interface
-        fields['ssid'] = ssid
-    fields['ssh'] = get_ssh_status()
-    fields['vnc'] = get_vnc_status()
+        fields["ssid"] = ssid
+    fields["ssh"] = get_ssh_status()
+    fields["vnc"] = get_vnc_status()
 
     return fields
 
 
 def get_id_fields() -> dict:
-    """
-    Return dev and hardware IDs
+    """Return dev and hardware IDs.
 
     Returns:
         dict: dictionary with fields {'hwid': hwid, 'devid': devid}
     """
     hwid = CSM_get_hw_id.get_hw_id()
     devid = CSM_get_dev_id.get_dev_id()
-    return {'hwid': hwid, 'devid': devid}
+    return {"hwid": hwid, "devid": devid}
 
 
 def load_request(request_path: Path) -> str:
-    """
-    Load request JSON file as string.
+    """Load request JSON file as string.
+
     If file read fails, a blank string is returned.
 
     Args:
@@ -157,13 +153,14 @@ def load_request(request_path: Path) -> str:
     try:
         with open(request_path) as f:
             return f.read()
-    except:
-        return ''
+    except Exception:
+        # TODO probably log this event
+        return ""
 
 
 def save_request(request_path: Path, request: str):
-    """
-    Save request JSON file.
+    """Save request JSON file.
+
     If file open/save fails, the failure is ignored as it is not critical.
 
     Args:
@@ -172,13 +169,12 @@ def save_request(request_path: Path, request: str):
     try:
         with open(request_path, "w") as f:
             f.write(request)
-    except:
+    except Exception:
         pass  # TODO log the event
 
 
 def send_request(api_url: str, request) -> Optional[HTTPResponse]:
-    """
-    Sends a POST request with JSON data to the specified url.
+    """Send a POST request with JSON data to the specified url.
 
     Args:
         api_url (str): url to the target for the post request.
@@ -187,21 +183,21 @@ def send_request(api_url: str, request) -> Optional[HTTPResponse]:
     Returns:
         Optional[HTTPResponse]: None if request fails for any reason, otherwise, returns the response from the server.
     """
-    req_json = json.dumps(request).encode('utf-8')
+    req_json = json.dumps(request).encode("utf-8")
     req = urllib.request.Request(api_url, data=req_json)
-    req.add_header('Content-Type', 'application/json')
+    req.add_header("Content-Type", "application/json")
     try:
         ctxt = ssl.create_default_context()
         resp = urllib.request.urlopen(req, context=ctxt)
         return resp
-    except(urllib.error.URLError):
+    except (urllib.error.URLError):
         # TODO handle error better? as in, better logging
         return None
 
 
 def parse_commandline(*args) -> (bool, bool):
-    """
-    Parse the command line and return flags, just two at the moment.
+    """Parse the command line and return flags, just two at the moment.
+
     Returns:
         bool: shutdown_request. Implies force_request.
         bool: force_request. Forces request to be sent without comparing last update.
@@ -209,23 +205,24 @@ def parse_commandline(*args) -> (bool, bool):
     if len(args) == 0:
         return False, False
 
-    valid = ['SHUTDOWN', 'START']
+    valid = ["SHUTDOWN", "START"]
     if len(args) > 1 or args[0] not in valid:
         print("Invalid commandline arguments")  # TODO proper logging?
         sys.exit(1)
 
-    shutdown_req = args[0] == 'SHUTDOWN'
+    shutdown_req = args[0] == "SHUTDOWN"
     return shutdown_req, True
 
 
 def main(*args):
-    """
+    """.
+
     Args:
         args (list): normal commandline arguments minus script name
     """
-    CSM_ROOT = Path('/var/opt/autopi/')
-    REQ_PATH = CSM_ROOT / 'old_request.json'
-    API_URL = 'http://localhost:8000/'  # TODO retarget API URL
+    CSM_ROOT = Path("/var/opt/autopi/")
+    REQ_PATH = CSM_ROOT / "old_request.json"
+    API_URL = "http://localhost:8000/"  # TODO retarget API URL
 
     shutdown_req, force_req = parse_commandline(*args)
 
@@ -257,5 +254,5 @@ def main(*args):
         print("Connection failed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(*sys.argv[1:])
