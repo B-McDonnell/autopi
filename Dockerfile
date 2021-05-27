@@ -1,10 +1,14 @@
 FROM pios:latest
-ARG setupfile=docker_setup.sh
+ARG setupfile=src/dockertools/setup.sh
 
-COPY . /autopi
+# set environment variables
+ENV DOCKER_HW_ID_PATH /dockertools/hwid
 
-ENV DOCKER_HW_ID_PATH /hwid
-COPY $setupfile /setup.sh
-RUN chmod +x /setup.sh
+# setup docker tools
+RUN mkdir /dockertools
+COPY $setupfile /dockertools/setup.sh
+COPY entrypoint /dockertools/entrypoint.sh
+RUN chmod +x /dockertools/setup.sh && \
+    chmox +x /dockertools/entrypoint.sh
 
-ENTRYPOINT [ "/setup.sh" ]
+ENTRYPOINT [ "/dockertools/entrypoint.sh" ]
