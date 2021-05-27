@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-from pathlib import Path
+r"""¯\_(ツ)_/¯."""
 
 
-def get_dev_id():
-    """
-    Returns device UUID as string
-    """
-    path = Path('/boot/CSM_device_id.txt')  # TODO should this change?
-    with open(path) as f:
+def get_dev_id() -> str:
+    """Return device UUID as string."""
+    with open("/boot/CSM_device_id.txt") as f:  # TODO should this change?
         lines = f.readlines()
-    return ''.join(lines).strip()
+    return "".join(lines).strip()
 
 
 if __name__ == "__main__":
