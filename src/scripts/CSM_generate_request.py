@@ -224,7 +224,7 @@ def main(*args):
     Args:
         args (list): normal commandline arguments minus script name
     """
-    CSM_ROOT = Path('/var/csm/')
+    CSM_ROOT = Path('/var/opt/autopi/')
     OLD_REQ = CSM_ROOT / 'old_request.json'
     API_URL = 'http://localhost:8000/'  # TODO retarget API URL
 
