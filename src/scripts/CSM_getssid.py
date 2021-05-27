@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Get the SSID of the network an interface is connected to."""
 
 import subprocess
 import sys
@@ -15,7 +16,7 @@ def is_wireless_active(interface: str) -> bool:
     Returns:
         bool: Interface is wireless and active.
     """
-    result = subprocess.run(['iwconfig', interface], capture_output=True)
+    result = subprocess.run(["iwconfig", interface], capture_output=True)
     if result.returncode != 0:
         return False
     return True
@@ -23,7 +24,7 @@ def is_wireless_active(interface: str) -> bool:
 
 def get_ssid(interface: str) -> (str, bool):
     """
-    Gets wireless SSID for specified interface.
+    Get wireless SSID for specified interface.
 
     Args:
         interface (str): the name of an interface.
@@ -32,17 +33,17 @@ def get_ssid(interface: str) -> (str, bool):
         str: ssid of the network interface.
         bool: status. If true, ssid was successfully obtained and returned in 'ssid', otherwise ssid is empty. If false interface nonexistent, interface is not wireless, or currently has no SSID.
     """
-    result = subprocess.run(['iwgetid', interface, '-r'], capture_output=True)
+    result = subprocess.run(["iwgetid", interface, "-r"], capture_output=True)
     if result.returncode != 0:
-        return '', False
+        return "", False
     output_b = result.stdout
-    output = output_b.decode('utf-8').strip()
+    output = output_b.decode("utf-8").strip()
     return output, len(output) > 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # take second argument if supplied to be interface name
-    interface = sys.argv[1] if len(sys.argv) > 1 else 'wlan0'
+    interface = sys.argv[1] if len(sys.argv) > 1 else "wlan0"
 
     status = is_wireless_active(interface)
     if not status:
