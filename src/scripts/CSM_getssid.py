@@ -4,30 +4,54 @@ import subprocess
 import sys
 
 
-def get_ssid(interface: str):
-    """
-    Get wireless SSID for specified interface
-    It will return 'ssid,status' (string,boolean respectively). 
+def is_wireless_active(interface: str) -> bool:
+    """Check if the interface is an active wireless interface.
+
+    Internally uses iwconfig return code to determine if the interface is wireless.
+
+    Args:
+        interface (str): the name of an interface.
+
     Returns:
-        ssid: str, status: bool
-    If status is true, then the ssid was successfully obtained and returned in 'ssid', otherwise ssid is empty. 
-    Status false if interface nonexistent, interface is not wireless, or currently has no SSID
+        bool: Interface is wireless and active.
+    """
+    result = subprocess.run(['iwconfig', interface], capture_output=True)
+    if result.returncode != 0:
+        return False
+    return True
+
+
+def get_ssid(interface: str) -> (str, bool):
+    """
+    Gets wireless SSID for specified interface.
+
+    Args:
+        interface (str): the name of an interface.
+
+    Returns:
+        str: ssid of the network interface.
+        bool: status. If true, ssid was successfully obtained and returned in 'ssid', otherwise ssid is empty. If false interface nonexistent, interface is not wireless, or currently has no SSID.
     """
     result = subprocess.run(['iwgetid', interface, '-r'], capture_output=True)
     if result.returncode != 0:
         return '', False
     output_b = result.stdout
     output = output_b.decode('utf-8').strip()
-    return output, True
+    return output, len(output) > 0
 
 
 if __name__ == '__main__':
     # take second argument if supplied to be interface name
     interface = sys.argv[1] if len(sys.argv) > 1 else 'wlan0'
 
-    ssid, status = get_ssid(sys.argv[1])
+    status = is_wireless_active(interface)
+    if not status:
+        print("Interface not connected, not wireless, or inactive")
+        sys.exit(1)
+
+    ssid, status = get_ssid(interface)
     if status:
-        print("Interface:", sys.argv[1], "--", "ESSID:", ssid)
+        print("Interface:", interface, "--", "ESSID:", ssid)
     else:
-        print("Interface '" + interface + "' not connected.")
+        print("Interface '" + interface + "' has no SSID (Not connected).")
         sys.exit(1)
