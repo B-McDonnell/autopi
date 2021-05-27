@@ -3,7 +3,7 @@ name: "Python quality check"
 on: [push]
 
 jobs:
-  analyze:
+  build:
     name: Analyze Python code
     runs-on: ubuntu-latest
     steps:
@@ -17,15 +17,35 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install isort black flake8 pydocstyle
           pip install -r requirements.txt
+  imports:
+    name: Check Python import layout
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Check import order with isort
         run: |
           isort --diff --check-only .
+  format:
+    name: Check Python format
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Check code style with black
         run: |
           black --diff --check .
+  lint:
+    name: Lint Python
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Lint code with flake8
         run: |
           flake8 . --count --show-source --statistics --append-config .flake8
+  docs:
+    name: Check docstrings
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Check docstrings with pydocstyle
         run: |
           pydocstyle --count .
