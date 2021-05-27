@@ -7,7 +7,7 @@ import stdiomask
 
 
 def set_home_network():
-    """Using user input, adds a network.
+    """Use user input, add a network.
     """
 
     items = ["CSM_add_network"]
