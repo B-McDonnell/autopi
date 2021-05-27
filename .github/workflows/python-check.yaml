@@ -1,0 +1,30 @@
+name: Python quality check
+
+on: [push]
+
+jobs:
+  - check-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions.checkout@v2
+      - name: Setup Python3.7.3
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7.3'
+      - name: Install dependencies
+        run: |
+          python -m pip3 install --upgrade pip setuptools wheel
+          pip install isort black flake8 pydocstyle
+          pip install -r requirements.txt
+      - name: Check import order with isort
+        run: |
+          isort --diff --check-only
+      - name: Check code style with black
+        run: |
+          black --diff --check .
+      - name: Lint code with flake8
+        run: |
+          flake8 . --count --show-source --statistics --append-config .flake8
+      - name: Check docstrings with pydocstyle
+        run: |
+          pydocstyle --count .
