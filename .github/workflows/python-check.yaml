@@ -1,13 +1,14 @@
-name: Python quality check
+name: "Python quality check"
 
 on: [push]
 
 jobs:
-  - check_python:
+  - analyze:
+    name: Analyze Python code
     runs-on: ubuntu-latest
     steps:
       - uses: actions.checkout@v2
-      - name: Setup Python3.7.3
+      - name: Setup Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.7.3'
