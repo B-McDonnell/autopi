@@ -12,7 +12,6 @@ import CSM_getip
 import CSM_get_hw_id
 import CSM_get_dev_id
 import CSM_getssid
-import CSM_get_mac
 from typing import Optional
 
 
@@ -225,7 +224,7 @@ def main(*args):
         args (list): normal commandline arguments minus script name
     """
     CSM_ROOT = Path('/var/opt/autopi/')
-    OLD_REQ = CSM_ROOT / 'old_request.json'
+    REQ_PATH = CSM_ROOT / 'old_request.json'
     API_URL = 'http://localhost:8000/'  # TODO retarget API URL
 
     shutdown_req, force_req = parse_commandline(*args)
@@ -236,18 +235,18 @@ def main(*args):
         request_fields = generate_general_request()
 
     request = get_id_fields()
+    new_req = json.dumps(request_fields)
     if force_req:
         # perform union
         request = {**request, **request_fields}
     else:
         # compare new request to previous
-        old = load_request(OLD_REQ)
-        new_req = json.dumps(request_fields)
+        old = load_request(REQ_PATH)
         if old != new_req:
             # they are different, so keep all fields
-            save_request(OLD_REQ, new_req)
             # perform union
             request = {**request, **request_fields}
+    save_request(REQ_PATH, new_req)
 
     print(request)
     resp = send_request(API_URL, request)
