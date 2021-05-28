@@ -19,6 +19,10 @@ TODO: will be done via Docker volume management (the containers are ephemeral).
 
 # Usage instructions
 ## Setup
+There are two required setups steps. First, the Raspberry Pi must have its MAC address registered with the school so it can connect to the internet on `CSMwireless`. Second, the Raspberry Pi must be registered with the IP/Status discovery system. This registration can only occur once the Raspberry Pi is connected to the network (i.e. has performed network registration).
+
+Custom networks can also be added to the Raspberry Pi.
+
 ### Network Registration
 
 
