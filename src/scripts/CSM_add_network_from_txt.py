@@ -20,17 +20,14 @@ for line in f:
         if len(line.strip().split("=")) > 1:
             (key, val) = line.strip().split("=")
             d[key] = val
-password_bool = False
-priority_bool = False
+
 items = ["CSM_add_network"]
 
 if len(d.get("priority")) > 0:
     items.append("--priority")
     items.append(d.get("priority"))
-    priority_bool = True
 
 if len(d.get("password")) > 0:
-    password_bool = True
     items.append("-p")
     items.append(d.get("password"))
 else:
