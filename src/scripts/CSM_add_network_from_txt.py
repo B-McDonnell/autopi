@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-
+    """Add network via .txt file.
+    """
 import subprocess
 
 # on boot, run this, then rewrite file in format...
