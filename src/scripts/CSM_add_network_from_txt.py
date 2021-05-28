@@ -60,8 +60,7 @@ def create_process(d: dict) -> list:
 
 
 def main():
-    """Perform main action and call helper functions.
-    """
+    """Perform main action and call helper functions."""
     f = open("/boot/CSM_new_network.txt", "r")
     d = get_dict(f)
     items = create_process(d)
@@ -72,3 +71,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
