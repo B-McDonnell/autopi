@@ -59,7 +59,12 @@ chmod +x /usr/bin/CSM_setup_home_network
 cp ./src/scripts/CSM_get_hw_id.py /usr/bin/CSM_get_hw_id
 chmod +x /usr/bin/CSM_get_hw_id
 
+
+cp ./src/scripts/CSM_add_network_from_txt.py /usr/bin/CSM_add_network_from_txt.py
+chmod +x /usr/bin/CSM_add_network_from_txt.py
+
 move_pyscript CSM_generate_request
+
 
 
 # ============================
@@ -86,5 +91,25 @@ crontab -l >/tmp/crontab_r 2>/dev/null
 grep -Fx "$WRITE_MAC_CRON" /tmp/crontab_r >/dev/null
 if [ "$?" -ne 0 ]; then
     echo "$WRITE_MAC_CRON">>/tmp/crontab_r
+fi
+crontab /tmp/crontab_r
+
+
+# =============================================================
+#      add network specified in file (CSM_new_network.txt)
+# =============================================================
+
+# adds network according to information in file
+
+# TODO: change reset command to copy a blank file to boot everytime
+ADD_NET_COMMAND = "CSM_add_network_from_txt"
+ADD_RESET_COMMAND="printf '%s\n' '# No space after (=).' '# Priority is an int value 1,2, or 3 (3 being prioritized the most).' '# If no password/priority, leave empty.' '# This file will be reset after network is added.' 'ssid=' 'password=' 'priority=' > /boot/CSM_new_network.txt"
+
+
+ADD_NET_CRON="@reboot $ADD_NET_COMMAND; $ADD_RESET_COMMAND"
+crontab -l >/tmp/crontab_r 2>/dev/null
+grep -Fx "$ADD_NET_CRON" /tmp/crontab_r >/dev/null
+if [ "$?" -ne 0 ]; then
+    echo "$ADD_NET_CRON">>/tmp/crontab_r
 fi
 crontab /tmp/crontab_r
