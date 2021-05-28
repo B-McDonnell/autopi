@@ -1,4 +1,5 @@
 # Table of contents
+The table of contents can be accessed from the dropdown menu to the left of `README.md`'s title.
 
 # Installation instructions
 ## Build image
