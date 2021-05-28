@@ -1,5 +1,5 @@
 # Usage
-- Look in .txt file in /boot/, and use provided network details to add network.
+- Look in `/boot/CSM_new_network.txt` file, and use provided network details to add network.
 
 
 # Implementation
@@ -10,4 +10,4 @@
 - subprocess
 
 # Technical considerations
-- Needs to use /boot/CSM_new_network.txt
+- Needs to use `/boot/CSM_new_network.txt`
