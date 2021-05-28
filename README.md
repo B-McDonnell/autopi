@@ -29,7 +29,20 @@
 11. Device registration should be complete.
 
 ### Home Network Registration
+There are two methods for adding a Home network to the RPi.
+- The first method is as follows:
+  1. Run CSM_setup_home_network on the RPi.
+  2. Follow the prompts and enter network information.
+  3. Once completed, network settings will reconfigure.
 
+- Alternative method
+  1. Insert SD card into Windows machine.
+  2. Find file 'CSM_new_network.txt'.
+  3. Fill out listed fields.
+  4. Remove SD card from Windows machine.
+  5. Insert SD card into RPi.
+  6. Boot RPi, network settings will reconfigure.
+  7. 'CSM_new_network.txt' will be reset to blank parameters.
 
 ## Get IP/status information
 In order to see the IP and status information for the Raspberry Pi, do the following:
