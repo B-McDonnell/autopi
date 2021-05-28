@@ -74,7 +74,7 @@ def set_home_network():
                 print('-'*50)
 
     try:
-        response = subprocess.run(
+        subprocess.run(
             ["CSM_wpa_country", "get"], capture_output=True, check=True)
     except subprocess.CalledProcessError as e:
         items.append("-c")
@@ -88,8 +88,12 @@ def set_home_network():
 
     items.append(str(ssid))
     print()
-    print("Adding network...")
-    subprocess.run(items)
+
+    print("Adding network...", end=' ')
+    try:
+        subprocess.run(items, check=True)
+    except subprocess.CalledProcessError as e:
+        print("\nAdding network failed:", e, file=sys.stderr)
 
 
 if __name__ == "__main__":
