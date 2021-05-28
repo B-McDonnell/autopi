@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """This script generates IP discovery requests and send them as JSON via POST."""
+
+import argparse
 import json
 import ssl
 import subprocess
@@ -23,39 +25,28 @@ def get_interfaces() -> list:
     Returns:
         list: list of interface name strings.
     """
-    ifaces = ["wlan0", "eth0"]
     ref_ifaces = netifaces.interfaces()
-    present = []
-    for i in ifaces:
-        if i in ref_ifaces:
-            present.append(i)
-    return present
+    return [x for x in ref_ifaces if not x.startswith("lo")]
 
 
-def select_interface(interfaces: list) -> (bool, str, str):
-    """Select first interface available and get its ip address.
-
-    Note:
-    To properly select the interface, you have to get its ip, so the ip is returned as well.
-
-    Args:
-        interfaces (list): list of interface names, the first entry that has an ip will be selected.
+def connected_interfaces() -> list:
+    """Get list of network connected interfaces.
 
     returns:
-        bool: interface_available
-        str: interface_name
-        str: ip_addr
+        list[str]: connected interface names.
+
+    Raises:
+        RuntimeError: if no interface is available
     """
-    interface = ""
-    has_ip = False
+    interfaces = get_interfaces()
+    if len(interfaces) == 0:
+        raise RuntimeError("No network interfaces") from None
+    connected = []
     for i in interfaces:
-        int_ip, status = CSM_getip.get_interface_ip(i)
+        _, status = CSM_getip.get_interface_ip(i)
         if status:
-            ip = int_ip
-            interface = i
-            has_ip = True
-            break
-    return has_ip, interface, ip
+            connected.append(i)
+    return connected
 
 
 def generate_shutdown_request() -> dict:
@@ -67,15 +58,23 @@ def generate_shutdown_request() -> dict:
     return {"event": "shutdown"}
 
 
-def get_mac(interface: str) -> str:
-    """Return MAC address for specified interface."""
-    return netifaces.ifaddresses(interface)[netifaces.AF_LINK][0]["addr"]
+def is_service_up(service: str) -> bool:
+    """Return bool representing whether service is up.
+
+    Obtains status from 'service sshd status' return code. The return codes are different per-service, but 0 should always imply UP. 0 => UP, not 0 => DOWN.
+
+    Args:
+        service (str): service name as in linux command 'service SERVICE_STR status'
+
+    Returns:
+        bool: up
+    """
+    result = subprocess.run(["service", service, "status"], capture_output=True)
+    return result.returncode == 0
 
 
 def get_service_status(service: str) -> str:
     """Return a string to be used as the service status.
-
-    Obtains status from 'service sshd status' return code. The return codes are different per-service, but 0 should always imply UP. 0 => UP, not 0 => DOWN.
 
     Args:
         service (str): service name.
@@ -83,12 +82,8 @@ def get_service_status(service: str) -> str:
     Returns:
         str: service status.
     """
-    result = subprocess.run(["service", service, "status"], capture_output=True)
-    code = result.returncode
-    if code == 0:
-        return "up"
-    else:
-        return "down"
+    b = is_service_up(service)
+    return "up" if b else "down"
 
 
 def get_ssh_status() -> str:
@@ -112,19 +107,24 @@ def generate_general_request() -> dict:
     Raises:
         RuntimeError: if no interface can be found
     """
-    available, int_name, ip = select_interface(get_interfaces())
-    if not available:  # can't send message
-        # TODO there should *maybe* be logging here...
-        raise RuntimeError from None
+    connected = connected_interfaces()
+    if len(connected) == 0:
+        raise RuntimeError("No connected network interfaces") from None
+    selected_int = connected[0]
+    if "wlan0" in connected:
+        selected_int = "wlan0"
+    ip, status = CSM_getip.get_interface_ip(selected_int)
+    if not status:
+        raise RuntimeError("Interface disconnected") from None
 
-    mac = CSM_get_mac.getMAC(int_name)
+    mac = CSM_get_mac.getMAC(selected_int)
     fields = {
         "ip": ip,
         "mac": mac,
     }
 
-    ssid, status = CSM_getssid.get_ssid(int_name)
-    if status:  # ensures ssid available for interface
+    ssid, status = CSM_getssid.get_ssid(selected_int)
+    if status:  # ensures ssid available for interface before adding it
         fields["ssid"] = ssid
     fields["ssh"] = get_ssh_status()
     fields["vnc"] = get_vnc_status()
@@ -198,67 +198,94 @@ def send_request(api_url: str, request) -> HTTPResponse:
     return resp
 
 
-def parse_commandline(*args) -> (bool, bool):
-    """Parse the command line and return flags, just two at the moment.
-
-    Returns:
-        bool: shutdown_request. Implies force_request.
-        bool: force_request. Forces request to be sent without comparing last update.
-    """
-    if len(args) == 0:
-        return False, False
-
-    valid = ["SHUTDOWN", "START"]
-    if len(args) > 1 or args[0] not in valid:
-        print("Invalid commandline arguments")  # TODO proper logging?
-        sys.exit(1)
-
-    shutdown_req = args[0] == "SHUTDOWN"
-    return shutdown_req, True
-
-
-def main(*args):
-    """.
+def main(event: str = "general", force: bool = False, verbose: bool = False):
+    """Generate the specified request, compare it to previous request if applicable, and send it.
 
     Args:
+        event (str):
+        force (bool): force the request to be generated without comparing to previous request
+        verbose (bool): show command output to stdout
         args (list): normal commandline arguments minus script name
+
+    Raises:
+        RuntimeError: if no network interface is connected to the network
+        URLError: if the connection failed
     """
     CSM_ROOT = Path("/var/opt/autopi/")
     REQ_PATH = CSM_ROOT / "old_request.json"
-    API_URL = "http://localhost:8000/"  # TODO retarget API URL
+    # TODO get API URL from a configuration file/environment variable
+    API_URL = "http://localhost:8000/"
 
-    shutdown_req, force_req = parse_commandline(*args)
-
-    if shutdown_req:
-        request_fields = generate_shutdown_request()
-    else:
+    request_fields = {}
+    if event != "shutdown":
         request_fields = generate_general_request()
 
-    request = get_id_fields()
     new_req = json.dumps(request_fields)
-    if force_req:
-        # perform union
-        request = {**request, **request_fields}
-    else:
+    if not force:
         # compare new request to previous
         old = load_request(REQ_PATH)
         if old != new_req:
-            # they are different, so keep all fields
-            # perform union
-            request = {**request, **request_fields}
+            save_request(REQ_PATH, new_req)
+        else:
+            request_fields = {}  # clear
     save_request(REQ_PATH, new_req)
 
-    print(request)
+    request = get_id_fields()
+    request["event"] = event
+    # perform union
+    request = {**request, **request_fields}
+
     resp = send_request(API_URL, request)
-    print(resp.status)
-    print(resp.readlines())
+    if verbose:
+        print(request)
+        print(resp.status)
+        print(resp.readlines())
+
+
+def parse_commandline() -> (str, bool, bool):
+    """Parse the command line and return the appropriate arguments for main.
+
+    Returns:
+        str: event type
+        bool: force request to be sent without comparing last update.
+        bool: verbose
+    """
+    parser = argparse.ArgumentParser(
+        description="Generate a POST request for a given event."
+    )
+    parser.add_argument("--verbose", "-v", action="count", default=0)
+    parser.add_argument(
+        "type",
+        choices=[
+            "start",
+            "shutdown",
+            "keepalive",
+            "net_update",
+            "ssh_change",
+            "vnc_change",
+            "general",
+        ],
+        nargs="?",
+        default="general",
+    )
+    result = parser.parse_args()
+
+    # get the parameters
+    event = result.type
+    force_req = False
+    if event == "shutdown" or event == "start":
+        force_req = True
+
+    verbose = result.verbose > 0
+
+    return event, force_req, verbose
 
 
 if __name__ == "__main__":
     try:
-        main(*sys.argv[1:])
-    except RuntimeError:
-        print("No network interface connected")
+        main(*parse_commandline())
+    except RuntimeError as re:
+        print(re)
         sys.exit(1)
     except URLError:
         print("Connection failed")

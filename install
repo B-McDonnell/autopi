@@ -31,7 +31,7 @@ pip3 install -r requirements.txt
 #   move scripts to /usr/bin
 # ============================
 
-function move_script() {
+function move_pyscript() {
     #if [ -z "$1" ]; then return 0; fi
     stem=`basename "$1" .py` # strip extension
     cp ./src/scripts/"$stem".py /usr/bin/"$stem"
@@ -59,7 +59,7 @@ chmod +x /usr/bin/CSM_setup_home_network
 cp ./src/scripts/CSM_get_hw_id.py /usr/bin/CSM_get_hw_id
 chmod +x /usr/bin/CSM_get_hw_id
 
-move_script CSM_generate_request
+move_pyscript CSM_generate_request
 
 
 # ============================
