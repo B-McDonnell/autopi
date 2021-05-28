@@ -9,9 +9,11 @@
 
 
 ## Setup web server
-
+TODO: will be done via Docker compose.
+Server requirements: Docker, Docker Compose.
 
 ## Migrate web server
+TODO: will be done via Docker volume management (the containers are ephemeral).
 
 
 # Usage instructions
