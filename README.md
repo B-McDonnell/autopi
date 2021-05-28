@@ -2,6 +2,10 @@
 
 # Installation instructions
 ## Build image
+1. `cd /path/to/autopi/`
+2. `chmod +x install`
+3. `./install`
+4. Remove autopi project: `cd ..; rm -rf autopi`
 
 
 ## Setup web server
