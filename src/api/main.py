@@ -28,14 +28,30 @@ def root():
             <title>Hello world home page</title>
         </head>
         <body>
-            <h1>Hello world!</h1>
+            <h1>Hello world! This is the home page</h1>
         </body>
     </html>
     """
     return HTMLResponse(content=content, status_code=200)
 
 
-@app.put("/api/status")
+@app.get("/help", response_class=HTMLResponse)
+def help():
+    """Serve help page."""
+    content = """
+    <html>
+        <head>
+            <title>Help page</title>
+        </head>
+        <body>
+            <h1>Hello world! This is the help page</h1>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=content, status_code=200)
+
+
+@app.post("/api/status")
 def update_status(status: Status):
     """Print status received."""
     print(status)
