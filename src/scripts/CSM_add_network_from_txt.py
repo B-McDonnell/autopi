@@ -2,8 +2,8 @@
 
 """Add network via .txt file."""
 
-from io import TextIOWrapper
 import subprocess
+from io import TextIOWrapper
 
 # on boot, run this, then rewrite file in format...
 # sudo sh -c "printf '%s\n' '#No space after (=).' '#Priority is an int value 1,2, or 3 (3 being prioritized the most).' '#If no password/priority, leave empty.' '#This file will be reset after network is added.' 'ssid=' 'password=' 'priority=' > /boot/CSM_new_network.txt"
@@ -71,4 +71,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
