@@ -89,7 +89,7 @@ def set_home_network():
     items.append(str(ssid))
     print()
 
-    print("Adding network...", end=' ')
+    print("Adding network...")
     try:
         subprocess.run(items, check=True)
     except subprocess.CalledProcessError as e:
