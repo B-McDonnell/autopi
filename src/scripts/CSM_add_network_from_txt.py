@@ -38,6 +38,6 @@ items.append(ssid)
 if priority_bool and passsword_bool and len(ssid) > 0:
     subprocess.run(items)
 
-else:
-    print("None")
+#else:
+    #print("None")
 f.close()
