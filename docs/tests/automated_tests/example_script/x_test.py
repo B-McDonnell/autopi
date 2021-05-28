@@ -1,12 +1,19 @@
+"""Example test script."""
+
 import unittest
 
 
 class TestRandom(unittest.TestCase):
+    """Example unit test group."""
+
     def test_1(self):
-        self.assertTrue(True != False)
+        """Example unit test."""
+        self.assertTrue(True != False)  # noqa: E712
 
     def test_2(self):
-        self.assertTrue(True == True)
+        """Example unit test."""
+        self.assertTrue(True == True)  # noqa: E712
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
