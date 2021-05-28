@@ -237,9 +237,13 @@ def main(event: str = "general", force: bool = False, verbose: bool = False):
 
     resp = send_request(API_URL, request)
     if verbose:
-        print(request)
-        print(resp.status)
-        print(resp.readlines())
+        print("----- POST Data ----")
+        print(json.dumps(request, indent=4, sort_keys=True))
+        print()
+        print("----- Response -----")
+        print("Response code:", resp.status)
+        print("Response body:")
+        print(b"".join(resp.readlines()).decode("utf-8"))
 
 
 def parse_commandline() -> (str, bool, bool):
