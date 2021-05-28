@@ -4,6 +4,7 @@ r"""Get the device ID. ¯\_(ツ)_/¯."""
 
 def get_dev_id() -> str:
     """Return device UUID as string."""
+    # TODO at some point, this path might be in a config file
     with open("/boot/CSM_device_id.txt") as f:
         lines = f.readlines()
     return "".join(lines)

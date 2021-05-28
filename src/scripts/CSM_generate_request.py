@@ -93,9 +93,8 @@ def get_ssh_status() -> str:
 
 def get_vnc_status() -> str:
     """Get VNC status as 'up' or 'down'."""
-    # TODO Currently, there are two services, I'm uncertain which one matters
-    return get_service_status("vncserver-virtuald")
-    # return get_service_status('vncserver-x11-systemd')
+    # TODO Currently, there are multiple services, I'm uncertain which one(s) matters
+    return get_service_status("vncserver-x11-serviced")
 
 
 def generate_general_request() -> dict:
@@ -143,7 +142,7 @@ def get_id_fields() -> dict:
     return {"hwid": hwid, "devid": devid}
 
 
-def load_request(request_path: Path) -> str:
+def load_request(request_path: Path) -> dict:
     """Load request JSON file as string.
 
     If file read fails, a blank string is returned.
@@ -152,29 +151,71 @@ def load_request(request_path: Path) -> str:
         request_path (Path): path to a file with a json request.
 
     Returns:
-        str: file contents.
+        dict: parsed file JSON contents.
+
+    Raises:
+        OSError: file open/read failed
     """
-    try:
-        with open(request_path) as f:
-            return f.read()
-    except Exception:
-        # TODO probably log this event
-        return ""
+    with open(request_path) as f:
+        return json.load(f)
 
 
-def save_request(request_path: Path, request: str):
+def save_request(request_path: Path, request: dict):
     """Save request JSON file.
 
     If file open/save fails, the failure is ignored as it is not critical.
 
     Args:
         request_path (Path): path to a file with a json request.
+        request (dict): dictionary with data fields.
+
+    Raises:
+        OSError: file open/read failed
     """
+    with open(request_path, "w") as f:
+        f.write(json.dumps(request))
+
+
+def generate_request(event: str, force: bool) -> dict:
+    """Generate the data needed for the request.
+
+    Args:
+        event (str): the type of the event.
+        force (bool): if true, the non-id/event-name fields will not be compared to the previous request, and will always be sent.
+
+    Returns:
+        dict: all the fields for the request.
+
+    Raises:
+        RuntimeError: if no network interface is connected to the network
+    """
+    CSM_ROOT = Path("/var/opt/autopi/")
+    REQ_PATH = CSM_ROOT / "old_request.json"
+
+    request_fields = {}
+    if event != "shutdown":
+        request_fields = generate_general_request()
+
     try:
-        with open(request_path, "w") as f:
-            f.write(request)
-    except Exception:
-        pass  # TODO log the event
+        if force:
+            save_request(REQ_PATH, request_fields)
+        else:
+            # compare new request to previous
+            old = load_request(REQ_PATH)
+            if old == request_fields:
+                request_fields = {}  # clear
+                REQ_PATH.touch()
+            else:
+                save_request(REQ_PATH, request_fields)
+    except OSError:
+        # TODO probably log this
+        pass
+
+    request = get_id_fields()
+    request["event"] = event
+    # perform union
+    request = {**request, **request_fields}
+    return request
 
 
 def send_request(api_url: str, request) -> HTTPResponse:
@@ -211,30 +252,10 @@ def main(event: str = "general", force: bool = False, verbose: bool = False):
         RuntimeError: if no network interface is connected to the network
         URLError: if the connection failed
     """
-    CSM_ROOT = Path("/var/opt/autopi/")
-    REQ_PATH = CSM_ROOT / "old_request.json"
     # TODO get API URL from a configuration file/environment variable
     API_URL = "http://localhost:8000/"
 
-    request_fields = {}
-    if event != "shutdown":
-        request_fields = generate_general_request()
-
-    new_req = json.dumps(request_fields)
-    if not force:
-        # compare new request to previous
-        old = load_request(REQ_PATH)
-        if old != new_req:
-            save_request(REQ_PATH, new_req)
-        else:
-            request_fields = {}  # clear
-    save_request(REQ_PATH, new_req)
-
-    request = get_id_fields()
-    request["event"] = event
-    # perform union
-    request = {**request, **request_fields}
-
+    request = generate_request(event, force)
     resp = send_request(API_URL, request)
     if verbose:
         print("----- POST Data ----")
