@@ -1,0 +1,12 @@
+
+[Unit]
+Description=Autopi periodic request timer
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=1m
+AccuracySec=1s
+Unit=autopi-periodic.service
+
+[Install]
+WantedBy=multi-user.target
