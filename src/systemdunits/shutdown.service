@@ -5,9 +5,8 @@ Before=shutdown.target network.target
 
 [Service]
 Type=oneshot
-ExecStart=bash -c "API_URL='http://192.168.170.1:8000/api/status' /home/pi/autopi/src/scripts/CSM_generate_request.py shutdown"
-#ExecStart=/root/shutdown_script.sh
-TimeoutStartSec=0
+ExecStart=/home/pi/autopi/src/scripts/CSM_generate_request.py shutdown
+TimeoutStartSec=10
 
 [Install]
 WantedBy=shutdown.target
