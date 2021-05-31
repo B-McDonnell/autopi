@@ -139,3 +139,5 @@ add_systemd_unit src/systemdunits/periodic.service noenable
 add_systemd_unit src/systemdunits/periodic.timer enable
 add_systemd_unit src/systemdunits/shutdown.service enable
 add_systemd_unit src/systemdunits/startup.service enable
+
+systemctl daemon-reload 
