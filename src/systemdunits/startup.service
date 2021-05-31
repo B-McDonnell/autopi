@@ -6,7 +6,6 @@ After=network.target
 Type=simple
 Restart=on-failure
 RestartSec=5
-Environment=API_URL='http://192.168.170.1:8000/api/status'
 ExecStart=/home/pi/autopi/src/scripts/CSM_generate_request.py start
 
 [Install]

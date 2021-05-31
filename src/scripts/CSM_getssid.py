@@ -33,7 +33,10 @@ def get_ssid(interface: str) -> (str, bool):
         str: ssid of the network interface.
         bool: status. If true, ssid was successfully obtained and returned in 'ssid', otherwise ssid is empty. If false interface nonexistent, interface is not wireless, or currently has no SSID.
     """
-    result = subprocess.run(["iwgetid", interface, "-r"], capture_output=True)
+    try:
+        result = subprocess.run(["iwgetid", interface, "-r"], capture_output=True)
+    except FileNotFoundError:
+        return "", False #iwgetid not present
     if result.returncode != 0:
         return "", False
     output_b = result.stdout
