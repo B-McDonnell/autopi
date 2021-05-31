@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 import ssl
 import subprocess
 import sys
@@ -254,6 +255,8 @@ def main(event: str = "general", force: bool = False, verbose: bool = False):
     """
     # TODO get API URL from a configuration file/environment variable
     API_URL = "http://localhost:8000/"
+    if 'API_URL' in os.environ:  # TODO replace this temporary code
+        API_URL = os.environ['API_URL']
 
     request = generate_request(event, force)
     resp = send_request(API_URL, request)
@@ -312,6 +315,7 @@ if __name__ == "__main__":
     except RuntimeError as re:
         print(re)
         sys.exit(1)
-    except URLError:
+    except URLError as ue:
         print("Connection failed")
+        print(ue)
         sys.exit(1)
