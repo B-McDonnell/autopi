@@ -124,16 +124,18 @@ function add_systemd_unit() {
 		echo "Missing parameter"
 		return 1
 	fi
-	TNAME="$SYSTEMD_PREFIX"`basename "$1"`
+	TNAME="$SYSTEMD_PREFIX"$(basename "$1")
 	cp "$1" "/etc/systemd/system/$TNAME"
-	systemctl daemon-reload
-	if [ -z "$2" ]; then
+	if [ "enable" -eq "$2" ]; then
 		systemctl enable $TNAME
+	elif [ "noenable" -ne "$2" ]; then
+		echo "Invalid parameter"
+		echo "Usage: add_systemd_unit PATH_TO_UNIT (enable | noenable)"
 	fi
 }
 
 # add units for startup+shutdown+periodic IP Discovery requests
 add_systemd_unit src/systemdunits/periodic.service noenable
-add_systemd_unit src/systemdunits/periodic.timer
-add_systemd_unit src/systemdunits/shutdown.service
-add_systemd_unit src/systemdunits/startup.service
+add_systemd_unit src/systemdunits/periodic.timer enable
+add_systemd_unit src/systemdunits/shutdown.service enable
+add_systemd_unit src/systemdunits/startup.service enable
