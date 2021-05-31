@@ -3,7 +3,6 @@
 
 import argparse
 import json
-import os
 import ssl
 import subprocess
 import sys
@@ -12,12 +11,12 @@ from http.client import HTTPResponse
 from pathlib import Path
 from urllib.error import URLError
 
+import CSM_get_config
 import CSM_get_dev_id
 import CSM_get_hw_id
 import CSM_get_mac
 import CSM_getip
 import CSM_getssid
-import CSM_get_config
 import netifaces
 
 
@@ -316,5 +315,5 @@ if __name__ == "__main__":
         sys.exit(1)
     except URLError as ue:
         print("Connection failed")
-        print("Readable contextual explanation:",ue)
+        print("Readable contextual explanation:", ue)
         sys.exit(1)

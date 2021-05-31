@@ -16,7 +16,10 @@ def is_wireless_active(interface: str) -> bool:
     Returns:
         bool: Interface is wireless and active.
     """
-    result = subprocess.run(["iwconfig", interface], capture_output=True)
+    try:
+        result = subprocess.run(["iwconfig", interface], capture_output=True)
+    except FileNotFoundError:
+        return "", False  # iwconfig not present
     if result.returncode != 0:
         return False
     return True
@@ -36,7 +39,7 @@ def get_ssid(interface: str) -> (str, bool):
     try:
         result = subprocess.run(["iwgetid", interface, "-r"], capture_output=True)
     except FileNotFoundError:
-        return "", False #iwgetid not present
+        return "", False  # iwgetid not present
     if result.returncode != 0:
         return "", False
     output_b = result.stdout
