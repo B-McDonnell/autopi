@@ -255,8 +255,8 @@ def main(event: str = "general", force: bool = False, verbose: bool = False):
     """
     # TODO get API URL from a configuration file/environment variable
     API_URL = "http://localhost:8000/"
-    if 'API_URL' in os.environ:  # TODO replace this temporary code
-        API_URL = os.environ['API_URL']
+    if "API_URL" in os.environ:  # TODO replace this temporary code
+        API_URL = os.environ["API_URL"]
 
     request = generate_request(event, force)
     resp = send_request(API_URL, request)
