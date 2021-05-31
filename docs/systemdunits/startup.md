@@ -1,5 +1,5 @@
 # Overview
-This service generates `start` event requests on system boot. Triggers on `multi-user` run level or higher. The service should not run until networking has started, after which the service will restart every 5 seconds until successfully sending a request. 
+This service generates `start` event requests on system boot. Triggers on `multi-user` run level or higher. The service should not run until networking has started, after which the service will restart every 5 seconds until successfully sending a request. Waiting longer delays sending the `start` event, a shorter restart interval risks systemd killing the service because of too many restarts.
 
 # Detailed notes
 `Type=simple` specifies the recommended service type.
