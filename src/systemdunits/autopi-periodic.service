@@ -1,7 +1,7 @@
 
 [Unit]
 Description=Autopi periodic status updates
-After=network.target
+After=network-online.target
 
 [Service]
 Type=simple
