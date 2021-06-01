@@ -1,5 +1,5 @@
 [Unit]
-Description=Run shutdown script at shutdown
+Description=Send shutdown event for IP discovery at system shutdown
 DefaultDependencies=no
 Before=shutdown.target network.target
 

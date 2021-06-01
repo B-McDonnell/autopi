@@ -1,7 +1,6 @@
-
 [Unit]
 Description=Autopi periodic request timer
-After=network.target
+After=network-online.target
 
 [Timer]
 OnBootSec=30s
