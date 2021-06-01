@@ -31,7 +31,7 @@ def get_api_url() -> str:
             for line in lines:
                 ln = line.strip()
                 if ln.startswith("API_URL="):
-                    api_url = ln[8:].strip()
+                    api_url = ln[8:].strip()  # TODO re-write this glorious code
     return api_url
 
 
