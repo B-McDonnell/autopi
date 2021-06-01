@@ -314,6 +314,5 @@ if __name__ == "__main__":
         print(re)
         sys.exit(1)
     except URLError as ue:
-        print("Connection failed")
-        print("Readable contextual explanation:", ue)
+        print("Connection failed:", ue)
         sys.exit(1)
