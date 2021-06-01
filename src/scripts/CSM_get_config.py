@@ -2,6 +2,7 @@
 """Temporary module for reading a dummy configuration."""
 
 import os
+from pathlib import Path
 
 
 # TODO REPLACE ME
@@ -19,11 +20,13 @@ def get_api_url() -> str:
     if "API_URL" in os.environ:
         api_url = os.environ["API_URL"]
     else:
+        config_path = Path("/autopi.config")
         try:
             with open("/autopi.config") as f:
                 lines = f.readlines()
         except OSError:
-            pass  # TODO what should happen here?
+            # TODO determine appropriate behavior; if it isn't scrapped outright
+            config_path.touch()
         else:
             for line in lines:
                 ln = line.strip()
