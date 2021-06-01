@@ -113,3 +113,31 @@ if [ "$?" -ne 0 ]; then
     echo "$ADD_NET_CRON">>/tmp/crontab_r
 fi
 crontab /tmp/crontab_r
+
+# =============================================================
+#		Install systemd unit files
+# =============================================================
+
+SYSTEMD_PREFIX='autopi-'
+function add_systemd_unit() {
+	if [ -z "$1" ]; then
+		echo "Missing parameter"
+		return 1
+	fi
+	TNAME="$SYSTEMD_PREFIX"$(basename "$1")
+	cp "$1" "/etc/systemd/system/$TNAME"
+	if [ "enable" -eq "$2" ]; then
+		systemctl enable $TNAME
+	elif [ "noenable" -ne "$2" ]; then
+		echo "Invalid parameter"
+		echo "Usage: add_systemd_unit PATH_TO_UNIT (enable | noenable)"
+	fi
+}
+
+# add units for startup+shutdown+periodic IP Discovery requests
+add_systemd_unit src/systemdunits/periodic.service noenable
+add_systemd_unit src/systemdunits/periodic.timer enable
+add_systemd_unit src/systemdunits/shutdown.service enable
+add_systemd_unit src/systemdunits/startup.service enable
+
+systemctl daemon-reload 

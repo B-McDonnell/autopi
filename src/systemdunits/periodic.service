@@ -1,0 +1,8 @@
+
+[Unit]
+Description=Autopi periodic status updates
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/pi/autopi/src/scripts/CSM_generate_request.py keepalive

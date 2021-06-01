@@ -11,6 +11,7 @@ from http.client import HTTPResponse
 from pathlib import Path
 from urllib.error import URLError
 
+import CSM_get_config
 import CSM_get_dev_id
 import CSM_get_hw_id
 import CSM_get_mac
@@ -253,10 +254,10 @@ def main(event: str = "general", force: bool = False, verbose: bool = False):
         URLError: if the connection failed
     """
     # TODO get API URL from a configuration file/environment variable
-    API_URL = "http://localhost:8000/"
+    api_url = CSM_get_config.get_api_url()
 
     request = generate_request(event, force)
-    resp = send_request(API_URL, request)
+    resp = send_request(api_url, request)
     if verbose:
         print("----- POST Data ----")
         print(json.dumps(request, indent=4, sort_keys=True))
@@ -312,6 +313,6 @@ if __name__ == "__main__":
     except RuntimeError as re:
         print(re)
         sys.exit(1)
-    except URLError:
-        print("Connection failed")
+    except URLError as ue:
+        print("Connection failed:", ue)
         sys.exit(1)

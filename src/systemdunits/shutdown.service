@@ -1,0 +1,12 @@
+[Unit]
+Description=Run shutdown script at shutdown
+DefaultDependencies=no
+Before=shutdown.target network.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/pi/autopi/src/scripts/CSM_generate_request.py shutdown
+TimeoutStartSec=10
+
+[Install]
+WantedBy=shutdown.target
