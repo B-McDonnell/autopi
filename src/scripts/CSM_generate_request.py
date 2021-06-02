@@ -241,7 +241,8 @@ def send_request(api_url: str, request) -> HTTPResponse:
 
 
 def generate_and_send_request(
-    event: str = "general", force: bool = False, verbose: bool = False):
+    event: str = "general", force: bool = False, verbose: bool = False
+):
     """Generate the specified request, compare it to previous request if applicable, and send it.
 
     Args:
