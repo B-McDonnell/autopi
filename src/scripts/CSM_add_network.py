@@ -159,6 +159,7 @@ def config(args: argparse.ArgumentParser):
         # add network
         update_config(config, config_filename)
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("SSID", type=str, help="SSID of the network")
@@ -207,4 +208,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-   
