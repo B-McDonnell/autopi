@@ -1,0 +1,7 @@
+[Unit]
+Description=Autopi status change request generation service
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/home/pi/autopi/src/scripts/CSM_generate_request.py %i
