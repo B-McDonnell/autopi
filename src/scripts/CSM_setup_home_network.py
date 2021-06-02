@@ -98,6 +98,7 @@ def set_home_network():
 
 
 def main():
+    """Tell to run with sudo."""
     if os.geteuid() != 0:
         print("Permission Denied: Must be run as super user!")
         sys.exit(1)

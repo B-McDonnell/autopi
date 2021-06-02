@@ -308,6 +308,7 @@ def parse_commandline() -> (str, bool, bool):
 
 
 def main():
+    """Catch exceptions."""
     try:
         generate(*parse_commandline())
     except RuntimeError as re:
