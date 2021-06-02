@@ -96,7 +96,7 @@ def main():
         default="/etc/wpa_supplicant/wpa_supplicant.conf",
     )
 
-    get_parser = subparsers.add_parser(
+    subparsers.add_parser(
         "get",
         help="get the current country code. Fails if country code does not exist",
         parents=[shared_parser],
