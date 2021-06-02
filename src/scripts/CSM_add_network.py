@@ -187,7 +187,6 @@ def main():
         type=int,
         help="priority level for the network. Networks with a higher priority network will be joined first",
     )
-    auth_group = parser.add_argument_group()
 
     pass_group = parser.add_mutually_exclusive_group(required=True)
     pass_group.add_argument(
