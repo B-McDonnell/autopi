@@ -18,7 +18,7 @@ def get_interface_ip(interface: str):
 
 
 def main():
-    """Main functionality."""
+    """Handle argv."""
     if len(sys.argv) > 1:
         # read command line arg
         ip, status = get_interface_ip(sys.argv[1])
