@@ -27,11 +27,12 @@ mkdir /var/opt/autopi  # create directory for script generated files
 pip3 install -r requirements.txt
 
 
-# ============================
-#   move scripts to /usr/bin
-# ============================
+# ==============================================================
+#   add scripts to install location; add to /usr/bin as needed
+# ==============================================================
 
 SCRIPT_DIR="/opt/autopi/"
+mkdir -p $"SCRIPT_DIR"
 
 function move_pyscript() {
     #if [ -z "$1" ]; then return 0; fi
