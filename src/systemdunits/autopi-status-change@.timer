@@ -1,0 +1,8 @@
+[Unit]
+Description=Autopi status change request timer
+After=network-online.target
+
+[Timer]
+OnActiveSec=3s
+AccuracySec=1s
+Unit=autopi-status-change@%I.service
