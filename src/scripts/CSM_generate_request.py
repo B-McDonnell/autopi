@@ -306,6 +306,7 @@ def parse_commandline() -> (str, bool, bool):
 
     return event, force_req, verbose
 
+
 def main():
     try:
         generate(*parse_commandline())
@@ -315,6 +316,7 @@ def main():
     except URLError as ue:
         print("Connection failed:", ue)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

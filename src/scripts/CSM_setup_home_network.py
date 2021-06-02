@@ -96,11 +96,13 @@ def set_home_network():
     except subprocess.CalledProcessError as e:
         print("\nAdding network failed:", e, file=sys.stderr)
 
+
 def main():
     if os.geteuid() != 0:
         print("Permission Denied: Must be run as super user!")
         sys.exit(1)
     set_home_network()
+
 
 if __name__ == "__main__":
     main()
