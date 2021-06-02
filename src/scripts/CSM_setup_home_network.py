@@ -4,14 +4,16 @@
 import os
 import subprocess
 import sys
+
 import CSM_wpa_country
 import stdiomask
 
 
 class HiddenPrints:
     """Hide output for updating country.
-       https://stackoverflow.com/questions/8391411/how-to-block-calls-to-print
+    https://stackoverflow.com/questions/8391411/how-to-block-calls-to-print
     """
+
     def __enter__(self):
         """Initialize hiding."""
         self._original_stdout = sys.stdout
