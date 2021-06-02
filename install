@@ -139,8 +139,6 @@ add_systemd_unit src/systemdunits/autopi-periodic.timer enable
 add_systemd_unit src/systemdunits/autopi-shutdown.service enable
 add_systemd_unit src/systemdunits/autopi-startup.service enable
 
-systemctl daemon-reload 
-
 
 # =============================================================
 #             Add hooks for SSH+VNC status change
@@ -157,3 +155,5 @@ mkdir "$VNC_OVERRIDE_DIR"
 mkdir "$SSH_OVERRIDE_DIR"
 cp src/systemdunits/vnc_override.conf "$VNC_OVERRIDE_DIR"/override.conf
 cp src/systemdunits/ssh_override.conf "$SSH_OVERRIDE_DIR"/override.conf
+
+systemctl daemon-reload
