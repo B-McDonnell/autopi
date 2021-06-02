@@ -41,25 +41,25 @@ function move_pyscript() {
     if [ "$2" == "command" ]; then
         prefix='CSM_'
         chmod +x "$SCRIPT_DIR"/"$name"
-        ln -s "$SCRIPT_DIR"/"$name" /usr/bin/"$stem"
+        ln -s "$SCRIPT_DIR"/"$name" /usr/bin/"$prefix""$stem"
     elif [ ! -z "$2" ]; then
         echo "Invalid parameter"
         return 1
     fi
 }
 
-move_pyscript CSM_get_config
-move_pyscript CSM_getip
-move_pyscript CSM_getssid
-move_pyscript CSM_wpa_country
-move_pyscript CSM_get_hw_id
-move_pyscript CSM_get_dev_id
+move_pyscript get_config
+move_pyscript get_ip
+move_pyscript get_ssid
+move_pyscript wpa_country
+move_pyscript get_hw_id
+move_pyscript get_dev_id
 
-move_pyscript CSM_get_mac command
-move_pyscript CSM_add_network command
-move_pyscript CSM_generate_request command
-move_pyscript CSM_setup_home_network command
-move_pyscript CSM_add_network_from_txt command
+move_pyscript get_mac command
+move_pyscript add_network command
+move_pyscript generate_request command
+move_pyscript setup_home_network command
+move_pyscript add_network_from_txt command
 
 
 # ============================
