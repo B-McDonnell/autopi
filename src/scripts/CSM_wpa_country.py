@@ -81,6 +81,7 @@ def update_country(config_file: str, country: str):
 
 
 def main():
+    """Set parsers."""
     parser = argparse.ArgumentParser()
 
     shared_parser = argparse.ArgumentParser(add_help=False)

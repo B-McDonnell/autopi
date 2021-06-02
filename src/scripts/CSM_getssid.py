@@ -50,7 +50,7 @@ def get_ssid(interface: str) -> (str, bool):
 
 
 def main():
-    # take second argument if supplied to be interface name
+    """Take second argument if supplied to be interface name."""
     interface = sys.argv[1] if len(sys.argv) > 1 else "wlan0"
 
     status = is_wireless_active(interface)

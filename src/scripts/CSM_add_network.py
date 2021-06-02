@@ -161,6 +161,7 @@ def config(args: argparse.ArgumentParser):
 
 
 def main():
+    """Add parsers."""
     parser = argparse.ArgumentParser()
     parser.add_argument("SSID", type=str, help="SSID of the network")
     parser.add_argument(
