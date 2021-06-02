@@ -1,5 +1,10 @@
 CREATE SCHEMA autopi;
 
+CREATE TABLE autopi.user(
+	last_login timestamptz NOT NULL,
+	username text PRIMARY KEY
+);
+
 CREATE TABLE autopi.raspi(
 	device_id uuid DEFAULT uuid_generate_v4 () PRIMARY KEY, 
 	hardware_id text,
@@ -10,7 +15,7 @@ CREATE TABLE autopi.raspi(
 	ssh text,
 	power text,
 	username text,
-	FOREIGN KEY(username) REFERENCES user(username)
+	FOREIGN KEY(username) REFERENCES autopi.user(username)
 );
 
 CREATE TABLE autopi.raspi_warning(
@@ -19,11 +24,6 @@ CREATE TABLE autopi.raspi_warning(
 	device_id text,
 	PRIMARY KEY(device_id, warning),
 	FOREIGN KEY(device_id) REFERENCES autopi.raspi(device_id)
-);
-
-CREATE TABLE autopi.user(
-	last_login timestamptz NOT NULL,
-	username text PRIMARY KEY
 );
 
 CREATE TABLE autopi.admin(
