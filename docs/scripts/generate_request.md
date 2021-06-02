@@ -48,10 +48,10 @@ The service statuses are obtained from the `service` command as follows:
 
 # Dependencies
 - `netifaces`
-- `CSM_getip`
-- `CSM_getssid`
-- `CSM_get_hw_id`
-- `CSM_get_dev_id`
+- `autopi.get_ip`
+- `autopi.get_ssid`
+- `autopi.get_hw_id`
+- `autopi.get_dev_id`
 - `service SERVICE_NAME status`
 
 # Technical considerations
