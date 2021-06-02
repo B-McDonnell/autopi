@@ -10,6 +10,7 @@ import stdiomask
 
 
 class HiddenPrints:
+
     """Hide output for updating country.
     https://stackoverflow.com/questions/8391411/how-to-block-calls-to-print
     """
