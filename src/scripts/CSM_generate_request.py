@@ -240,7 +240,7 @@ def send_request(api_url: str, request) -> HTTPResponse:
     return resp
 
 
-def main(event: str = "general", force: bool = False, verbose: bool = False):
+def generate(event: str = "general", force: bool = False, verbose: bool = False):
     """Generate the specified request, compare it to previous request if applicable, and send it.
 
     Args:
@@ -269,7 +269,7 @@ def main(event: str = "general", force: bool = False, verbose: bool = False):
 
 
 def parse_commandline() -> (str, bool, bool):
-    """Parse the command line and return the appropriate arguments for main.
+    """Parse the command line and return the appropriate arguments for generate.
 
     Returns:
         str: event type
@@ -306,13 +306,15 @@ def parse_commandline() -> (str, bool, bool):
 
     return event, force_req, verbose
 
-
-if __name__ == "__main__":
+def main():
     try:
-        main(*parse_commandline())
+        generate(*parse_commandline())
     except RuntimeError as re:
         print(re)
         sys.exit(1)
     except URLError as ue:
         print("Connection failed:", ue)
         sys.exit(1)
+
+if __name__ == "__main__":
+    main()

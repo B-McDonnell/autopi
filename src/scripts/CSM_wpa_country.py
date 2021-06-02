@@ -80,7 +80,7 @@ def update_country(config_file: str, country: str):
         fout.writelines(header + contents)
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
 
     shared_parser = argparse.ArgumentParser(add_help=False)
@@ -115,3 +115,7 @@ if __name__ == "__main__":
         get_country(args.FILENAME)
     elif args.subparser == "update":
         update_country(args.FILENAME, args.COUNTRY_CODE)
+
+
+if __name__ == "__main__":
+    main()

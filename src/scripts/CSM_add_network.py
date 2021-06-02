@@ -116,7 +116,7 @@ def update_config(wpa_config: str, config_filename: str):
     run_reconfigure()
 
 
-def main(args: argparse.ArgumentParser):
+def config(args: argparse.ArgumentParser):
     """Add a new network.
 
     Args:
@@ -159,8 +159,7 @@ def main(args: argparse.ArgumentParser):
         # add network
         update_config(config, config_filename)
 
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("SSID", type=str, help="SSID of the network")
     parser.add_argument(
@@ -203,4 +202,8 @@ if __name__ == "__main__":
         help="password for network. If not specified, will read from stdin",
     )
     args = parser.parse_args()
-    main(args)
+    config(args)
+
+
+if __name__ == "__main__":
+    main()
