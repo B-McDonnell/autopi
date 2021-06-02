@@ -49,7 +49,7 @@ def get_ssid(interface: str) -> (str, bool):
     return output, len(output) > 0
 
 
-if __name__ == "__main__":
+def main():
     # take second argument if supplied to be interface name
     interface = sys.argv[1] if len(sys.argv) > 1 else "wlan0"
 
@@ -64,3 +64,7 @@ if __name__ == "__main__":
     else:
         print("Interface '" + interface + "' has no SSID (Not connected).")
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
