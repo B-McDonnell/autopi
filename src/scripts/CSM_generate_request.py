@@ -240,7 +240,7 @@ def send_request(api_url: str, request) -> HTTPResponse:
     return resp
 
 
-def generate(event: str = "general", force: bool = False, verbose: bool = False):
+def generate_and_send_request(event: str = "general", force: bool = False, verbose: bool = False):
     """Generate the specified request, compare it to previous request if applicable, and send it.
 
     Args:
@@ -310,7 +310,7 @@ def parse_commandline() -> (str, bool, bool):
 def main():
     """Catch exceptions."""
     try:
-        generate(*parse_commandline())
+        generate_and_send_request(*parse_commandline())
     except RuntimeError as re:
         print(re)
         sys.exit(1)
