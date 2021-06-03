@@ -5,7 +5,25 @@ import os
 import subprocess
 import sys
 
+import CSM_wpa_country
 import stdiomask
+
+
+class HiddenPrints:
+    """Hide output for updating country.
+
+    https://stackoverflow.com/questions/8391411/how-to-block-calls-to-print
+    """
+
+    def __enter__(self):
+        """Initialize hiding."""
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, "w")
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Revert to show prints."""
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
 
 
 def set_home_network():
@@ -76,11 +94,10 @@ def set_home_network():
                 print("-" * 50)
 
     try:
-        subprocess.run(["CSM_wpa_country", "get"], capture_output=True, check=True)
-    except subprocess.CalledProcessError:
-        items.append("-c")
-        items.append("US")
-
+        with HiddenPrints():
+            CSM_wpa_country.get_country("/etc/wpa_supplicant/wpa_supplicant.conf")
+    except SystemExit:
+        CSM_wpa_country.update_country("/etc/wpa_supplicant/wpa_supplicant.conf", "US")
     if is_there_password:
         items.append("-p")
         items.append(password)
@@ -97,8 +114,13 @@ def set_home_network():
         print("\nAdding network failed:", e, file=sys.stderr)
 
 
-if __name__ == "__main__":
+def main():
+    """Tell to run with sudo."""
     if os.geteuid() != 0:
         print("Permission Denied: Must be run as super user!")
         sys.exit(1)
     set_home_network()
+
+
+if __name__ == "__main__":
+    main()
