@@ -11,13 +11,9 @@ from http.client import HTTPResponse
 from pathlib import Path
 from urllib.error import URLError
 
-import CSM_get_config
-import CSM_get_dev_id
-import CSM_get_hw_id
-import CSM_get_mac
-import CSM_getip
-import CSM_getssid
 import netifaces
+
+from . import CSM_get_config, device_info, network_info
 
 
 def get_interfaces() -> list:
@@ -44,7 +40,7 @@ def connected_interfaces() -> list:
         raise RuntimeError("No network interfaces") from None
     connected = []
     for i in interfaces:
-        _, status = CSM_getip.get_interface_ip(i)
+        _, status = network_info.get_interface_ip(i)
         if status:
             connected.append(i)
     return connected
@@ -113,17 +109,17 @@ def generate_general_request() -> dict:
     selected_int = connected[0]
     if "wlan0" in connected:
         selected_int = "wlan0"
-    ip, status = CSM_getip.get_interface_ip(selected_int)
+    ip, status = network_info.get_interface_ip(selected_int)
     if not status:
         raise RuntimeError("Interface disconnected") from None
 
-    mac = CSM_get_mac.getMAC(selected_int)
+    mac = network_info.getMAC(selected_int)
     fields = {
         "ip": ip,
         "mac": mac,
     }
 
-    ssid, status = CSM_getssid.get_ssid(selected_int)
+    ssid, status = network_info.get_ssid(selected_int)
     if status:  # ensures ssid available for interface before adding it
         fields["ssid"] = ssid
     fields["ssh"] = get_ssh_status()
@@ -138,8 +134,8 @@ def get_id_fields() -> dict:
     Returns:
         dict: dictionary with fields {'hwid': hwid, 'devid': devid}
     """
-    hwid = CSM_get_hw_id.get_hw_id()
-    devid = CSM_get_dev_id.get_dev_id()
+    hwid = device_info.get_hw_id()
+    devid = device_info.get_dev_id()
     return {"hwid": hwid, "devid": devid}
 
 
