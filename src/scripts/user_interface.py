@@ -1,4 +1,5 @@
 """Utilities to interact with the user in a consistent manner."""
+import math
 from typing import Callable, Optional
 
 import stdiomask
@@ -12,24 +13,23 @@ def print_header(header: str, pattern: str = "="):
         pattern (str, optional): string to be repeated to bracket the header contents. Defaults to '='.
     """
     # center header contents with a minimum indent of 2
-    indent = 2
-    pattern_count = int(len(header) / len(pattern))
-    while len(pattern) * pattern_count < indent * 2 + len(header):
-        pattern_count += 1
-    while len(pattern) * pattern_count > indent * 2 + len(header):
-        indent += 1
+    header_lines = header.splitlines()
+    header_length = max((len(line) for line in header_lines))
+    minimum_indent = 2
+    pattern_count = math.ceil((minimum_indent * 2 + header_length) / len(pattern))
+    indent = (pattern_count * len(pattern) - header_length) // 2
 
+    print(pattern_count, indent)
     print(pattern * pattern_count)
-    print(" " * indent + header)
+    for line in header_lines:
+        print(" " * indent + line)
     print(pattern * pattern_count)
 
 
 def _get_valid_input(
     inputer: Callable,
     validator: Callable[str, bool],
-    error_message: Optional[str] = None,
-    *args,
-    **kwargs
+    error_message: Optional[str] = "Invalid input",
 ) -> str:
     """Get input validated by a predicate, re-asking on failure.
 
@@ -44,11 +44,11 @@ def _get_valid_input(
         (str): user input
     """
     while True:
-        user_input = inputer(*args, **kwargs)
+        user_input = inputer()
         if validator(user_input):
             return user_input
 
-        message = error_message if error_message is not None else "Invalid input"
+        message = error_message if error_message is not None else ""
         print("\n", message, "\n", end="")
 
 
@@ -73,7 +73,7 @@ def get_input(
     if validator is None:
         return input(query)
     else:
-        return _get_valid_input(input, validator, error_message, prompt=query)
+        return _get_valid_input(lambda: input(query), validator, error_message)
 
 
 def get_secret(
@@ -100,15 +100,19 @@ def get_secret(
 
     def _input(query: str, mask: str) -> str:
         if validator is None:
-            return stdiomask.getpass(prompt=query, mask=mask)
+            return stdiomask.getpass(query, mask=mask)
         else:
             return _get_valid_input(
-                stdiomask.getpass, validator, error_message, prompt=query, mask=mask
+                lambda: stdiomask.getpass(query, mask=mask), validator, error_message
             )
 
     query = query + "\n" if newline else query
     while True:
         user_input = _input(query, mask)
+
+        if not get_twice:
+            return user_input
+
         user_input_check = _input("Re-type:", mask)
 
         if user_input != user_input_check:
