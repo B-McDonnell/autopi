@@ -5,6 +5,11 @@ import subprocess
 import netifaces
 
 
+def is_interface(interface: str) -> bool:
+    """Check if interface string is a valid interface."""
+    return interface in netifaces.interfaces()
+
+
 def getMAC(interface: str) -> str:
     """Return MAC address using network interface as a parameter.
 
@@ -26,7 +31,7 @@ def get_interface_ip(interface: str):
         return "", False
     addrs = netifaces.ifaddresses(interface)
     if netifaces.AF_INET in addrs:
-        ipinfo = addrs[netifaces.AF_INET][0]
+        ipinfo = addrs[netifaces.AF_INET][0]  # TODO account for multiple addresses
         return ipinfo["addr"], True
     return "", False
 
