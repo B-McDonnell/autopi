@@ -80,7 +80,8 @@ def update_country(config_file: str, country: str):
         fout.writelines(header + contents)
 
 
-if __name__ == "__main__":
+def main():
+    """Set parsers."""
     parser = argparse.ArgumentParser()
 
     shared_parser = argparse.ArgumentParser(add_help=False)
@@ -95,7 +96,7 @@ if __name__ == "__main__":
         default="/etc/wpa_supplicant/wpa_supplicant.conf",
     )
 
-    get_parser = subparsers.add_parser(
+    subparsers.add_parser(
         "get",
         help="get the current country code. Fails if country code does not exist",
         parents=[shared_parser],
@@ -115,3 +116,7 @@ if __name__ == "__main__":
         get_country(args.FILENAME)
     elif args.subparser == "update":
         update_country(args.FILENAME, args.COUNTRY_CODE)
+
+
+if __name__ == "__main__":
+    main()
