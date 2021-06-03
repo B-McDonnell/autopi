@@ -1,18 +1,25 @@
 """An interface with wpa config files and commands."""
 
+import itertools
 import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 
-class PasswordLengthException(RuntimeError):
+class PasswordLengthError(RuntimeError):
     """Password does not meet wpa_password length requirements."""
 
     pass
 
 
-class SSIDLengthException(RuntimeError):
+class SSIDLengthError(RuntimeError):
     """SSID has an invalid length."""
+
+    pass
+
+
+class BadConfigError(RuntimeError):
+    """Config is invalid."""
 
     pass
 
@@ -25,17 +32,17 @@ def _make_network_with_passwd(ssid: str, passphrase: str) -> str:
         passphrase (str): password of the network.
 
     Raises:
-        SSIDLengthException: ssid is too long.
-        PasswordLengthException: password does not meet wpa length requirements.
+        SSIDLengthError: ssid is too long.
+        PasswordLengthError: password does not meet wpa length requirements.
         subprocess.CalledProcessError: wpa_passphrase failed.
 
     Returns:
         str: wpa network configuration.
     """
     if len(ssid) > 32:
-        raise SSIDLengthException("SSID must be less than or equal to 32 characters")
+        raise SSIDLengthError("SSID must be less than or equal to 32 characters")
     if len(passphrase) < 8 or len(passphrase) > 63:
-        raise PasswordLengthException(
+        raise PasswordLengthError(
             "Passphrase must be from 8 to 63 characters (inclusive)"
         )
     result = subprocess.run(
@@ -107,13 +114,13 @@ def network_exists(
         ignore_empty_lines (bool, optional): exclude empty lines from the check. Defaults to True.
 
     Raises:
-        ValueError: config_file is not a valid file
+        FileNotFoundError: config_file is not a valid file
 
     Returns:
         bool: network already exists in the config
     """
     if not Path(config_file).absolute().is_file():
-        raise ValueError("config file path is not a valid file")
+        raise FileNotFoundError("config file path is not a valid file")
     with open(config_file, "r") as config_file:
         current_contents = config_file.read()
 
@@ -179,13 +186,13 @@ def add_network(
         drop_comments (bool, optional): remove any comments before adding to config. Defaults to True.
 
     Raises:
-        ValueError: config_file is not a valid file.
+        FileNotFoundError: config_file is not a valid file.
 
     Returns:
         bool: config was succesfully added. Returns False if network config already exists.
     """
     if not Path(config_file).absolute().is_file():
-        raise ValueError("config file path is not a valid file")
+        raise FileNotFoundError("config file path is not a valid file")
 
     if network_exists:
         return False
@@ -214,3 +221,78 @@ def run_reconfigure(interface: Optional[str]) -> bool:
     response = subprocess.run(command, check=True, capture_output=True)
     if response.stdout != b"OK\n":
         return False
+
+
+def get_country(config_file: str) -> Optional[str]:
+    """Get the country code from a wpa config file.
+
+    Args:
+        config_file (str): filename of wpa config file
+
+    Raises:
+        FileNotFoundError: config_file is not a valid file
+
+    Returns:
+        str | None: country code from config_file or None if it does not exist
+    """
+    if not Path(config_file).absolute().is_file():
+        raise FileNotFoundError("config file path is not a valid file")
+    with open(config_file, "r") as fin:
+        # get country
+        lines = [line.strip() for line in fin.readlines()]
+        for line in lines:
+            if line.startswith("country="):
+                return line.split("=")[1]
+
+    # country was not found
+    return None
+
+
+def _split_config_file(config_file) -> (List[str], List[str]):
+    with open(config_file, "r") as fin:
+        lines = fin.readlines()
+
+    def _not_network_line(line: str) -> bool:
+        return not line.strip().startswith("network={")
+
+    header = list(itertools.takewhile(_not_network_line, lines))
+    contents = list(itertools.dropwhile(_not_network_line, lines))
+
+    return header, contents
+
+
+def update_country(config_file: str, country: str):
+    """Add or replace country code in a wpa_config file.
+
+    Args:
+        config_file (str): filename of wpa config file
+        country (str): country code to add or update to
+
+    Raises:
+        FileNotFoundError: config_file is not a valid file
+        BadConfigError: too many country codes exist
+    """
+    if not Path(config_file).absolute().is_file():
+        raise FileNotFoundError("config file path is not a valid file")
+
+    header, contents = _split_config_file(config_file)
+    for i, line in enumerate(reversed(header)):
+        if not line.isspace():
+            header = header[:-i]
+            break
+
+    country_code_indices = [
+        index
+        for index, line in enumerate(header)
+        if line.strip().startswith("country=")
+    ]
+    if len(country_code_indices) > 1:
+        raise BadConfigError("config has too many country codes")
+    elif len(country_code_indices) == 1:
+        header[country_code_indices[0]] = f"country={country}\n"
+    else:
+        header.append(f"country={country}\n")
+    header.append("\n")
+
+    with open(config_file, "w") as fout:
+        fout.writelines(header + contents)
