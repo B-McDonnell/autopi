@@ -136,3 +136,9 @@ add_systemd_unit src/systemdunits/autopi-shutdown.service enable
 add_systemd_unit src/systemdunits/autopi-startup.service enable
 
 systemctl daemon-reload 
+
+# =============================================================
+#                   Add hook for IP change
+# =============================================================
+
+cp src/hooks/99-autopi-ip-hook.sh /lib/dhcpcd/dhcpcd-hooks/99-autopi-ip-hook
