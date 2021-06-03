@@ -6,7 +6,7 @@ After=network-online.target
 Type=simple
 Restart=on-failure
 RestartSec=5
-ExecStart=/home/pi/autopi/src/scripts/CSM_generate_request.py start
+ExecStart=/usr/bin/CSM_generate_request.py start
 
 [Install]
 WantedBy=multi-user.target
