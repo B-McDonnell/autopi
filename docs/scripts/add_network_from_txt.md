@@ -3,7 +3,7 @@
 
 
 # Implementation
-- Uses subprocess to run CSM_add_network and add the provided network.
+- Uses subprocess to run `CSM_add_network` and add the provided network.
 - Run on reboot, add network, reset .txt file.
 
 # Dependencies

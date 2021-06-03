@@ -1,5 +1,5 @@
 # Usage
-`CSM_get_hw_id`
+`get_hw_id`
 
 Returns a sha256 string serving as the hardware id. 
 

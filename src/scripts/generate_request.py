@@ -11,12 +11,12 @@ from http.client import HTTPResponse
 from pathlib import Path
 from urllib.error import URLError
 
-import CSM_get_config
-import CSM_get_dev_id
-import CSM_get_hw_id
-import CSM_get_mac
-import CSM_getip
-import CSM_getssid
+import get_config
+import get_dev_id
+import get_hw_id
+import get_ip
+import get_mac
+import get_ssid
 import netifaces
 
 
@@ -44,7 +44,7 @@ def connected_interfaces() -> list:
         raise RuntimeError("No network interfaces") from None
     connected = []
     for i in interfaces:
-        _, status = CSM_getip.get_interface_ip(i)
+        _, status = get_ip.get_interface_ip(i)
         if status:
             connected.append(i)
     return connected
@@ -113,17 +113,17 @@ def generate_general_request() -> dict:
     selected_int = connected[0]
     if "wlan0" in connected:
         selected_int = "wlan0"
-    ip, status = CSM_getip.get_interface_ip(selected_int)
+    ip, status = get_ip.get_interface_ip(selected_int)
     if not status:
         raise RuntimeError("Interface disconnected") from None
 
-    mac = CSM_get_mac.getMAC(selected_int)
+    mac = get_mac.getMAC(selected_int)
     fields = {
         "ip": ip,
         "mac": mac,
     }
 
-    ssid, status = CSM_getssid.get_ssid(selected_int)
+    ssid, status = get_ssid.get_ssid(selected_int)
     if status:  # ensures ssid available for interface before adding it
         fields["ssid"] = ssid
     fields["ssh"] = get_ssh_status()
@@ -138,8 +138,8 @@ def get_id_fields() -> dict:
     Returns:
         dict: dictionary with fields {'hwid': hwid, 'devid': devid}
     """
-    hwid = CSM_get_hw_id.get_hw_id()
-    devid = CSM_get_dev_id.get_dev_id()
+    hwid = get_hw_id.get_hw_id()
+    devid = get_dev_id.get_dev_id()
     return {"hwid": hwid, "devid": devid}
 
 
@@ -256,7 +256,7 @@ def generate_and_send_request(
         URLError: if the connection failed
     """
     # TODO get API URL from a configuration file/environment variable
-    api_url = CSM_get_config.get_api_url()
+    api_url = get_config.get_api_url()
 
     request = generate_request(event, force)
     resp = send_request(api_url, request)

@@ -27,44 +27,40 @@ mkdir /var/opt/autopi  # create directory for script generated files
 pip3 install -r requirements.txt
 
 
-# ============================
-#   move scripts to /usr/bin
-# ============================
+# ==============================================================
+#   add scripts to install location; add to /usr/bin as needed
+# ==============================================================
+
+SCRIPT_DIR="/opt/autopi/"
+mkdir -p $"SCRIPT_DIR"
 
 function move_pyscript() {
     #if [ -z "$1" ]; then return 0; fi
     stem=`basename "$1" .py` # strip extension
-    cp ./src/scripts/"$stem".py /usr/bin/"$stem"
-    chmod +x /usr/bin/"$stem"
+    name="$stem".py
+    cp ./src/scripts/"$name" "$SCRIPT_DIR"/
+    if [ "$2" == "command" ]; then
+        prefix='CSM_'
+        chmod +x "$SCRIPT_DIR"/"$name"
+        ln -s "$SCRIPT_DIR"/"$name" /usr/bin/"$prefix""$stem"
+    elif [ ! -z "$2" ]; then
+        echo "Invalid parameter"
+        return 1
+    fi
 }
 
-cp ./src/scripts/CSM_getip.py /usr/bin/CSM_getip
-chmod +x /usr/bin/CSM_getip
+move_pyscript get_config
+move_pyscript get_ip
+move_pyscript get_ssid
+move_pyscript get_hw_id
+move_pyscript get_dev_id
 
-cp ./src/scripts/CSM_getssid.py /usr/bin/CSM_getssid
-chmod +x /usr/bin/CSM_getssid
-
-cp ./src/scripts/CSM_get_mac.py /usr/bin/CSM_get_mac
-chmod +x /usr/bin/CSM_get_mac
-
-cp ./src/scripts/CSM_add_network.py /usr/bin/CSM_add_network
-chmod +x /usr/bin/CSM_add_network
-
-cp ./src/scripts/CSM_wpa_country.py /usr/bin/CSM_wpa_country
-chmod +x /usr/bin/CSM_wpa_country
-
-cp ./src/scripts/CSM_setup_home_network.py /usr/bin/CSM_setup_home_network
-chmod +x /usr/bin/CSM_setup_home_network
-
-cp ./src/scripts/CSM_get_hw_id.py /usr/bin/CSM_get_hw_id
-chmod +x /usr/bin/CSM_get_hw_id
-
-
-cp ./src/scripts/CSM_add_network_from_txt.py /usr/bin/CSM_add_network_from_txt.py
-chmod +x /usr/bin/CSM_add_network_from_txt.py
-
-move_pyscript CSM_generate_request
-
+move_pyscript get_mac command
+move_pyscript add_network command
+move_pyscript generate_request command
+move_pyscript setup_home_network command
+move_pyscript add_network_from_txt command
+move_pyscript wpa_country command
 
 
 # ============================

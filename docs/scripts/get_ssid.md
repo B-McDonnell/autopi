@@ -1,5 +1,5 @@
 # Usage
-`CSM_getssid [INTERFACE_NAME]`
+`get_ssid [INTERFACE_NAME]`
 
 - `INTERFACE_NAME` is `wlan0` by default. Script fails if interface not wireless or disconnected.
 
