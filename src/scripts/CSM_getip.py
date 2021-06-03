@@ -17,7 +17,8 @@ def get_interface_ip(interface: str):
     return "", False
 
 
-if __name__ == "__main__":
+def main():
+    """Handle argv."""
     if len(sys.argv) > 1:
         # read command line arg
         ip, status = get_interface_ip(sys.argv[1])
@@ -36,3 +37,7 @@ if __name__ == "__main__":
         else:
             print("No active interface")
             sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

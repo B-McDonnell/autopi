@@ -157,3 +157,10 @@ cp src/systemdunits/vnc_override.conf "$VNC_OVERRIDE_DIR"/override.conf
 cp src/systemdunits/ssh_override.conf "$SSH_OVERRIDE_DIR"/override.conf
 
 systemctl daemon-reload
+
+
+# =============================================================
+#                   Add hook for IP change
+# =============================================================
+
+cp src/hooks/99-autopi-ip-hook.sh /lib/dhcpcd/dhcpcd-hooks/99-autopi-ip-hook
