@@ -6,7 +6,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 
-from scripts.wpa_interface import add_network, make_network, run_reconfigure
+from . import wpa_interface as wpa
 
 
 @dataclass
@@ -87,7 +87,9 @@ def main():
     cli_args = _parse_args()
 
     try:
-        new_network = make_network(cli_args.ssid, cli_args.password, cli_args.priority)
+        new_network = wpa.make_network(
+            cli_args.ssid, cli_args.password, cli_args.priority
+        )
     except RuntimeError | subprocess.CalledProcessError as e:
         # TODO: log error
         print(e, file=sys.stderr)
@@ -99,14 +101,14 @@ def main():
             return
 
     try:
-        add_network(new_network, cli_args.config_file)
-    except ValueError as e:
+        wpa.add_network(new_network, cli_args.config_file)
+    except FileNotFoundError as e:
         # TODO: log error
         print(e, file=sys.stderr)
         sys.exit(1)
 
     try:
-        run_reconfigure(cli_args.interface)
+        wpa.run_reconfigure(cli_args.interface)
     except subprocess.CalledProcessError as e:
         # TODO: log error
         print(e, file=sys.stderr)
