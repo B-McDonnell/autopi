@@ -1,8 +1,34 @@
-#!/usr/bin/env python3
-"""Get the SSID of the network an interface is connected to."""
+"""Utilities to retrieve network information."""
 
 import subprocess
-import sys
+
+import netifaces
+
+
+def getMAC(interface: str) -> str:
+    """Return MAC address using network interface as a parameter.
+
+    Args:
+        interface (str): Interface (i.e. wlan0 or eth0).
+
+    Returns:
+        str: MAC address.
+    """
+    try:
+        return netifaces.ifaddresses(interface)[netifaces.AF_LINK][0]["addr"]
+    except Exception as e:
+        raise RuntimeError("MAC address could not be found") from e
+
+
+def get_interface_ip(interface: str):
+    """Get the IP address linked to an interface."""
+    if interface not in netifaces.interfaces():
+        return "", False
+    addrs = netifaces.ifaddresses(interface)
+    if netifaces.AF_INET in addrs:
+        ipinfo = addrs[netifaces.AF_INET][0]
+        return ipinfo["addr"], True
+    return "", False
 
 
 def is_wireless_active(interface: str) -> bool:
@@ -47,20 +73,3 @@ def get_ssid(interface: str) -> (str, bool):
     output_b = result.stdout
     output = output_b.decode("utf-8").strip()
     return output, len(output) > 0
-
-
-if __name__ == "__main__":
-    # take second argument if supplied to be interface name
-    interface = sys.argv[1] if len(sys.argv) > 1 else "wlan0"
-
-    status = is_wireless_active(interface)
-    if not status:
-        print("Interface not connected, not wireless, or inactive")
-        sys.exit(1)
-
-    ssid, status = get_ssid(interface)
-    if status:
-        print("Interface:", interface, "--", "ESSID:", ssid)
-    else:
-        print("Interface '" + interface + "' has no SSID (Not connected).")
-        sys.exit(1)
