@@ -114,8 +114,13 @@ def set_home_network():
         print("\nAdding network failed:", e, file=sys.stderr)
 
 
-if __name__ == "__main__":
+def main():
+    """Tell to run with sudo."""
     if os.geteuid() != 0:
         print("Permission Denied: Must be run as super user!")
         sys.exit(1)
     set_home_network()
+
+
+if __name__ == "__main__":
+    main()
