@@ -4,7 +4,7 @@ Each subfolder under the current folder will be searched for python files of the
 
 ```
 tests/automated_tests/
-  - CSM_script1/
+  - script1/
     - input/           # Directories are optional and are ignored by the test framework
     - output/          # However, the directories can be accessed by test files if desired...
     - scripty_test.py  # This is the only required file, note the '*_test.py' name.
@@ -16,7 +16,7 @@ The following is an example of good practice directory structure:
 
 ```
 tests/automated_tests/
-  - CSM_script1/
+  - script1/
     - input/          # Optional; use this directory for input files needed by a test
     - output/         # Optional; use this directory for any output examples needed by a test
     - script_test.py  # This is the only required file, note the '*_test.py' name.
@@ -24,7 +24,7 @@ tests/automated_tests/
 
 Each test file will be treated as containing unit tests as expected by the 'unittest' framework. These have the following form:
 
-```
+```python
 import unittest
 
 class REPLACEWITHGROUPTESTNAME(unittest.TestCase):
@@ -46,4 +46,4 @@ The current working directory will be the test's folder. So, to access the corre
 
 No execution order for test files or tests in a file is guaranteed.
 
-Test folders should be named with the stem of the script name. That is, `CSM_getip.py` test folder should be named `CSM_getip`. Non-compliance will be punished severely...
+Test folders should be named with the stem of the script name. That is, `get_ip.py` test folder should be named `get_ip`. Non-compliance will be punished severely...
