@@ -2,99 +2,76 @@
 """Add a network from user input."""
 
 import os
-import subprocess
 import sys
 
-import stdiomask
+import scripts.user_interface as ui
+import scripts.wpa_interface as wpa
+
+
+def _is_yes(user_input: str) -> bool:
+    return user_input.lower in ("y", "yes")
+
+
+def _is_no(user_input: str) -> bool:
+    return user_input.lower in ("n", "no")
+
+
+def _is_yes_or_no(user_input: str) -> bool:
+    return _is_yes(user_input) or _is_no(user_input)
 
 
 def set_home_network():
     """Use user input, add a network."""
-    items = ["CSM_add_network"]
-    ssid = input("What is the name of your home network? (Case sensitive)\n")
-    password_bool = False
-    is_there_password = False
-    while not password_bool:
-        want_password = input("Does this network have a password? (y/n)\n")
-        if want_password.lower() == "y":
-            while True:
-                password = stdiomask.getpass(
-                    prompt="What is the password to this network? (It will be encrypted)\n"
-                )
-                password_reentered = stdiomask.getpass(prompt="Re-enter password.\n")
-                if password == password_reentered:
-                    password_bool = True
-                    is_there_password = True
-                    break
-                else:
-                    print("-" * 50)
-                    print("Passwords do not match! Re-enter.")
-                    print("-" * 50)
-        elif want_password.lower() == "n":
-            password = ""
-            break
-        else:
-            print("-" * 50)
-            print("Error! Re-enter input using (y/n)")
-            print("-" * 50)
-    want_priority = False
-    p_bool = False
-    while not p_bool:
-        priority = input(
-            "Would you like to set a priority of connecting to this network over MINES networks? (y/n)\n"
+    # ssid
+    ssid = ui.get_input(
+        "What is the name of your home network? (case sensitive)",
+        validator=wpa.is_valid_ssid,
+        error_message=wpa.SSIDLengthError.containt_msg,
+    )
+
+    # password
+    if _is_yes(
+        ui.get_input(
+            "Does this network have a password? (y/n)", validator=_is_yes_or_no
         )
-        if priority.lower() == "n":
-            p_bool = True
-        elif priority.lower() == "y":
-            want_priority = True
-            items.append("--priority")
-            p_bool = True
-
-        else:
-            print("-" * 50)
-            print("Error! Re-enter input using (y/n)")
-            print("-" * 50)
-        while want_priority:
-            priority_level = input(
-                "Would you like low, medium, or high priority? (CSMwireless is set to medium)\n"
-            )
-            if priority_level.lower() == "low":
-                priority = 1
-                items.append(str(priority))
-                break
-            elif priority_level.lower() == "medium":
-                priority = 2
-                items.append(str(priority))
-                break
-            elif priority_level.lower() == "high":
-                priority = 3
-                items.append(str(priority))
-                break
-            else:
-                print("-" * 50)
-                print("Error! Re-enter input using (low, medium, high)")
-                print("-" * 50)
-
-    try:
-        subprocess.run(["CSM_wpa_country", "get"], capture_output=True, check=True)
-    except subprocess.CalledProcessError:
-        items.append("-c")
-        items.append("US")
-
-    if is_there_password:
-        items.append("-p")
-        items.append(password)
+    ):
+        password = ui.get_secret(
+            "What is the password? (It will be encrypted)",
+            validator=wpa.is_valid_passwd,
+            error_message=wpa.PasswordLengthError.containt_msg,
+        )
     else:
-        items.append("-n")
+        password = None
 
-    items.append(str(ssid))
-    print()
+    # priority
+    if _is_yes(
+        ui.get_input(
+            "Would you like to set a priority of connecting to this network?",
+            validator=_is_yes_or_no,
+        )
+    ):
+        priority = ui.get_input(
+            "Would you like low, medium, or high priority?",
+            validator=lambda l: l.lower() in ("l", "m", "h", "low", "m", "high"),
+        )
+        priority = (
+            "1"
+            if priority in ("l", "low")
+            else "2"
+            if priority in ("m", "medium")
+            else "3"
+        )
+    else:
+        priority = None
 
-    print("Adding network...")
-    try:
-        subprocess.run(items, check=True)
-    except subprocess.CalledProcessError as e:
-        print("\nAdding network failed:", e, file=sys.stderr)
+    wpa.add_network(
+        network_config=wpa.make_network(ssid, password, priority),
+        config_file=wpa.get_default_wpa_config_file(),
+    )
+    if wpa.get_country(wpa.get_default_wpa_config_file()) is None:
+        wpa.update_country(
+            wpa.get_default_wpa_config_file(), country="US"
+        )  # TODO: get from config
 
 
 if __name__ == "__main__":
