@@ -1,0 +1,70 @@
+version: '3.1'
+
+services:
+
+  db:
+    container_name: autopi_db
+    build:
+      dockerfile: Dockerfile.db
+      context: .
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=autopi
+      - POSTGRES_INITDB_WALDIR=/log
+    ports:
+      - "5432:5432"
+    networks:
+      - db_net
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - db_log:/log
+
+  api:
+    container_name: autopi_api
+    build:
+      dockerfile: Dockerfile.fastapi
+      context: .
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    networks:
+      - api_net
+      - db_net
+    volumes:
+      - api_log:/log
+
+  proxy:
+    container_name: autopi_rev_proxy
+    build:
+      dockerfile: Dockerfile.caddy
+      context: .
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - proxy_net
+      - api_net
+    volumes:
+      - "${PWD}/Caddyfile:/etc/caddy/Caddyfile"
+      - "${PWD}/caddy_data:/data"
+      - proxy_config:/config
+        #- proxy_data:/data
+      - proxy_log:/log
+
+
+networks:
+  db_net:
+    internal: true 
+  api_net:
+    internal: true
+  proxy_net:
+
+volumes:
+  db_data:
+  db_log:
+  api_log:
+  proxy_config:
+  proxy_data:
+  proxy_log:
