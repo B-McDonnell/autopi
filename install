@@ -130,10 +130,10 @@ function add_systemd_unit() {
 }
 
 # add units for startup+shutdown+periodic IP Discovery requests
-add_systemd_unit src/systemdunits/autopi-periodic.service noenable
-add_systemd_unit src/systemdunits/autopi-periodic.timer enable
-add_systemd_unit src/systemdunits/autopi-shutdown.service enable
-add_systemd_unit src/systemdunits/autopi-startup.service enable
+add_systemd_unit src/systemdunits/autopi_periodic.service noenable
+add_systemd_unit src/systemdunits/autopi_periodic.timer enable
+add_systemd_unit src/systemdunits/autopi_shutdown.service enable
+add_systemd_unit src/systemdunits/autopi_startup.service enable
 
 
 # =============================================================
