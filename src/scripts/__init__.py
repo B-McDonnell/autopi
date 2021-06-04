@@ -1,1 +1,1 @@
-"""Scripts package."""
+"""Scripts to be called externally."""
