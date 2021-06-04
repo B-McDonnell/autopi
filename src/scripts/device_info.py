@@ -1,6 +1,7 @@
 """Utilities to retrieve device information."""
 
 import os
+import subprocess
 from hashlib import sha256
 
 
@@ -35,3 +36,18 @@ def get_hw_id() -> str:
     info_lines = get_hw_info()
     raw = "".join(info_lines).encode("utf-8")
     return sha256(raw).hexdigest()
+
+
+def is_service_up(service: str) -> bool:
+    """Return bool representing whether service is up.
+
+    Obtains status from 'service SERVICE_STR status' return code. The return codes are different per-service, but 0 should always imply UP. 0 => UP, not 0 => DOWN.
+
+    Args:
+        service (str): service name as in linux command 'service SERVICE_STR status'
+
+    Returns:
+        bool: service is up
+    """
+    result = subprocess.run(["service", service, "status"], capture_output=True)
+    return result.returncode == 0
