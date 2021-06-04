@@ -3,6 +3,7 @@
 
 import sys
 
+import scripts.user_interface as ui
 from scripts.network_info import getMAC
 
 
@@ -12,12 +13,12 @@ def user_input() -> str:
     Returns:
         str: Network interface (wlan0 or eth0).
     """
-    while True:
-        connection = input("What is your connection type? (ethernet, wireless)\n")
-        if connection.lower() == "ethernet":
-            return "eth0"
-        elif connection.lower() == "wifi" or connection.lower() == "wireless":
-            return "wlan0"
+    # TODO: possibly default interfaces from config
+    connection = ui.get_input(
+        "What is your connection type? (ethernet, wireless)",
+        validator=lambda l: l.lower() in ("ethernet", "wifi", "wireless"),
+    )
+    return "etho0" if connection.lower() == "ethernet" else "wlan0"
 
 
 def main() -> str:
