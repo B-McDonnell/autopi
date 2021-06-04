@@ -14,7 +14,7 @@ services:
       - POSTGRES_USER=autopi
       - POSTGRES_INITDB_WALDIR=/log
     volumes:
-      - "./db:/var/lib/postgresql/data"
-      - "./log:/log"
+      - "${AUTOPI_DATA_DIR}/db:/var/lib/postgresql/data"
+      - "${AUTOPI_LOG_DIR}/log:/log"
     ports:
       - "5432:5432"
