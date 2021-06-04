@@ -13,7 +13,7 @@ from urllib.error import URLError
 
 import netifaces
 
-from . import CSM_get_config, device_info, network_info
+from scripts import config, device_info, network_info
 
 
 def get_interfaces() -> list:
@@ -250,7 +250,7 @@ def main(event: str = "general", force: bool = False, verbose: bool = False):
         URLError: if the connection failed
     """
     # TODO get API URL from a configuration file/environment variable
-    api_url = CSM_get_config.get_api_url()
+    api_url = config.get_api_url()
 
     request = generate_request(event, force)
     resp = send_request(api_url, request)

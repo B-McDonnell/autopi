@@ -5,7 +5,7 @@ import argparse
 import os
 import sys
 
-from . import wpa_interface as wpa
+from scripts import wpa_interface as wpa
 
 
 def main():
@@ -47,11 +47,7 @@ def main():
         else:
             print(country)
     elif args.subparser == "update":
-        try:
-            wpa.update_country(args.FILENAME, args.COUNTRY_CODE)
-        except wpa.BadConfigError as e:
-            print(e, file=sys.stderr)
-            sys.exit(1)
+        wpa.update_country(args.FILENAME, args.COUNTRY_CODE)
 
 
 if __name__ == "__main__":
