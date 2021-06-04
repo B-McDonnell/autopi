@@ -8,19 +8,48 @@ from typing import Iterable, List, Optional
 class PasswordLengthError(RuntimeError):
     """Password does not meet wpa_password length requirements."""
 
-    def __init__(
-        self, msg="Password length must be in 8..63 (inclusive)", *args, **kwargs
-    ):
+    __default_message: str = "Password length must be in 8..63 (inclusive)"
+
+    def __init__(self, msg=__default_message, *args, **kwargs):
         """Set default message."""
-        super.__init__(msg, *args, **kwargs)
+        super().__init__(msg, *args, **kwargs)
+
+    @property
+    def containt_msg(self) -> str:
+        """Get password contraint message."""
+        return self.__default_message
 
 
 class SSIDLengthError(RuntimeError):
     """SSID has an invalid length."""
 
-    def __init__(self, msg="SSID length must be in 8..63 (inclusive)", *args, **kwargs):
+    __default_message: str = "SSID length must be in 1..32 (inclusive)"
+
+    def __init__(self, msg="SSID length must be in 1..32 (inclusive)", *args, **kwargs):
         """Set default message."""
-        super.__init__(msg, *args, **kwargs)
+        super().__init__(msg, *args, **kwargs)
+
+    @property
+    def containt_msg(self) -> str:
+        """Get ssid contraint message."""
+        return self.__default_message
+
+
+def is_valid_ssid(ssid: str) -> bool:
+    """Check if ssid is valid."""
+    n = len(ssid)
+    return 1 <= n <= 32
+
+
+def is_valid_passwd(passwd: str) -> bool:
+    """Check if wpa password is valid."""
+    n = len(passwd)
+    return 8 <= n <= 63
+
+
+def get_default_wpa_config_file() -> str:
+    """Get default wpa config file."""
+    return "etc/wpa_supplicant/wpa_supplicant.conf"  # TODO: get from config
 
 
 def _make_network_with_passwd(ssid: str, passphrase: str) -> str:
@@ -155,9 +184,9 @@ def make_network(
     Returns:
         str: new wpa network string
     """
-    if len(ssid) < 1 or len(ssid) > 32:
+    if not is_valid_ssid(ssid):
         raise SSIDLengthError()
-    if passwd is not None and (len(passwd) < 8 or len(passwd) > 63):
+    if passwd is not None and not is_valid_passwd(passwd):
         raise PasswordLengthError()
 
     network_str = (
