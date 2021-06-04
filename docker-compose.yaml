@@ -1,0 +1,20 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+
+  db:
+    container_name: autopi_db
+    build:
+      dockerfile: Dockerfile.db
+      context: .
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=autopi
+      - POSTGRES_INITDB_WALDIR=/log
+    volumes:
+      - "./db:/var/lib/postgresql/data"
+      - "./log:/log"
+    ports:
+      - "5432:5432"
