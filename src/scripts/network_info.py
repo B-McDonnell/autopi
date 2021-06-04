@@ -1,13 +1,27 @@
 """Utilities to retrieve network information."""
 
 import subprocess
+from ipaddress import ip_address
+from typing import List, Optional
 
 import netifaces
 
 
-def is_interface(interface: str) -> bool:
-    """Check if interface string is a valid interface."""
-    return interface in netifaces.interfaces()
+def get_interfaces(exclude_loopback: bool = True) -> List[str]:
+    """Obtain a list of available interfaces.
+
+    Args:
+        exclude_loopback (bool): exclude interfaces with an ip address in the range reserved for loopbacks
+
+    Returns:
+        list[str]: list of interface name strings
+    """
+    ref_ifaces = netifaces.interfaces()
+    return [
+        x
+        for x in ref_ifaces
+        if not (exclude_loopback and ip_address(get_interface_ip(x)).is_loopback)
+    ]
 
 
 def getMAC(interface: str) -> str:
@@ -25,15 +39,25 @@ def getMAC(interface: str) -> str:
         raise RuntimeError("MAC address could not be found") from e
 
 
-def get_interface_ip(interface: str):
+def is_interface(interface: str) -> bool:
+    """Check if a string is a network interface on the system."""
+    return interface in netifaces.interfaces()
+
+
+def is_interface_connected(interface: str) -> bool:
+    """Check if interface is connected to a network."""
+    return get_interface_ip(interface) is not None
+
+
+def get_interface_ip(interface: str) -> Optional[str]:
     """Get the IP address linked to an interface."""
     if interface not in netifaces.interfaces():
-        return "", False
+        return None
     addrs = netifaces.ifaddresses(interface)
     if netifaces.AF_INET in addrs:
         ipinfo = addrs[netifaces.AF_INET][0]  # TODO account for multiple addresses
-        return ipinfo["addr"], True
-    return "", False
+        return ipinfo["addr"]
+    return None
 
 
 def is_wireless_active(interface: str) -> bool:
@@ -57,7 +81,7 @@ def is_wireless_active(interface: str) -> bool:
     return True
 
 
-def get_ssid(interface: str) -> (str, bool):
+def get_ssid(interface: str) -> Optional[str]:
     """
     Get wireless SSID for specified interface.
 
@@ -65,16 +89,16 @@ def get_ssid(interface: str) -> (str, bool):
         interface (str): the name of an interface.
 
     Returns:
-        str: ssid of the network interface.
-        bool: status. If true, ssid was successfully obtained and returned in 'ssid', otherwise ssid is empty. If false interface nonexistent, interface is not wireless, or currently has no SSID.
+        str | None: ssid of the network interface. If the interface cannot be obtained, False
     """
     try:
         result = subprocess.run(["iwgetid", interface, "-r"], capture_output=True)
     except FileNotFoundError:
         # TODO Probably log this
+        # look into ModuleNotFoundError
         return "", False  # iwgetid not present
     if result.returncode != 0:
         return "", False
     output_b = result.stdout
     output = output_b.decode("utf-8").strip()
-    return output, len(output) > 0
+    return output if len(output) > 0 else None

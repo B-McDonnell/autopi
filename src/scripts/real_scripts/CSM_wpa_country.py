@@ -2,8 +2,8 @@
 """Manage the country code in a WPA config file."""
 
 import argparse
-import os
 import sys
+from pathlib import Path
 
 from scripts import wpa_interface as wpa
 
@@ -36,7 +36,7 @@ def main():
 
     args = parser.parse_args()
 
-    if not os.path.isfile(os.path.abspath(args.FILENAME)):
+    if not Path(args.FILENAME).is_file():
         print(f'"{args.FILENAME}" is not a valid file', file=sys.stderr)
         sys.exit(1)
 

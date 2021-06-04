@@ -4,46 +4,13 @@
 import argparse
 import json
 import ssl
-import subprocess
 import sys
 import urllib.request
 from http.client import HTTPResponse
 from pathlib import Path
 from urllib.error import URLError
 
-import netifaces
-
 from scripts import config, device_info, network_info
-
-
-def get_interfaces() -> list:
-    """Obtain a list of available interfaces.
-
-    Returns:
-        list: list of interface name strings.
-    """
-    ref_ifaces = netifaces.interfaces()
-    return [x for x in ref_ifaces if not x.startswith("lo")]
-
-
-def connected_interfaces() -> list:
-    """Get list of network connected interfaces.
-
-    returns:
-        list[str]: connected interface names.
-
-    Raises:
-        RuntimeError: if no interface is available
-    """
-    interfaces = get_interfaces()
-    if len(interfaces) == 0:
-        raise RuntimeError("No network interfaces") from None
-    connected = []
-    for i in interfaces:
-        _, status = network_info.get_interface_ip(i)
-        if status:
-            connected.append(i)
-    return connected
 
 
 def generate_shutdown_request() -> dict:
@@ -55,21 +22,6 @@ def generate_shutdown_request() -> dict:
     return {"event": "shutdown"}
 
 
-def is_service_up(service: str) -> bool:
-    """Return bool representing whether service is up.
-
-    Obtains status from 'service sshd status' return code. The return codes are different per-service, but 0 should always imply UP. 0 => UP, not 0 => DOWN.
-
-    Args:
-        service (str): service name as in linux command 'service SERVICE_STR status'
-
-    Returns:
-        bool: up
-    """
-    result = subprocess.run(["service", service, "status"], capture_output=True)
-    return result.returncode == 0
-
-
 def get_service_status(service: str) -> str:
     """Return a string to be used as the service status.
 
@@ -79,23 +31,43 @@ def get_service_status(service: str) -> str:
     Returns:
         str: service status.
     """
-    b = is_service_up(service)
+    b = device_info.is_service_up(service)
     return "up" if b else "down"
 
 
-def get_ssh_status() -> str:
-    """Get SSH status as 'up' or 'down'."""
-    return get_service_status("sshd")
+def _is_ssh_up() -> bool:
+    """Check SSH service status."""
+    return device_info.is_service_up("sshd")
 
 
-def get_vnc_status() -> str:
-    """Get VNC status as 'up' or 'down'."""
+def _is_vnc_up() -> bool:
+    """Check VNC service status."""
     # TODO Currently, there are multiple services, I'm uncertain which one(s) matters
-    return get_service_status("vncserver-x11-serviced")
+    return device_info.is_service_up("vncserver-x11-serviced")
 
 
-def generate_general_request() -> dict:
-    """Return fields needed for request.
+def _get_interface() -> str:
+    """Get connected interface.
+
+    Raises:
+        RuntimeError: no connected network interfaces
+
+    Returns:
+        str: interface name
+    """
+    connected = list(
+        filter(
+            lambda i: network_info.is_interface_connected(i),
+            network_info.get_interfaces(),
+        )
+    )
+    if len(connected) == 0:
+        raise RuntimeError("No connected network interfaces")
+    return connected[0] if "wlan0" not in connected else "wlan0"
+
+
+def get_network_fields(interface: str) -> dict:
+    """Return network fields needed for request.
 
     Returns:
         dict: dictionary of field(s).
@@ -103,29 +75,33 @@ def generate_general_request() -> dict:
     Raises:
         RuntimeError: if no interface can be found
     """
-    connected = connected_interfaces()
-    if len(connected) == 0:
-        raise RuntimeError("No connected network interfaces") from None
-    selected_int = connected[0]
-    if "wlan0" in connected:
-        selected_int = "wlan0"
-    ip, status = network_info.get_interface_ip(selected_int)
-    if not status:
-        raise RuntimeError("Interface disconnected") from None
+    ip = network_info.get_interface_ip(interface)
+    if ip is None:
+        raise RuntimeError("Interface disconnected")
 
-    mac = network_info.getMAC(selected_int)
+    mac = network_info.getMAC(interface)
     fields = {
         "ip": ip,
         "mac": mac,
     }
 
-    ssid, status = network_info.get_ssid(selected_int)
+    ssid, status = network_info.get_ssid(interface)
     if status:  # ensures ssid available for interface before adding it
         fields["ssid"] = ssid
-    fields["ssh"] = get_ssh_status()
-    fields["vnc"] = get_vnc_status()
 
     return fields
+
+
+def get_service_fields() -> dict:
+    """Return service fields needed for request.
+
+    Returns:
+        dict: dictionary of field(s).
+    """
+    return {
+        "ssh": "up" if _is_ssh_up() else "down",
+        "vnc": "up" if _is_vnc_up() else "down",
+    }
 
 
 def get_id_fields() -> dict:
@@ -134,9 +110,7 @@ def get_id_fields() -> dict:
     Returns:
         dict: dictionary with fields {'hwid': hwid, 'devid': devid}
     """
-    hwid = device_info.get_hw_id()
-    devid = device_info.get_dev_id()
-    return {"hwid": hwid, "devid": devid}
+    return {"hwid": device_info.get_hw_id(), "devid": device_info.get_dev_id()}
 
 
 def load_request(request_path: Path) -> dict:
@@ -186,32 +160,33 @@ def generate_request(event: str, force: bool) -> dict:
     Raises:
         RuntimeError: if no network interface is connected to the network
     """
+    # TODO: get path from config
     CSM_ROOT = Path("/var/opt/autopi/")
     REQ_PATH = CSM_ROOT / "old_request.json"
 
-    request_fields = {}
+    info_fields = {}
     if event != "shutdown":
-        request_fields = generate_general_request()
+        info_fields = {**get_network_fields(_get_interface()), **get_service_fields}
 
     try:
         if force:
-            save_request(REQ_PATH, request_fields)
+            save_request(REQ_PATH, info_fields)
         else:
+            # TODO: replace this implementation with a checksum
             # compare new request to previous
             old = load_request(REQ_PATH)
-            if old == request_fields:
-                request_fields = {}  # clear
+            if old == info_fields:
+                info_fields = {}  # clear non-essential fields
                 REQ_PATH.touch()
             else:
-                save_request(REQ_PATH, request_fields)
+                save_request(REQ_PATH, info_fields)
     except OSError:
         # TODO probably log this
         pass
 
     request = get_id_fields()
     request["event"] = event
-    # perform union
-    request = {**request, **request_fields}
+    request = {**request, **info_fields}
     return request
 
 
