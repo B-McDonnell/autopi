@@ -6,7 +6,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 
-from . import wpa_interface as wpa
+from scripts import wpa_interface as wpa
 
 
 @dataclass
