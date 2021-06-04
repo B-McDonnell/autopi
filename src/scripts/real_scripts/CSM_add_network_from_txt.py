@@ -2,11 +2,13 @@
 
 """Add network via .txt file."""
 
-import subprocess
 from io import TextIOWrapper
 
+import scripts.wpa_interface as wpa
+
+# TODO: get default file from config dir
 # on boot, run this, then rewrite file in format...
-# sudo sh -c "printf '%s\n' '#No space after (=).' '#Priority is an int value 1,2, or 3 (3 being prioritized the most).' '#If no password/priority, leave empty.' '#This file will be reset after network is added.' 'ssid=' 'password=' 'priority=' > /boot/CSM_new_network.txt"
+# sudo sh -c "printf '%s\n' '#No space after (=).' '#Priority is an int value 1,2, or 3 (3 being prioritized the most).' '#If no password/priority, leave empty or delete line.' '#This file will be reset after network is added.' 'ssid=' 'password=' 'priority=' > /boot/CSM_new_network.txt"
 
 # Look for format:
 #
@@ -28,45 +30,34 @@ def get_dict(f: TextIOWrapper) -> dict:
     """
     d = {}
     for line in f:
-        if not line.lstrip().startswith("#"):
-            values = list(filter(None, line.strip().split("=")))
-            if len(values) > 1:
-                (key, val) = values
-                d[key] = val
+        if line.lstrip().startswith("#"):
+            continue
+        values = list(filter(None, line.strip().split("=")))
+        if len(values) > 1:
+            key, *val = values
+            d[key] = val
     return d
-
-
-def create_process(d: dict) -> list:
-    """Create subprocess of adding new network.
-
-    Args:
-        d (dict): Dictionary set up with (field, input) Ie. ('ssid', 'CSMwireless').
-
-    Returns:
-        list: List of arguments for subprocess to run.
-    """
-    items = ["CSM_add_network"]
-    if "priority" in d:
-        items.append("--priority")
-        items.append(d.get("priority"))
-
-    if "password" in d:
-        items.append("-p")
-        items.append(d.get("password"))
-    else:
-        items.append("-n")
-    items.append(d.get("ssid"))
-    return items
 
 
 def main():
     """Perform main action and call helper functions."""
-    f = open("/boot/CSM_new_network.txt", "r")
-    d = get_dict(f)
-    items = create_process(d)
-    if "ssid" in d:
-        subprocess.run(items)
-    f.close()
+    with open("/boot/CSM_new_network.txt", "r") as fin:
+        d = get_dict(fin)
+    if not ("ssid" in d and not d["ssid"].empty()):
+        return
+
+    wpa.add_network(
+        network_config=wpa.make_network(
+            ssid=d["ssid"],
+            passwd=d["password"]
+            if "password" in d and not d["password"].empty()
+            else None,
+            priority=d["priority"]
+            if "priority" in d and not d["priority"].empty()
+            else None,
+        ),
+        config_file=wpa.get_default_wpa_config_file(),
+    )
 
 
 if __name__ == "__main__":
