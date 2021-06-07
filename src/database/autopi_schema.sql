@@ -23,7 +23,7 @@ CREATE TABLE autopi.raspi(
 
 CREATE TABLE autopi.raspi_warning(
 	warning text,
-	added_at timestamptz NOT NULL,
+	added_at timestamptz DEFAULT NOW(),
 	device_id uuid,
 	PRIMARY KEY(device_id, warning),
 	FOREIGN KEY(device_id) REFERENCES autopi.raspi(device_id)
