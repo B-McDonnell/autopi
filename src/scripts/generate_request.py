@@ -55,15 +55,20 @@ def _get_interface() -> str:
     Returns:
         str: interface name
     """
-    connected = list(
+    connected_interfaces = list(
         filter(
             lambda i: network_info.is_interface_connected(i),
             network_info.get_interfaces(),
         )
     )
-    if len(connected) == 0:
+    if len(connected_interfaces) == 0:
         raise RuntimeError("No connected network interfaces")
-    return connected[0] if "wlan0" not in connected else "wlan0"
+    default_interface = network_info.get_default_interface()
+    return (
+        connected_interfaces[0]
+        if default_interface not in connected_interfaces
+        else default_interface
+    )
 
 
 def get_network_fields(interface: str) -> dict:
@@ -85,8 +90,8 @@ def get_network_fields(interface: str) -> dict:
         "mac": mac,
     }
 
-    ssid, status = network_info.get_ssid(interface)
-    if status:  # ensures ssid available for interface before adding it
+    ssid = network_info.get_ssid(interface)
+    if ssid is not None:  # ensures ssid available for interface before adding it
         fields["ssid"] = ssid
 
     return fields
@@ -166,7 +171,7 @@ def generate_request(event: str, force: bool) -> dict:
 
     info_fields = {}
     if event != "shutdown":
-        info_fields = {**get_network_fields(_get_interface()), **get_service_fields}
+        info_fields = {**get_network_fields(_get_interface()), **get_service_fields()}
 
     try:
         if force:
