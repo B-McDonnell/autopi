@@ -1,13 +1,13 @@
 # Usage
-- Look in `/boot/CSM_new_network.txt` file, and use provided network details to add network.
+- Look in `/boot/new_network.py.txt` file, and use provided network details to add network.
 
 
 # Implementation
-- Uses subprocess to run `CSM_add_network` and add the provided network.
+- Uses subprocess to run `add_network.py` and add the provided network.
 - Run on reboot, add network, reset .txt file.
 
 # Dependencies
 - subprocess
 
 # Technical considerations
-- Needs to use `/boot/CSM_new_network.txt`
+- Needs to use `/boot/new_network.py.txt`

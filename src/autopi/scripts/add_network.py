@@ -6,7 +6,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 
-from scripts import wpa_interface as wpa
+from autopi.util import wpa_interface as wpa
 
 
 @dataclass
@@ -90,7 +90,7 @@ def main():
         new_network = wpa.make_network(
             cli_args.ssid, cli_args.password, cli_args.priority
         )
-    except RuntimeError | subprocess.CalledProcessError as e:
+    except (RuntimeError, subprocess.CalledProcessError) as e:
         # TODO: log error
         print(e, file=sys.stderr)
         sys.exit(1)

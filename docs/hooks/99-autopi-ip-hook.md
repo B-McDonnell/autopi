@@ -15,4 +15,4 @@ The script specifically generates requests on the following events:
 The hook script does not need to have execute permissions configured.
 
 # Dependencies
-- `CSM_generate_request.py`
+- `generate_request.py`

@@ -2,7 +2,7 @@
 - Script to retrieve ethernet or wireless MAC address.
 - Can be called with parameters (wlan0, eth0)
 ##Example
-- `CSM_get_mac wlan0` gets wireless MAC address
+- `get_mac.py wlan0` gets wireless MAC address
 
 # Implementation
 - Uses netifaces and argv to obtain needed network information

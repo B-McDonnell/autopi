@@ -72,8 +72,7 @@ def get_input(
     query = query + "\n" if newline else query
     if validator is None:
         return input(query)
-    else:
-        return _get_valid_input(lambda: input(query), validator, error_message)
+    return _get_valid_input(lambda: input(query), validator, error_message)
 
 
 def get_secret(
@@ -101,10 +100,9 @@ def get_secret(
     def _input(query: str, mask: str) -> str:
         if validator is None:
             return stdiomask.getpass(query, mask=mask)
-        else:
-            return _get_valid_input(
-                lambda: stdiomask.getpass(query, mask=mask), validator, error_message
-            )
+        return _get_valid_input(
+            lambda: stdiomask.getpass(query, mask=mask), validator, error_message
+        )
 
     query = query + "\n" if newline else query
     while True:

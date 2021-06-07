@@ -4,7 +4,7 @@
 
 from io import TextIOWrapper
 
-import scripts.wpa_interface as wpa
+import autopi.util.wpa_interface as wpa
 
 # TODO: get default file from config dir
 # on boot, run this, then rewrite file in format...

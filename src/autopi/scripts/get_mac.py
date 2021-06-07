@@ -3,8 +3,8 @@
 
 import sys
 
-import scripts.user_interface as ui
-from scripts.network_info import getMAC
+import autopi.util.user_interface as ui
+from autopi.util.network_info import get_mac
 
 
 def user_input() -> str:
@@ -31,7 +31,7 @@ def main() -> str:
         interface = user_input()
     else:
         interface = sys.argv[1]
-    return getMAC(interface)
+    return get_mac(interface)
 
 
 if __name__ == "__main__":
