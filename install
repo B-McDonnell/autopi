@@ -4,8 +4,8 @@
 #  Check for root privileges
 # ============================
 
-id=`id -u`
-if test $id != 0; then
+id=$(id -u)
+if test "$id" != 0; then
     echo "Run this script as root" # prompt and exit if standard user
     exit 1
 fi
@@ -26,54 +26,35 @@ mkdir /var/opt/autopi  # create directory for script generated files
 # Install any necessary python packages
 pip3 install -r requirements.txt
 
+# ============================
+#   move autopi code to /opt
+# ============================
+mkdir /opt/autopi
+find src/autopi/ -maxdepth 1 \( -path src/autopi/tests -prune \) -o -print | sed 's/^src\/autopi\///' | xargs -I {} cp -r src/autopi/{} /opt/autopi
 
-# ==============================================================
-#   add scripts to install location; add to /usr/bin as needed
-# ==============================================================
+# =================
+#   chmod scripts
+# =================
+find tempdir/scripts/ -type f -print | grep -vF "__init__.py" | xargs chmod +x
 
-SCRIPT_DIR="/opt/autopi/"
-mkdir -p $"SCRIPT_DIR"
-
-function move_pyscript() {
-    #if [ -z "$1" ]; then return 0; fi
-    stem=`basename "$1" .py` # strip extension
-    name="$stem".py
-    cp ./src/scripts/"$name" "$SCRIPT_DIR"/
-    if [ "$2" == "command" ]; then
-        prefix='CSM_'
-        chmod +x "$SCRIPT_DIR"/"$name"
-        ln -s "$SCRIPT_DIR"/"$name" /usr/bin/"$prefix""$stem"
-    elif [ ! -z "$2" ]; then
-        echo "Invalid parameter"
-        return 1
-    fi
-}
-
-move_pyscript get_config
-move_pyscript get_ip
-move_pyscript get_ssid
-move_pyscript get_hw_id
-move_pyscript get_dev_id
-
-move_pyscript get_mac command
-move_pyscript add_network command
-move_pyscript generate_request command
-move_pyscript setup_home_network command
-move_pyscript add_network_from_txt command
-move_pyscript wpa_country command
+# =======================================
+#   add user-facing scripts to /usr/bin
+# =======================================
+ln -s /opt/autopi/scripts/add_home_network.py /usr/bin/CSM_add_home_network
 
 
 # ============================
 #      run initial setup
 # ============================
+SCRIPTS_DIR="/opt/autopi/scripts"
 
 # add country information to network discovery system
-CSM_wpa_country get 1>/dev/null
-if [ $? -ne 0 ]; then
-    CSM_wpa_country update US
+"$SCRIPTS_DIR"/wpa_country.py get 1>/dev/null
+if "$SCRIPTS_DIR"/wpa_country.py get 1>/dev/null; then
+    "$SCRIPTS_DIR"/wpa_country.py update US
 fi
 # add guest network by default
-CSM_add_network --no-password --priority=2 CSMwireless
+"$SCRIPTS_DIR"/add_network.py --no-password --priority=2 CSMwireless
 
 
 # ===================================================
@@ -81,11 +62,11 @@ CSM_add_network --no-password --priority=2 CSMwireless
 # ===================================================
 
 # adds mac address to file in boot called "CSM_mac.txt"
-WRITE_MAC_COMMAND="CSM_get_mac wlan0 > /boot/CSM_mac.txt"
+WRITE_MAC_COMMAND="$SCRIPTS_DIR/get_mac.py wlan0 > /boot/CSM_mac.txt"
 WRITE_MAC_CRON="@reboot $WRITE_MAC_COMMAND"
 crontab -l >/tmp/crontab_r 2>/dev/null
 grep -Fx "$WRITE_MAC_CRON" /tmp/crontab_r >/dev/null
-if [ "$?" -ne 0 ]; then
+if grep -Fx "$WRITE_MAC_CRON" /tmp/crontab_r >/dev/null; then
     echo "$WRITE_MAC_CRON">>/tmp/crontab_r
 fi
 crontab /tmp/crontab_r
@@ -98,14 +79,21 @@ crontab /tmp/crontab_r
 # adds network according to information in file
 
 # TODO: change reset command to copy a blank file to boot everytime
-ADD_NET_COMMAND = "CSM_add_network_from_txt"
-ADD_RESET_COMMAND="printf '%s\n' '# No space after (=).' '# Priority is an int value 1,2, or 3 (3 being prioritized the most).' '# If no password/priority, leave empty.' '# This file will be reset after network is added.' 'ssid=' 'password=' 'priority=' > /boot/CSM_new_network.txt"
+ADD_NET_COMMAND="$SCRIPTS_DIR/add_network_from_txt.py"
+ADD_RESET_COMMAND="printf << EOF
+# No space after (=).
+# Priority is an int value 1,2, or 3 (3 being prioritized the most).
+# If no password/priority, leave empty.
+# This file will be reset after network is added.
+ssid=
+password=
+priority=
+EOF > /boot/CSM_new_network.txt"
 
 
 ADD_NET_CRON="@reboot $ADD_NET_COMMAND; $ADD_RESET_COMMAND"
 crontab -l >/tmp/crontab_r 2>/dev/null
-grep -Fx "$ADD_NET_CRON" /tmp/crontab_r >/dev/null
-if [ "$?" -ne 0 ]; then
+if grep -Fx "$ADD_NET_CRON" /tmp/crontab_r >/dev/null; then
     echo "$ADD_NET_CRON">>/tmp/crontab_r
 fi
 crontab /tmp/crontab_r
@@ -120,9 +108,9 @@ function add_systemd_unit() {
 		return 1
 	fi
 	TNAME=$(basename "$1")
-	cp "$1" "/etc/systemd/system/$TNAME"
+    ln -s "$(realpath "$1")" "/etc/systemd/system/$TNAME"
 	if [ "enable" == "$2" ]; then
-		systemctl enable $TNAME
+		systemctl enable "$TNAME"
 	elif [ "noenable" != "$2" ]; then
 		echo "Invalid parameter"
 		echo "Usage: add_systemd_unit PATH_TO_UNIT (enable | noenable)"
@@ -130,27 +118,27 @@ function add_systemd_unit() {
 }
 
 # add units for startup+shutdown+periodic IP Discovery requests
-add_systemd_unit src/systemdunits/autopi_periodic.service noenable
-add_systemd_unit src/systemdunits/autopi_periodic.timer enable
-add_systemd_unit src/systemdunits/autopi_shutdown.service enable
-add_systemd_unit src/systemdunits/autopi_startup.service enable
-
+add_systemd_unit /opt/autopi/hooks/autopi_periodic.service noenable
+add_systemd_unit /opt/autopi/hooks/autopi_periodic.timer enable
+add_systemd_unit /opt/autopi/hooks/autopi_shutdown.service enable
+add_systemd_unit /opt/autopi/hooks/autopi_startup.service enable
+_
 
 # =============================================================
 #             Add hooks for SSH+VNC status change
 # =============================================================
 
 # copy helper units
-cp src/systemdunits/autopi_status_change@.service /etc/systemd/system/
-cp src/systemdunits/autopi_status_change@.timer /etc/systemd/system/
+ln -s /opt/autopi/hooks/autopi_status_change@.service /etc/systemd/system/
+ln -s /opt/autopi/hooks/autopi_status_change@.timer /etc/systemd/system/
 
 # Add override files to hook events; they must go in a subdirectory named after the service
 VNC_OVERRIDE_DIR="/etc/systemd/system/vncserver-x11-serviced.service.d/"
 SSH_OVERRIDE_DIR="/etc/systemd/system/ssh.service.d/"
 mkdir "$VNC_OVERRIDE_DIR"
 mkdir "$SSH_OVERRIDE_DIR"
-cp src/systemdunits/vnc_override.conf "$VNC_OVERRIDE_DIR"/override.conf
-cp src/systemdunits/ssh_override.conf "$SSH_OVERRIDE_DIR"/override.conf
+ln -s /opt/autopi/hooks/vnc_override.conf "$VNC_OVERRIDE_DIR/override.conf"
+ln -s /opt/autopi/hooks/ssh_override.conf "$SSH_OVERRIDE_DIR/override.conf"
 
 systemctl daemon-reload
 
@@ -159,4 +147,4 @@ systemctl daemon-reload
 #                   Add hook for IP change
 # =============================================================
 
-cp src/hooks/99-autopi-ip-hook.sh /lib/dhcpcd/dhcpcd-hooks/99-autopi-ip-hook
+cp /opt/autopi/hooks/99-autopi-ip-hook.sh /lib/dhcpcd/dhcpcd-hooks/99-autopi-ip-hook
