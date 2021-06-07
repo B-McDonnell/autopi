@@ -6,7 +6,7 @@ After=network-online.target
 OnBootSec=30s
 OnUnitActiveSec=1m
 AccuracySec=1s
-Unit=autopi-periodic.service
+Unit=autopi_periodic.service
 
 [Install]
 WantedBy=multi-user.target

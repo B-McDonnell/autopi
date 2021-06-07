@@ -5,7 +5,7 @@ Before=shutdown.target network.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/CSM_generate_request shutdown
+ExecStart=/opt/autopi/scripts/generate_request.py shutdown
 TimeoutStartSec=10
 
 [Install]
