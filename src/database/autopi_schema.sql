@@ -4,7 +4,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE autopi.user(
 	last_login timestamptz NOT NULL DEFAULT NOW(),
-	username text PRIMARY KEY
+	username text PRIMARY KEY,
+	is_admin boolean NOT NULL
 );
 
 CREATE TABLE autopi.raspi(
@@ -29,6 +30,3 @@ CREATE TABLE autopi.raspi_warning(
 	FOREIGN KEY(device_id) REFERENCES autopi.raspi(device_id)
 );
 
-CREATE TABLE autopi.admin(
-	username text PRIMARY KEY
-);
