@@ -1,7 +1,0 @@
-[Unit]
-Description=Autopi status change request generation service
-After=network-online.target
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/CSM_generate_request %I
