@@ -1,5 +1,5 @@
 # Usage
-`CSM_generate_request [start | shutdown | keepalive | net_update | ssh_change | vnc_change | general] [-v]`
+`generate_request.py [start | shutdown | keepalive | net_update | ssh_change | vnc_change | general] [-v]`
 
 The first argument is the event type.
 If `start` is supplied, it generates the same request as above, but it does not compare it to the prior request. This is intended to be used on system startup.

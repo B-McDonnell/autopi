@@ -10,7 +10,7 @@ from http.client import HTTPResponse
 from pathlib import Path
 from urllib.error import URLError
 
-from scripts import config, device_info, network_info
+from autopi.util import config, device_info, network_info
 
 
 def generate_shutdown_request() -> dict:
@@ -57,7 +57,7 @@ def _get_interface() -> str:
     """
     connected_interfaces = list(
         filter(
-            lambda i: network_info.is_interface_connected(i),
+            network_info.is_interface_connected,
             network_info.get_interfaces(),
         )
     )
@@ -84,7 +84,7 @@ def get_network_fields(interface: str) -> dict:
     if ip is None:
         raise RuntimeError("Interface disconnected")
 
-    mac = network_info.getMAC(interface)
+    mac = network_info.get_mac(interface)
     fields = {
         "ip": ip,
         "mac": mac,
@@ -277,7 +277,7 @@ def parse_commandline() -> (str, bool, bool):
     # get the parameters
     event = result.type
     force_req = False
-    if event == "shutdown" or event == "start":
+    if event in ("shutdown", "start"):
         force_req = True
 
     verbose = result.verbose > 0

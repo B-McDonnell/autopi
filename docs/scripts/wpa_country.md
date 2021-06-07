@@ -1,7 +1,7 @@
 # Usage
-`CSM_wpa_country`:
+`wpa_country.py`:
 ```
-usage: CSM_wpa_country [-h] (get | update) ...
+usage: wpa_country.py [-h] (get | update) ...
 
 optional arguments:
   -h, --help      show this help message and exit
@@ -11,9 +11,9 @@ subcommands:
     get           get the current country code. Fails if country code does not exist
     update        change the current country code
 ```
-`CSM_wpa_country get`:
+`wpa_country.py get`:
 ```
-usage: CSM_wpa_country get [-h] [FILENAME]
+usage: wpa_country.py get [-h] [FILENAME]
 
 positional arguments:
   FILENAME    path to configuration file. Fails if file not not exist. Uses /etc/wpa_supplicant/wpa_supplicant.conf by default
@@ -21,9 +21,9 @@ positional arguments:
 optional arguments:
   -h, --help  show this help message and exit
 ```
-`CSM_wpa_country update`:
+`wpa_country.py update`:
 ```
-usage: CSM_wpa_country update [-h] [FILENAME] COUNTRY_CODE
+usage: wpa_country.py update [-h] [FILENAME] COUNTRY_CODE
 
 positional arguments:
   FILENAME      path to configuration file. Fails if file not not exist. Uses /etc/wpa_supplicant/wpa_supplicant.conf by default
@@ -41,4 +41,4 @@ Configuration file is parsed and managed in pure Python.
 None
 
 # Technical considerations
-`CSM_wpa_country` does not validate the country code used. The country code must be in ISO 3166-1 format.
+`wpa_country.py` does not validate the country code used. The country code must be in ISO 3166-1 format.

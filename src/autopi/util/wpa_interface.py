@@ -141,8 +141,8 @@ def network_exists(
     Returns:
         bool: network already exists in the config
     """
-    with open(config_file, "r") as config_file:
-        current_contents = config_file.read()
+    with open(config_file, "r") as fin:
+        current_contents = fin.read()
 
     if ignore_comments:
         current_contents = _strip_comment_lines(current_contents)
@@ -194,6 +194,8 @@ def make_network(
         if passwd is not None
         else _make_network_without_passwd(ssid)
     )
+    if drop_comments:
+        network_str = _strip_comment_lines(network_str)
     if priority is not None:
         network_str = _add_priority(network_str, priority)
 
@@ -244,8 +246,7 @@ def run_reconfigure(interface: Optional[str]) -> bool:
         command.extend(["-i", interface])
     command.append("reconfigure")
     response = subprocess.run(command, check=True, capture_output=True)
-    if response.stdout != b"OK\n":
-        return False
+    return response.stdout == b"OK\n"
 
 
 def get_country(config_file: str) -> Optional[str]:

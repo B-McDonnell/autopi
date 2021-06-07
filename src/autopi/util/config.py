@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Temporary module for reading a dummy configuration."""
 
 import os
@@ -31,7 +30,3 @@ def get_api_url() -> str:
                 if ln.startswith("API_URL="):
                     api_url = ln[8:].strip()  # TODO re-write this glorious code
     return api_url
-
-
-if __name__ == "__main__":
-    print(get_api_url())

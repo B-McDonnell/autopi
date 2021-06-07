@@ -55,7 +55,7 @@ Custom networks can also be added to the Raspberry Pi.
 ### Home Network Registration
 There are two methods for adding a Home network to the RPi.
 - The first method is as follows:
-  1. Run `CSM_setup_home_network` on the RPi.
+  1. Run `CSM_add_home_network` on the RPi.
   2. Follow the prompts and enter network information.
   3. Once completed, network settings will reconfigure.
 

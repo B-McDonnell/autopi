@@ -4,8 +4,8 @@
 import os
 import sys
 
-import scripts.user_interface as ui
-import scripts.wpa_interface as wpa
+import autopi.util.user_interface as ui
+import autopi.util.wpa_interface as wpa
 
 
 def _is_yes(user_input: str) -> bool:
