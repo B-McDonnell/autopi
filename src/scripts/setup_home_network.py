@@ -9,11 +9,11 @@ import scripts.wpa_interface as wpa
 
 
 def _is_yes(user_input: str) -> bool:
-    return user_input.lower in ("y", "yes")
+    return user_input.lower() in ("y", "yes")
 
 
 def _is_no(user_input: str) -> bool:
-    return user_input.lower in ("n", "no")
+    return user_input.lower() in ("n", "no")
 
 
 def _is_yes_or_no(user_input: str) -> bool:
@@ -26,7 +26,7 @@ def set_home_network():
     ssid = ui.get_input(
         "What is the name of your home network? (case sensitive)",
         validator=wpa.is_valid_ssid,
-        error_message=wpa.SSIDLengthError.containt_msg,
+        error_message=wpa.SSIDLengthError.constraint_msg,
     )
 
     # password
@@ -38,7 +38,7 @@ def set_home_network():
         password = ui.get_secret(
             "What is the password? (It will be encrypted)",
             validator=wpa.is_valid_passwd,
-            error_message=wpa.PasswordLengthError.containt_msg,
+            error_message=wpa.PasswordLengthError.constraint_msg,
         )
     else:
         password = None
@@ -46,13 +46,13 @@ def set_home_network():
     # priority
     if _is_yes(
         ui.get_input(
-            "Would you like to set a priority of connecting to this network?",
+            "Would you like to set a priority of connecting to this network? (y/n)",
             validator=_is_yes_or_no,
         )
     ):
         priority = ui.get_input(
             "Would you like low, medium, or high priority?",
-            validator=lambda l: l.lower() in ("l", "m", "h", "low", "m", "high"),
+            validator=lambda l: l.lower() in ("l", "m", "h", "low", "medium", "high"),
         )
         priority = (
             "1"

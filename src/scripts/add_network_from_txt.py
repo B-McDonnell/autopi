@@ -22,6 +22,8 @@ import scripts.wpa_interface as wpa
 def get_dict(f: TextIOWrapper) -> dict:
     """Create dictionary of passed in file contents.
 
+    Only includes values in the format `key=value` where `value` is not empty. Excludes comments ('#').
+
     Args:
         f (TextIOWrapper): Text file including network info.
 
@@ -35,7 +37,7 @@ def get_dict(f: TextIOWrapper) -> dict:
         values = list(filter(None, line.strip().split("=")))
         if len(values) > 1:
             key, *val = values
-            d[key] = val
+            d[key] = "=".join(val)
     return d
 
 
@@ -43,18 +45,15 @@ def main():
     """Perform main action and call helper functions."""
     with open("/boot/CSM_new_network.txt", "r") as fin:
         d = get_dict(fin)
-    if not ("ssid" in d and not d["ssid"].empty()):
+    if "ssid" not in d:
+        # TODO: log
         return
 
     wpa.add_network(
         network_config=wpa.make_network(
             ssid=d["ssid"],
-            passwd=d["password"]
-            if "password" in d and not d["password"].empty()
-            else None,
-            priority=d["priority"]
-            if "priority" in d and not d["priority"].empty()
-            else None,
+            passwd=d["password"] if "password" in d else None,
+            priority=d["priority"] if "priority" in d else None,
         ),
         config_file=wpa.get_default_wpa_config_file(),
     )
