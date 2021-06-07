@@ -38,7 +38,7 @@ Retrieves and updates country code information in `wpa_supplicant` configuration
 Configuration file is parsed and managed in pure Python.
 
 # Dependencies
-None
+- `autopi.util.wpa_interface`
 
 # Technical considerations
 `wpa_country.py` does not validate the country code used. The country code must be in ISO 3166-1 format.

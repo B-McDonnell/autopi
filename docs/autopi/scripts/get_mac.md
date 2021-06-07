@@ -10,7 +10,6 @@
 - Uses netifaces to obtain needed network information
 
 # Dependencies
-- netifaces
 - `autopi.util.user_interface`
 - `autopi.util.network_info`
 
