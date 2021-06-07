@@ -1,0 +1,7 @@
+[Unit]
+Description=Autopi periodic status updates
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/autopi/scripts/generate_request.py keepalive
