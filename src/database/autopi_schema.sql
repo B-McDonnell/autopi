@@ -31,6 +31,9 @@ CREATE TABLE autopi.raspi_warning(
 	FOREIGN KEY(device_id) REFERENCES autopi.raspi(device_id)
 );
 
+
+-- Add trigger to automatically update 'updated_at' in raspi column whenever the row is UPDATE'd.
+
 CREATE OR REPLACE FUNCTION update_user_time() RETURNS TRIGGER
 	AS
 	$BODY$
