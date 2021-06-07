@@ -2,9 +2,27 @@
 
 import subprocess
 from ipaddress import ip_address
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import netifaces
+
+
+def get_default_gateway() -> Tuple[str, str]:
+    """Get the default IPv4 gateway (ip, interface) of the device.
+
+    Returns:
+        tuple[str, str]: tuple containing the ip and interface of the default gateway
+    """
+    return netifaces.gateways["default"][netifaces.AF_INET]
+
+
+def get_default_interface() -> str:
+    """Get the default IPv4 interface of the device.
+
+    Returns:
+        str: the interface of the default gateway
+    """
+    return get_default_gateway()[0]
 
 
 def get_interfaces(exclude_loopback: bool = True) -> List[str]:
@@ -94,8 +112,7 @@ def get_ssid(interface: str) -> Optional[str]:
     try:
         result = subprocess.run(["iwgetid", interface, "-r"], capture_output=True)
     except FileNotFoundError:
-        # TODO Probably log this
-        # look into ModuleNotFoundError
+        # TODO Log this
         return "", False  # iwgetid not present
     if result.returncode != 0:
         return "", False
