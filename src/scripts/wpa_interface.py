@@ -15,7 +15,7 @@ class PasswordLengthError(RuntimeError):
         super().__init__(msg, *args, **kwargs)
 
     @property
-    def containt_msg(self) -> str:
+    def constraint_msg(self) -> str:
         """Get password contraint message."""
         return self.__default_message
 
@@ -25,12 +25,12 @@ class SSIDLengthError(RuntimeError):
 
     __default_message: str = "SSID length must be in 1..32 (inclusive)"
 
-    def __init__(self, msg="SSID length must be in 1..32 (inclusive)", *args, **kwargs):
+    def __init__(self, msg=__default_message, *args, **kwargs):
         """Set default message."""
         super().__init__(msg, *args, **kwargs)
 
     @property
-    def containt_msg(self) -> str:
+    def constraint_msg(self) -> str:
         """Get ssid contraint message."""
         return self.__default_message
 
@@ -49,7 +49,7 @@ def is_valid_passwd(passwd: str) -> bool:
 
 def get_default_wpa_config_file() -> str:
     """Get default wpa config file."""
-    return "etc/wpa_supplicant/wpa_supplicant.conf"  # TODO: get from config
+    return "/etc/wpa_supplicant/wpa_supplicant.conf"  # TODO: get from config
 
 
 def _make_network_with_passwd(ssid: str, passphrase: str) -> str:
@@ -99,7 +99,7 @@ def _add_priority(network_config: str, priority: int) -> str:
     Returns:
         str: modified wpa network config.
     """
-    lines = network_config.split("\n")
+    lines = network_config.splitlines()
     for i, line in enumerate(lines):
         if line.strip() == "}":
             closing_index = i
@@ -116,7 +116,7 @@ def _strip_comment_lines(network_config: str) -> str:
     Returns:
         str: config with commented lines removed.
     """
-    lines = network_config.split("\n")
+    lines = network_config.splitlines()
     commentless_lines = [line for line in lines if not line.strip().startswith("#")]
     return "\n".join(commentless_lines)
 
@@ -207,7 +207,7 @@ def add_network(
 
     Args:
         network_config (str): network config to add
-        config_file (str): filename of wpa cconfig file
+        config_file (str): filename of wpa config file
         drop_comments (bool, optional): remove any comments before adding to config. Defaults to True.
 
     Raises:
@@ -216,8 +216,11 @@ def add_network(
     Returns:
         bool: config was succesfully added. Returns False if network config already exists.
     """
-    if network_exists:
+    if network_exists(network_config, config_file):
         return False
+
+    if drop_comments:
+        network_config = _strip_comment_lines(network_config)
 
     with open(config_file, "a") as fout:
         fout.write(network_config)
@@ -281,11 +284,15 @@ def _split_config_file(config_file) -> (List[str], List[str]):
 
 
 def _without_trailing_empty_lines(lines: List[str]) -> Iterable[str]:
-    valid_lines = []
-    for line in reversed(lines):
-        if len(line) > 0 and not line.isspace() or len(valid_lines) > 0:
-            valid_lines.append(line)
-    return reversed(valid_lines)
+    bad_indices = []
+    last_index = len(lines) - 1
+    for i, line in enumerate(reversed(lines)):
+        if len(line) == 0 or line.isspace():
+            bad_indices.append(last_index - i)
+        else:
+            break
+    print(bad_indices)
+    return (line for i, line in enumerate(lines) if i not in bad_indices)
 
 
 def update_country(config_file: str, country: str):
