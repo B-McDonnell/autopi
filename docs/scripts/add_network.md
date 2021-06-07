@@ -22,8 +22,10 @@ Add a network to be automatically connected to. Allows for standard SSID/passwor
 `add_network.py` automatically generates `wpa_supplicant` configurations, adds them to their appropriate location, and reconfigures `wpa` to allow for automatic connections using `wpa_cli`
 
 # Dependencies
-- `wpa_cli`
+- `wpa_cli` via `wpa_interface.py`
 - `wpa_supplicant`
+- `wpa_passphrase` via `wpa_interface.py`
+- `autopi.util.wpa_interface`
 
 # Technical considerations
 - `add_network.py` does not account for a country being set in the `wpa_supplicant` configuration file, as is required by RasPis. `wpa_country.py` accounts for this.

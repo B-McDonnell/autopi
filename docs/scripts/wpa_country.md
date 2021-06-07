@@ -13,21 +13,21 @@ subcommands:
 ```
 `wpa_country.py get`:
 ```
-usage: wpa_country.py get [-h] [FILENAME]
+`usage: wpa_country.py get [-h] [FILENAME]`
 
 positional arguments:
-  FILENAME    path to configuration file. Fails if file not not exist. Uses /etc/wpa_supplicant/wpa_supplicant.conf by default
+  FILENAME    path to configuration file. Fails if file not not exist. Uses `/etc/wpa_supplicant/wpa_supplicant.conf` by default
 
 optional arguments:
   -h, --help  show this help message and exit
 ```
 `wpa_country.py update`:
 ```
-usage: wpa_country.py update [-h] [FILENAME] COUNTRY_CODE
+usage: `wpa_country.py update [-h] [FILENAME] COUNTRY_CODE`
 
 positional arguments:
-  FILENAME      path to configuration file. Fails if file not not exist. Uses /etc/wpa_supplicant/wpa_supplicant.conf by default
-  COUNTRY_CODE  ISO 3166-1 country code
+  FILENAME      path to configuration file. Fails if file not not exist. Uses `/etc/wpa_supplicant/wpa_supplicant.conf` by default
+  COUNTRY\_CODE  ISO 3166-1 country code
 
 optional arguments:
   -h, --help    show this help message and exit

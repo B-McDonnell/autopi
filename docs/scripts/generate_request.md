@@ -15,10 +15,11 @@ The overall structure of the JSON is:
 {
     'hwid': 'sdflhagsdshslsha256sumghsalghs',
     'devid': 'abc123',
-    'ip': '1.2.3.4',
+    'ip': '10.2.3.4',
     'ssid': 'mynet',
     'ssh': 'up',
     'vnc': 'down',
+    'event': 'keepalive',
     ...
 }
 ```
@@ -44,14 +45,13 @@ The fields take the following form, with all variables being strings:
 
 The service statuses are obtained from the `service` command as follows: 
 `SSH_STATUS` = `service sshd status`
-`VNC_STATUS` = `service vncserver_virtuald status`
+`VNC_STATUS` = `service vncserver_x11_serviced status`
 
 # Dependencies
 - `netifaces`
-- `autopi.get_ip`
-- `autopi.get_ssid`
-- `autopi.get_hw_id`
-- `autopi.get_dev_id`
+- `autopi.network_info`
+- `autopi.device_info`
+- `autopi.config`
 - `service SERVICE_NAME status`
 
 # Technical considerations

@@ -1,13 +1,14 @@
 # Usage
-- Look in `/boot/new_network.py.txt` file, and use provided network details to add network.
+`add_network_from_txt.py`
+
+- Look in `/boot/CSM_new_network.txt` file, and use provided network details to add network.
 
 
 # Implementation
-- Uses subprocess to run `add_network.py` and add the provided network.
 - Run on reboot, add network, reset .txt file.
 
 # Dependencies
-- subprocess
+- `autopi.util.wpa_interface`
 
 # Technical considerations
-- Needs to use `/boot/new_network.py.txt`
+- Needs to use `/boot/CSM_new_network.txt`

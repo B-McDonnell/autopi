@@ -3,12 +3,12 @@
 
 
 # Implementation
-- Uses user input to configure a new network via `add_network.py`.
+- Uses user input to configure a new network via `wpa_interface.py`.
 
 # Dependencies
 - Uses stdiomask
-- Uses `add_network.py` as command
-- Uses `wpa_country.py` as command
+- Uses `autopi.util.user_interface`
+- Uses `autopi.util.wpa_interface`
 
 # Technical considerations
 - Sets country to 'US' as default if empty.
