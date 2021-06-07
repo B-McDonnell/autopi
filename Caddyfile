@@ -1,0 +1,10 @@
+localhost:80 {
+	respond /api/* 403 {
+		close
+	}
+	reverse_proxy * autopi_api:80
+}
+
+localhost:443 {
+	reverse_proxy * autopi_api:80
+}

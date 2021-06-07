@@ -4,4 +4,4 @@ After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/CSM_generate_request keepalive
+ExecStart=/opt/autopi/scripts/generate_request.py keepalive
