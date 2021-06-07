@@ -1,7 +1,0 @@
-[Unit]
-Description=Autopi periodic status updates
-After=network-online.target
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/CSM_generate_request keepalive
