@@ -6,7 +6,6 @@
 - Uses user input to configure a new network via `wpa_interface.py`.
 
 # Dependencies
-- Uses stdiomask
 - Uses `autopi.util.user_interface`
 - Uses `autopi.util.wpa_interface`
 

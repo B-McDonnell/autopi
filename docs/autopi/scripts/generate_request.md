@@ -48,11 +48,9 @@ The service statuses are obtained from the `service` command as follows:
 `VNC_STATUS` = `service vncserver_x11_serviced status`
 
 # Dependencies
-- `netifaces`
-- `autopi.network_info`
-- `autopi.device_info`
-- `autopi.config`
-- `service SERVICE_NAME status`
+- `autopi.util.network_info`
+- `autopi.util.device_info`
+- `autopi.util.config`
 
 # Technical considerations
 The VNC service has multiple components, it is unclear which component(s) must be functioning to work or what to expect in the future.
