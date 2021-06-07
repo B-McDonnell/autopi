@@ -3,7 +3,7 @@ CREATE SCHEMA autopi;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE autopi.user(
-	last_login timestamptz NOT NULL,
+	last_login timestamptz DEFAULT NOW(),
 	username text PRIMARY KEY
 );
 
@@ -11,13 +11,14 @@ CREATE TABLE autopi.raspi(
 	device_id uuid DEFAULT uuid_generate_v4 () PRIMARY KEY, 
 	hardware_id text,
 	ip_addr text,
-	updated_at timestamptz,
-	added_at timestamptz NOT NULL,
+	alias text,
+	updated_at timestamptz DEFAULT NOW(),
+	added_at timestamptz DEFAULT NOW(),
 	vnc text,
 	ssh text,
 	power text,
 	username text,
-	FOREIGN KEY(username) REFERENCES autopi.user(username)
+	FOREIGN KEY(username) REFERENCES autopi.user(username) ON DELETE CASCADE
 );
 
 CREATE TABLE autopi.raspi_warning(
