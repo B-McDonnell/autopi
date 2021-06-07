@@ -11,6 +11,7 @@ CREATE TABLE autopi.user(
 CREATE TABLE autopi.raspi(
 	device_id uuid DEFAULT uuid_generate_v4 () PRIMARY KEY, 
 	hardware_id text,
+	registered boolean NOT NULL GENERATED ALWAYS AS (hardware_id IS NOT NULL) STORED,
 	ip_addr text,
 	alias text,
 	updated_at timestamptz NOT NULL DEFAULT NOW(),
