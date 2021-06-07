@@ -30,3 +30,15 @@ CREATE TABLE autopi.raspi_warning(
 	PRIMARY KEY(device_id, warning),
 	FOREIGN KEY(device_id) REFERENCES autopi.raspi(device_id)
 );
+
+CREATE OR REPLACE FUNCTION update_user_time() RETURNS TRIGGER
+	AS
+	$BODY$
+	BEGIN
+		new.updated_at := NOW();
+		RETURN new;
+	END;
+	$BODY$
+	LANGUAGE plpgsql;
+
+CREATE TRIGGER onupdate BEFORE UPDATE ON autopi.raspi FOR EACH ROW EXECUTE PROCEDURE update_user_time();
