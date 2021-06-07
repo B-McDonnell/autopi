@@ -118,11 +118,11 @@ function add_systemd_unit() {
 }
 
 # add units for startup+shutdown+periodic IP Discovery requests
-add_systemd_unit /opt/autopi/hooks/autopi-periodic.service noenable
-add_systemd_unit /opt/autopi/hooks/autopi-periodic.timer enable
-add_systemd_unit /opt/autopi/hooks/autopi-shutdown.service enable
-add_systemd_unit /opt/autopi/hooks/autopi-startup.service enable
-
+add_systemd_unit /opt/autopi/hooks/autopi_periodic.service noenable
+add_systemd_unit /opt/autopi/hooks/autopi_periodic.timer enable
+add_systemd_unit /opt/autopi/hooks/autopi_shutdown.service enable
+add_systemd_unit /opt/autopi/hooks/autopi_startup.service enable
+_
 
 # =============================================================
 #             Add hooks for SSH+VNC status change
