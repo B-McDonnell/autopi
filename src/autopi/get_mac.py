@@ -3,8 +3,8 @@
 
 import sys
 
-import autopi.util.user_interface as ui
-from autopi.util.network_info import get_mac
+import util.user_interface as ui
+from util.network_info import get_mac
 
 
 def user_input() -> str:

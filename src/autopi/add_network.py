@@ -6,7 +6,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 
-from autopi.util import wpa_interface as wpa
+from util import wpa_interface as wpa
 
 
 @dataclass
