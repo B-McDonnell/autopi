@@ -13,7 +13,7 @@ def get_default_gateway() -> Tuple[str, str]:
     Returns:
         tuple[str, str]: tuple containing the ip and interface of the default gateway
     """
-    return netifaces.gateways["default"][netifaces.AF_INET]
+    return netifaces.gateways()["default"][netifaces.AF_INET]
 
 
 def get_default_interface() -> str:
@@ -35,9 +35,10 @@ def get_interfaces(exclude_loopback: bool = True) -> List[str]:
         list[str]: list of interface name strings
     """
     ref_ifaces = netifaces.interfaces()
+    up_ifaces = [x for x in ref_ifaces if get_interface_ip(x) is not None]
     return [
         x
-        for x in ref_ifaces
+        for x in up_ifaces
         if not (exclude_loopback and ip_address(get_interface_ip(x)).is_loopback)
     ]
 
@@ -69,6 +70,7 @@ def is_interface_connected(interface: str) -> bool:
 
 def get_interface_ip(interface: str) -> Optional[str]:
     """Get the IP address linked to an interface."""
+    print(interface)
     if interface not in netifaces.interfaces():
         return None
     addrs = netifaces.ifaddresses(interface)
