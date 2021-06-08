@@ -32,27 +32,27 @@ pip3 install -r requirements.txt
 mkdir /opt/autopi
 find src/autopi/ -maxdepth 1 \( -path src/autopi/tests -prune \) -o -print | sed 's/^src\/autopi\///' | xargs -I {} cp -r src/autopi/{} /opt/autopi
 
-# =================
-#   chmod scripts
-# =================
-find tempdir/scripts/ -type f -print | grep -vF "__init__.py" | xargs chmod +x
+# ========================
+#   chmod python scripts
+# ========================
+find /opt/autopi -type f -exec awk '/^#!.*python/{print FILENAME}{nextfile}' {} + | xargs chmod +x
 
 # =======================================
 #   add user-facing scripts to /usr/bin
 # =======================================
-ln -s /opt/autopi/scripts/add_home_network.py /usr/bin/CSM_add_home_network
+ln -s /opt/autopi/add_home_network.py /usr/bin/CSM_add_home_network
 
 
 # ============================
 #      run initial setup
 # ============================
-SCRIPTS_DIR="/opt/autopi/scripts"
+SCRIPTS_DIR="/opt/autopi"
 
 # add country information to network discovery system
-"$SCRIPTS_DIR"/wpa_country.py get 1>/dev/null
-if "$SCRIPTS_DIR"/wpa_country.py get 1>/dev/null; then
-    "$SCRIPTS_DIR"/wpa_country.py update US
+if "$SCRIPTS_DIR/wpa_country.py" get 1>/dev/null; then
+    "$SCRIPTS_DIR/wpa_country.py" update US
 fi
+
 # add guest network by default
 "$SCRIPTS_DIR"/add_network.py --no-password --priority=2 CSMwireless
 
