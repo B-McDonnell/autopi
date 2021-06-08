@@ -5,7 +5,7 @@ Before=shutdown.target network.target
 
 [Service]
 Type=oneshot
-ExecStart=/opt/autopi/scripts/generate_request.py shutdown
+ExecStart=/opt/autopi/generate_request.py shutdown
 TimeoutStartSec=10
 
 [Install]
