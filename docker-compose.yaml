@@ -47,8 +47,8 @@ services:
       - proxy_net
       - api_net
     volumes:
-      - "${PWD}/Caddyfile:/etc/caddy/Caddyfile"
-      - "${PWD}/caddy_data:/data"
+      - "./Caddyfile:/etc/caddy/Caddyfile"
+      - "./caddy_data:/data"
       - proxy_config:/config
         #- proxy_data:/data
       - proxy_log:/log
