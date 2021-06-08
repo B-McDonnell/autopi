@@ -1,1 +1,1 @@
-"""RPi-side python."""
+"""RPi-side executable scripts."""

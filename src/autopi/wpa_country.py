@@ -5,7 +5,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from autopi.util import wpa_interface as wpa
+from util import wpa_interface as wpa
 
 
 def main():

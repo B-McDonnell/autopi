@@ -10,7 +10,7 @@ from http.client import HTTPResponse
 from pathlib import Path
 from urllib.error import URLError
 
-from autopi.util import config, device_info, network_info
+from util import config, device_info, network_info
 
 
 def generate_shutdown_request() -> dict:
