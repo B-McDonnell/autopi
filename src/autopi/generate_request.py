@@ -237,9 +237,9 @@ def generate_and_send_request(
         print(json.dumps(request, indent=4, sort_keys=True))
         print()
         print("----- Response -----")
-        print("Response code:", resp.status)
+        print("Response code:", resp.status_code)
         print("Response body:")
-        print(b"".join(resp.readlines()).decode("utf-8"))
+        print(resp.json())
 
 
 def parse_commandline() -> (str, bool, bool):
