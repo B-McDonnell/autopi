@@ -70,7 +70,6 @@ def is_interface_connected(interface: str) -> bool:
 
 def get_interface_ip(interface: str) -> Optional[str]:
     """Get the IP address linked to an interface."""
-    print(interface)
     if interface not in netifaces.interfaces():
         return None
     addrs = netifaces.ifaddresses(interface)
