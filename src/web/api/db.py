@@ -32,10 +32,13 @@ class PiDB:
         self.connect(self._credentials)
         return self
 
-    def __exit__(self, exctype: Optional[Type[BaseException]],
-             excinst: Optional[BaseException],
-             # exctb: Optional[TracebackType]) -> bool:
-             exctb: Optional) -> bool:
+    def __exit__(
+        self,
+        exctype: Optional[Type[BaseException]],
+        excinst: Optional[BaseException],
+        # exctb: Optional[TracebackType]) -> bool:
+        exctb: Optional,
+    ) -> bool:
         # FIXME This code is wrong... gobbles all exceptions
         self.close()
         if excinst is not None:
@@ -182,4 +185,4 @@ class PiDB:
             FROM autopi.raspi_warning w, autopi.raspi r
             WHERE w.device_id = r.device_id and r.username = %s
         """
-        return self._fetch_simple_query(query, (username, ))
+        return self._fetch_simple_query(query, (username,))
