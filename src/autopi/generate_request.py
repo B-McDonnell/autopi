@@ -3,13 +3,11 @@
 
 import argparse
 import json
-import ssl
 import sys
-import urllib.request
 from http.client import HTTPResponse
 from pathlib import Path
-from urllib.error import URLError
 
+import requests
 from util import config, device_info, network_info
 
 
@@ -195,7 +193,7 @@ def generate_request(event: str, force: bool) -> dict:
     return request
 
 
-def send_request(api_url: str, request) -> HTTPResponse:
+def send_request(api_url: str, request: dict) -> HTTPResponse:
     """Send a POST request with JSON data to the specified url.
 
     Args:
@@ -208,12 +206,7 @@ def send_request(api_url: str, request) -> HTTPResponse:
     Raises:
         URLError on connection failure.
     """
-    req_json = json.dumps(request).encode("utf-8")
-    req = urllib.request.Request(api_url, data=req_json)
-    req.add_header("Content-Type", "application/json")
-    ctxt = ssl.create_default_context()
-    resp = urllib.request.urlopen(req, context=ctxt)
-    return resp
+    return requests.post(api_url, json=request)
 
 
 def generate_and_send_request(
@@ -241,9 +234,9 @@ def generate_and_send_request(
         print(json.dumps(request, indent=4, sort_keys=True))
         print()
         print("----- Response -----")
-        print("Response code:", resp.status)
+        print("Response code:", resp.status_code)
         print("Response body:")
-        print(b"".join(resp.readlines()).decode("utf-8"))
+        print(resp.json())
 
 
 def parse_commandline() -> (str, bool, bool):
@@ -292,9 +285,9 @@ def main():
     except RuntimeError as re:
         print(re)
         sys.exit(1)
-    except URLError as ue:
-        print("Connection failed:", ue)
-        sys.exit(1)
+    # except URLError as ue:
+    #     print("Connection failed:", ue)
+    #     sys.exit(1)
 
 
 if __name__ == "__main__":

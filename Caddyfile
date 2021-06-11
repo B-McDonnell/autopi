@@ -1,10 +1,13 @@
-localhost:80 {
-	respond /api/* 403 {
-		close
-	}
-	reverse_proxy * autopi_api:80
+{
+	auto_https disable_redirects
 }
 
-localhost:443 {
-	reverse_proxy * autopi_api:80
+***REMOVED***
+
+@http protocol http
+
+respond @http 403 {
+	close
 }
+
+reverse_proxy * autopi_api:80
