@@ -5,24 +5,24 @@ from fastapi.responses import HTMLResponse
 
 from .core import StatusModel, UserModel
 from .db import PiDB
+from generate_table import Row, Klass, build_page, construct_row, RowItem
 
 app = FastAPI()
 
 
 # TODO it may simplify things to have Caddy guarantee that the user is authenticated
 @app.get("/", response_class=HTMLResponse)
-def root():
-    """Serve homepage."""
-    content = """
-    <html>
-        <head>
-            <title>Hello world home page</title>
-        </head>
-        <body>
-            <h1>Hello world! This is the home page</h1>
-        </body>
-    </html>
-    """
+def root(username: str = Cookie(None)):
+    with PiDB as db:
+        warnings = db.get_user_wanings(username)
+        raspis = db.get_raspis()
+    warning_ids = [warning[0] for warning in warnings]
+    warning_rows = tuple(Row(items=(RowItem("Name", warning[1], Klass.WARNING), RowItem("Warning Description", warning[2], Klass.WARNING))) for warning in warnings)
+    
+    columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated", "Power"]
+    rows = [construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids) for items in raspis]
+
+    content = build_page(rows, warning_rows)
     return HTMLResponse(content=content, status_code=200)
 
 
