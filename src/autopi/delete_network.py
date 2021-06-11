@@ -8,7 +8,6 @@ import util.wpa_interface as wpa
 
 def delete_ssid():
     """Delete network after check if exists."""
-
     ssid = ui.get_input(
         "What is the SSID of the network to be deleted? (case sensitive)",
         validator=wpa.is_valid_ssid,
@@ -36,7 +35,7 @@ def _ssid_exists(ssid: str, config_file: str) -> bool:
     """
     with open(config_file, "r") as fin:
         current_contents = fin.read()
-        if current_contents.find('ssid="'+ssid+'"') == -1:
+        if current_contents.find('ssid="' + ssid + '"') == -1:
             return False
         return True
 
@@ -56,7 +55,7 @@ def _get_new_config(ssid: str, config_file: str) -> str:
         position = current_contents.find('ssid="' + ssid + '"')
         start = current_contents.rfind("\n\nnetwork={", 0, position)
         end = current_contents.find("}", position)
-        new_config = current_contents[0: start:] + current_contents[end + 1::]
+        new_config = current_contents[0:start:] + current_contents[end + 1 : :]
         return new_config
 
 
