@@ -35,12 +35,10 @@ def get_interfaces(exclude_loopback: bool = True) -> List[str]:
         list[str]: list of interface name strings
     """
     ref_ifaces = netifaces.interfaces()
-    up_ifaces = [x for x in ref_ifaces if get_interface_ip(x) is not None]
-    return [
-        x
-        for x in up_ifaces
-        if not (exclude_loopback and ip_address(get_interface_ip(x)).is_loopback)
-    ]
+    up_ifaces = (x for x in ref_ifaces if get_interface_ip(x) is not None)
+    if not exclude_loopback:
+        return list(up_ifaces)
+    return [x for x in up_ifaces if not ip_address(get_interface_ip(x)).is_loopback]
 
 
 def get_mac(interface: str) -> str:
