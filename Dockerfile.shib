@@ -1,0 +1,25 @@
+#syntax=docker/dockerfile:1
+
+FROM centos:latest
+
+# Install http
+RUN yum -y install httpd 
+
+# Configure yum to be able to get shibboleth
+COPY "./src/web/shib/autopi-shib.repo" "/etc/yum.repos.d/"
+RUN yum -y install yum-utils; yum-config-manager --enable shibboleth
+# Install shibboleth
+RUN yum -y install shibboleth.x86_64
+
+# Copy startup script
+#COPY "./src/web/shib/shib-init-wrapper.sh" "/sbin/shib-init-wrapper.sh"
+COPY "shib-init-wrapper.sh" "/sbin/shib-init-wrapper.sh"
+RUN chmod +x /sbin/shib-init-wrapper.sh
+
+# Install shibboleth configurations
+# COPY "./src/web/shib/*.xml" "/etc/shibboleth/*.xml"
+
+# Start up image
+#CMD ["/usr/sbin/httpd", "-DFOREGROUND"]
+EXPOSE 80
+CMD ["/sbin/shib-init-wrapper.sh"]
