@@ -9,7 +9,8 @@ CREATE TABLE autopi.user(
 );
 
 CREATE TABLE autopi.raspi(
-	device_id uuid DEFAULT uuid_generate_v4 () PRIMARY KEY, 
+	device_id uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
+	ssid text, 
 	hardware_id text,
 	registered boolean NOT NULL GENERATED ALWAYS AS (hardware_id IS NOT NULL) STORED,
 	ip_addr text,
