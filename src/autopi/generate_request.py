@@ -3,14 +3,11 @@
 
 import argparse
 import json
-import ssl
 import sys
 from http.client import HTTPResponse
 from pathlib import Path
 
 import requests
-from requests.exceptions import HTTPError
-
 from util import config, device_info, network_info
 
 
@@ -288,9 +285,9 @@ def main():
     except RuntimeError as re:
         print(re)
         sys.exit(1)
-    #except URLError as ue:
-    #    print("Connection failed:", ue)
-    #    sys.exit(1)
+    # except URLError as ue:
+    #     print("Connection failed:", ue)
+    #     sys.exit(1)
 
 
 if __name__ == "__main__":
