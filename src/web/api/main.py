@@ -1,13 +1,10 @@
 """Test API server."""
 
-from fastapi import FastAPI, HTTPException, Cookie
+from fastapi import Cookie, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
-from typing import Optional
 
 from .core import StatusModel, UserModel
-from . import db
-
+from .db import PiDB
 
 app = FastAPI()
 
@@ -44,20 +41,26 @@ def help():
     """
     return HTMLResponse(content=content, status_code=200)
 
+
 @app.get("/register", response_class=HTMLResponse)
-def register(username: str = Cookie(None)): # FIXME this is probably not how the username cookie is passed, if that is how shibboleth works
+def register(
+    username: str = Cookie(None),
+):  # FIXME this is probably not how the username cookie is passed, if that is how shibboleth works
     """Serve register page."""
     if username is None:
-        raise HTTPException(status_code=401, detail="Please log in...") # TODO A redirect would probably be better
+        raise HTTPException(
+            status_code=401, detail="Please log in..."
+        )  # TODO A redirect would probably be better
 
-    devid = db.get_unregistered_devid(username)
+    with PiDB() as db:
+        devid = db.get_unregistered_devid(username)
 
     # FIXME Return a nicer page!
     # TODO The contents of the page have a baked in assumption about the device file name
     content = f"""
     <html>
         <head>
-            <title>Help page</title>
+            <title>Register</title>
         </head>
         <body>
             Enter the following ID in '/boot/CSM_device_id.txt'
@@ -72,7 +75,8 @@ def register(username: str = Cookie(None)): # FIXME this is probably not how the
 @app.post("/api/add_user")
 def add_user(user: UserModel):
     try:
-        db.add_user_query(user.username)
+        with PiDB() as db:
+            db.add_user_query(user.username)
     except Exception as e:
         # Ensure proper error logging
         print("Error:", e)
@@ -82,16 +86,20 @@ def add_user(user: UserModel):
 @app.post("/api/status")
 def update_status(status: StatusModel):
     """Print status received."""
-    if not db.devid_exists(status.devid):
-        raise HTTPException(status_code=403) # TODO ascertain proper response to bad id; minimal information is preferable
+    with PiDB() as db:
+        if not db.devid_exists(status.devid):
+            raise HTTPException(
+                status_code=403
+            )  # TODO ascertain proper response to bad id; minimal information is preferable
 
-    prev_hwid = db.query_hardware_id(status.devid)
-    if prev_hwid != status.hwid:
-        db.add_raspi_warning(status.devid, "New hardware ID detected!") # TODO handle message properly
+        prev_hwid = db.query_hardware_id(status.devid)
+        if prev_hwid != status.hwid:
+            msg = "New hardware ID detected!"
+            db.add_raspi_warning(status.devid, msg)  # TODO handle message properly
 
-    if status.event == 'shutdown':
-        db.update_status_shutdown(status)
-    else:
-        db.update_status_general(status)
-    print(status)
-    return {"response text": "I got the status update!", "status": status}
+        if status.event == "shutdown":
+            db.update_status_shutdown(status)
+        else:
+            db.update_status_general(status)
+        print(status)
+        return {"response text": "I got the status update!", "status": status}
