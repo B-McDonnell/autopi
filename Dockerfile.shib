@@ -3,7 +3,8 @@
 FROM centos:latest
 
 # Install http
-RUN yum -y install httpd 
+RUN yum -y install httpd mod_ssl
+EXPOSE 443
 
 # Configure yum to be able to get shibboleth
 COPY "./src/web/shib/autopi-shib.repo" "/etc/yum.repos.d/"
@@ -12,14 +13,19 @@ RUN yum -y install yum-utils; yum-config-manager --enable shibboleth
 RUN yum -y install shibboleth.x86_64
 
 # Copy startup script
-#COPY "./src/web/shib/shib-init-wrapper.sh" "/sbin/shib-init-wrapper.sh"
-COPY "shib-init-wrapper.sh" "/sbin/shib-init-wrapper.sh"
+COPY "./src/web/shib/shib-init-wrapper.sh" "/sbin/shib-init-wrapper.sh"
 RUN chmod +x /sbin/shib-init-wrapper.sh
+
+# Install apache configuration
+COPY "./src/web/shib/apache2.conf" "/etc/httpd/conf/httpd.conf"
 
 # Install shibboleth configurations
 # COPY "./src/web/shib/*.xml" "/etc/shibboleth/*.xml"
 
+COPY ./keys/autopi_server.crt /etc/ssl/cert/
+COPY ./keys/autopi_server.key /etc/ssl/private/
+# RUN chmod 640 /etc/ssl/private/autopi_server.key
+# RUN chown root:ssl-cert /etc/ssl/private/autopi_server.key
+
 # Start up image
-#CMD ["/usr/sbin/httpd", "-DFOREGROUND"]
-EXPOSE 80
 CMD ["/sbin/shib-init-wrapper.sh"]

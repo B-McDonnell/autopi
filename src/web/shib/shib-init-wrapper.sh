@@ -1,14 +1,16 @@
 #!/bin/bash
 
 PROC_HTTP='/usr/sbin/httpd'
-PROC_SHIB='/usr/sbin/shibd'
+#PROC_SHIB='/usr/sbin/shibd'
+PROC_SHIB='true'
 
 # Start the first process
 $PROC_HTTP
 status=$?
 if [ $status -ne 0 ]; then
   echo "Failed to start httpd: $status"
-  exit $status
+  bash
+  #exit $status
 fi
 
 # Start the second process
@@ -32,7 +34,8 @@ while sleep 60; do
   PROCESS_2_STATUS=$?
   # If the greps above find anything, they exit with 0 status
   # If they are not both 0, then something is wrong
-  if [ $PROCESS_1_STATUS -ne 0 -o $PROCESS_2_STATUS -ne 0 ]; then
+  #if [ $PROCESS_1_STATUS -ne 0 -o $PROCESS_2_STATUS -ne 0 ]; then
+  if [ $PROCESS_1_STATUS -ne 0 ]; then
     echo "One of the processes has already exited."
     exit 1
   fi

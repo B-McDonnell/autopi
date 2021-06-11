@@ -39,19 +39,16 @@ services:
   proxy:
     container_name: autopi_rev_proxy
     build:
-      dockerfile: Dockerfile.caddy
+      dockerfile: Dockerfile.shib
       context: .
     restart: unless-stopped
     ports:
-      - "80:80"
       - "443:443"
     networks:
       - proxy_net
       - api_net
     volumes:
-      - "./Caddyfile:/etc/caddy/Caddyfile"
-      - "./caddy_data:/data"
-      - proxy_config:/config
+        #- proxy_config:/config
         #- proxy_data:/data
       - proxy_log:/log
 
