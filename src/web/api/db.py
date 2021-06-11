@@ -1,6 +1,6 @@
 """Test API server."""
 
-from typing import Optional
+from typing import Optional, Type
 
 from psycopg2 import connect
 
@@ -32,8 +32,16 @@ class PiDB:
         self.connect(self._credentials)
         return self
 
-    def __exit__(self):
+    def __exit__(self, exctype: Optional[Type[BaseException]],
+             excinst: Optional[BaseException],
+             # exctb: Optional[TracebackType]) -> bool:
+             exctb: Optional) -> bool:
+        # FIXME This code is wrong... gobbles all exceptions
         self.close()
+        if excinst is not None:
+            print(excinst)
+            raise excinst
+        return True
 
     def connect(self, credentials: dict):
         self._connection = connect(**credentials)
@@ -70,7 +78,7 @@ class PiDB:
             INSERT INTO autopi.user (username)
             VALUES (%s);
         """
-        self.commit_simple_query(query, (username,))
+        self._commit_simple_query(query, (username,))
 
     def add_raspi(self, username: str) -> str:
         query = """
@@ -85,7 +93,7 @@ class PiDB:
 
     def get_unregistered_devid(self, username: str) -> str:
         fetch_query = """SELECT device_id FROM autopi.raspi WHERE username=%s AND registered=false;"""
-        result = self.fetch_simple_query(fetch_query, (username,))
+        result = self._fetch_simple_query(fetch_query, (username,))
         # TODO could check that only one id is unregistered, maybe log it
         if len(result) != 0:
             return result[0][0]
@@ -97,14 +105,14 @@ class PiDB:
         query = """
             SELECT device_id FROM autopi.raspi WHERE device_id=%s;
         """
-        results = self.fetch_simple_query(query, (devid,))
+        results = self._fetch_simple_query(query, (devid,))
         return len(results)
 
     def query_hardware_id(self, devid: str) -> str:
         query = """
             SELECT hardware_id FROM autopi.raspi WHERE device_id=%s;
         """
-        results = self.fetch_simple_query(query, (devid,))
+        results = self._fetch_simple_query(query, (devid,))
         # FIXME does not check that the id exists; assumes that it does
         return results[0][0]
 
@@ -129,7 +137,7 @@ class PiDB:
         query += """ WHERE device_id=%s;"""
         data.append(status.devid)
 
-        self.commit_simple_query(query, tuple(data))
+        self._commit_simple_query(query, tuple(data))
 
     def update_status_shutdown(self, status: StatusModel):
         query = """
@@ -137,7 +145,7 @@ class PiDB:
             SET hardware_id=%s, power='off'
             WHERE device_id=%s;
         """
-        self.commit_simple_query(query, (status.hwid, status.devid))
+        self._commit_simple_query(query, (status.hwid, status.devid))
 
     def has_timed_out(self, devid: str) -> bool:
         TIMEOUT_DURATION = "5 minute"  # TODO maybe this shouldn't be defined here...
@@ -146,7 +154,7 @@ class PiDB:
             WHERE device_id=%s
             AND updated_at + interval %s < now();
         """  # TODO perhaps the timeout should not be handled by the
-        result = self.fetch_simple_query(query, (devid, TIMEOUT_DURATION))
+        result = self._fetch_simple_query(query, (devid, TIMEOUT_DURATION))
         return len(result) > 0
 
     def add_raspi_warning(self, devid: str, warning: str):
@@ -154,7 +162,7 @@ class PiDB:
             INSERT INTO autopi.raspi_warning (device_id, warning)
             VALUES (%s, %s);
         """
-        self.commit_simple_query(query, (devid, warning))
+        self._commit_simple_query(query, (devid, warning))
 
     def get_raspi_warnings(self, devid: str) -> list:
         """Return list of warnings for a specific device.
@@ -166,4 +174,4 @@ class PiDB:
             SELECT warning, added_at FROM autopi.raspi_warning
             WHERE device_id=%s;
         """
-        return self.fetch_simple_query(query, (devid,))
+        return self._fetch_simple_query(query, (devid,))

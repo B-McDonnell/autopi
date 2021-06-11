@@ -52,7 +52,9 @@ def register(
             status_code=401, detail="Please log in..."
         )  # TODO A redirect would probably be better
 
+    devid = None
     with PiDB() as db:
+        print("test")
         devid = db.get_unregistered_devid(username)
 
     # FIXME Return a nicer page!
