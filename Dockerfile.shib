@@ -21,8 +21,14 @@ COPY "./src/web/shib/apache2.conf" "/etc/httpd/conf/httpd.conf"
 
 # Install shibboleth configurations
 # COPY "./src/web/shib/*.xml" "/etc/shibboleth/*.xml"
+COPY "./src/web/shib/sp-metadata.xml" "/etc/shibboleth/"
+COPY "./src/web/shib/idp-metadata.xml" "/etc/shibboleth/"
+COPY "./src/web/shib/attribute-map.xml" "/etc/shibboleth/"
+COPY "./src/web/shib/sp-cert.pem" "/etc/shibboleth/"
+COPY "./src/web/shib/sp-key.pem" "/etc/shibboleth/"
+# TODO RUN CHMOD?CHOWN ... sp-key.pem
 
-COPY ./keys/autopi_server.crt /etc/ssl/cert/
+COPY ./keys/autopi_server.cer /etc/ssl/cert/
 COPY ./keys/autopi_server.key /etc/ssl/private/
 # RUN chmod 640 /etc/ssl/private/autopi_server.key
 # RUN chown root:ssl-cert /etc/ssl/private/autopi_server.key
