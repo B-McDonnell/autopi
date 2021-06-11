@@ -6,7 +6,7 @@ After=network-online.target
 Type=simple
 Restart=on-failure
 RestartSec=5
-ExecStart=/opt/autopi/scripts/generate_request.py start
+ExecStart=/opt/autopi/generate_request.py start
 
 [Install]
 WantedBy=multi-user.target
