@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """Delete a network from user input."""
 
-import os
-import sys
-import re
 
 import util.user_interface as ui
 import util.wpa_interface as wpa
 
+
 def delete_ssid():
     """Delete network after check if exists."""
-     # ssid
+
     ssid = ui.get_input(
         "What is the SSID of the network to be deleted? (case sensitive)",
         validator=wpa.is_valid_ssid,
@@ -26,7 +24,7 @@ def delete_ssid():
         print("SSID not found.")
 
 
-def _ssid_exists(ssid: str, config_file:str) -> bool:
+def _ssid_exists(ssid: str, config_file: str) -> bool:
     """Check to see if SSID exists in config.
 
     Args:
@@ -42,8 +40,9 @@ def _ssid_exists(ssid: str, config_file:str) -> bool:
             return False
         return True
 
-def _get_new_config(ssid: str, config_file:str) -> str:
-    """Creates new configuration after deletion.
+
+def _get_new_config(ssid: str, config_file: str) -> str:
+    """Create new configuration after deletion.
 
     Args:
         ssid (str): SSID of network
@@ -54,7 +53,7 @@ def _get_new_config(ssid: str, config_file:str) -> str:
     """
     with open(config_file, "r") as fin:
         current_contents = fin.read()
-        position = current_contents.find('ssid="'+ssid+'"')
+        position = current_contents.find('ssid="' + ssid + '"')
         start = current_contents.rfind("\n\nnetwork={", 0, position)
         end = current_contents.find("}", position)
         new_config = current_contents[0: start:] + current_contents[end + 1::]
