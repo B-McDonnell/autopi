@@ -5,5 +5,5 @@ VOLUME ["/data", "/log"]
 RUN echo "host all all    0.0.0.0/0 md5" >> /etc/postgresql/pg_hba.conf \
 	&&  echo "listen_addresses='*'" >> /etc/postgresql/postgresql.conf
 
-COPY src/database/autopi_schema.sql /docker-entrypoint-initdb.d/
+COPY src/web/database/autopi_schema.sql /docker-entrypoint-initdb.d/
 
