@@ -175,11 +175,3 @@ class PiDB:
             WHERE device_id=%s;
         """
         return self._fetch_simple_query(query, (devid,))
-
-    def get_user_wanings(self, username: str) -> list:
-        query = """
-            SELECT w.device_id, r.alias, w.warning
-            FROM autopi.raspi_warning w, autopi.raspi r
-            WHERE w.device_id = r.device_id and r.username = %s
-        """
-        return self._fetch_simple_query(query, (username, ))
