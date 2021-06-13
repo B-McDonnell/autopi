@@ -77,7 +77,7 @@ class PiDBConnection:
                 else:
                     cur.execute(query, data)
 
-    def _fetchcell(self, query: str, data: Optional[tuple] = None) -> Optional[tuple]:
+    def _fetchcell(self, query: str, data: Optional[tuple] = None) -> Optional:
         """Execute query, returning query result.
 
         Opens cursor and commits transaction. Intended for use with "SELECT" queries.
@@ -125,8 +125,8 @@ class PiDBConnection:
             username (str): the username it will be connected to.
 
         Raises:
-            pyscopg2.ProgrammingError: on user exists, probably...
-        """  # FIXME
+            pyscopg2.errors.UniqueViolation (derived from pyscopg2.IntegrityError): on user exists
+        """
         query = """
             INSERT INTO autopi.user (username)
             VALUES (%s);
