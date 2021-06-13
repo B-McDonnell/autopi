@@ -176,18 +176,40 @@ def build_table(a: Airium, rows: Iterable[Row]) -> Airium:
     return a
 
 
-def build_page(
-    pi_rows: list[Row], warning_rows: list[Row], style_file: Optional[str] = None
-) -> str:
-    """Construct the HTML of a homepage.
+def build_homepage_content(
+    pi_rows: list[Row], warning_rows: list[Row], airium: Optional[Airium] = None
+) -> Airium:
+    """Construct the warning and raspi tables.
 
+    Args:
     Args:
         pi_rows (list[Row]): RasPi rows
         warning_rows (list[Row]): warning rows
-        style_file (str | None): css file for html styling. Defaults to None.
+        airium (Airium | None, optional): existing Airium builder to add to. Defaults to None.
 
     Returns:
-        str: generated HTML
+        Airium: object containing HTML information
+    """
+    if airium is None:
+        airium = Airium()
+    if len(warning_rows) > 0:
+        airium.h1(_t="Warnings")
+        airium = build_table(airium, warning_rows)
+    airium.h1(_t="Raspberry Pis")
+    airium = build_table(airium, pi_rows)
+    return airium
+
+
+def build_page(title: str, body_content: str, style_file: Optional[str] = None) -> str:
+    """Construct a page with the navigation header and styling.
+
+    Args:
+        title (str): title of the page
+        body_content (str): content of the page
+        style_file (str | None, optional): path to a CSS style file. Defaults to None.
+
+    Returns:
+        str: string representation of the page's HTML
     """
     if style_file is not None:
         with open(style_file) as fin:
@@ -198,22 +220,15 @@ def build_page(
         with a.head():
             if style_file is not None:
                 a.style(_t=style)
-            a.meta(
-                http_equiv="content-type",
-                content="text/html; charset=UTF-8;charset=utf-8",
-            )
+            a.meta(http_equiv="content-type", content="text/html", charset="utf-8")
+            a.title(_t=title)
         with a.body():
             with a.div(klass="topnav"):
                 with a.ul():
                     a.li().a(href="/").h2(_t="Home")
                     a.li().a(href="register").h2(_t="Register")
                     a.li().a(href="help").h2(_t="Help")
-            with a.div(klass="content-wrapper"):
-                if len(warning_rows) > 0:
-                    a.h1(_t="Warnings")
-                    a = build_table(a, warning_rows)
-                a.h1(_t="Raspberry Pis")
-                a = build_table(a, pi_rows)
+            a.div(klass="content-wrapper", _t=body_content)
     return str(a)
 
 
@@ -268,7 +283,11 @@ def get_warnings() -> list[tuple[str]]:
     """Get placeholder warnings."""
     # TEMP
     return [
-        # ("asdfghjkl", "lazy_dog", "An unrecognized device is using the ID of this Pi. If this is not you, contact your instructor")
+        (
+            "qwertyuiop",
+            "hyper_bunny",
+            "An unrecognized device is using the ID of this Pi. If this is not you, contact your instructor",
+        )
     ]
 
 
@@ -283,7 +302,7 @@ def check_html(html_str: str, print_out: bool = False):
 
 
 def main(username: str) -> str:
-    """Temporary function describing the page generation logic."""
+    """Temporary function demonstrating the page generation logic."""
     # with PiDB() as db:
     # warnings = db.get_user_wanings(username)
     # raspis = db.get_raspis(username)
@@ -308,7 +327,10 @@ def main(username: str) -> str:
         for items in raspis
     ]
 
-    content = build_page(rows, warning_rows, style_file="/app/style.css")
+    body = build_homepage_content(rows, warning_rows)
+    content = build_page(
+        title="home page", body_content=str(body), style_file="src/web/api/style.css"
+    )
     return content
 
 

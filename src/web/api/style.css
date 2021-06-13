@@ -6,11 +6,12 @@ body {
 .content-wrapper {
     width: 1080px;
     margin: auto;
+    clear: both;
 }
 
 .topnav {
     width: 100%;
-	float: left;
+	/* float: left; */
 	margin: 0 0 1em 0;
 	padding: 0;
 	/* background-color: #fff; */
@@ -44,6 +45,22 @@ body {
 
 .topnav li h2:hover {
     color: rgb(67, 95, 185);
+}
+
+a:link { 
+    text-decoration: none; 
+}
+
+a:visited {
+    text-decoration: none; 
+}
+
+a:hover { 
+    text-decoration: none; 
+}
+
+a:active { 
+    text-decoration: none; 
 }
 
 /* TABLE STYLINGS */
