@@ -62,6 +62,7 @@ def register(
             status_code=401, detail="Please log in..."
         )  # TODO A redirect would probably be better
 
+    devid = None
     with connect() as db:
         devid = db.get_unregistered_devid(username)
 
