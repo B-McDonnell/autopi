@@ -49,7 +49,7 @@ class PiDBConnection:
         self._connection.close()
         self._connection = None
 
-    def _commit_simple_query(self, query: str, data: Optional[tuple] = None):
+    def _commit(self, query: str, data: Optional[tuple] = None):
         """Execute query.
 
         Opens cursor and commits transaction. Intended for modification queries.
@@ -65,7 +65,27 @@ class PiDBConnection:
                 else:
                     cur.execute(query, data)
 
-    def _fetch_simple_query(self, query: str, data: Optional[tuple] = None) -> list:
+    def _fetchone(self, query: str, data: Optional[tuple] = None) -> Optional[tuple]:
+        """Execute query, returning query result.
+
+        Opens cursor and commits transaction. Intended for use with "SELECT" queries.
+
+        Args:
+            query (str): the query to be executed.
+            data (Optional[tuple]): parameters to be used (safely) in the query. It is passed directly to the execute call.
+
+        Returns:
+            tuple: all response rows.
+        """
+        with self._connection:
+            with self._connection.cursor() as cur:
+                if data is None:
+                    cur.execute(query)
+                else:
+                    cur.execute(query, data)
+                return cur.fetchone()
+
+    def _fetchall(self, query: str, data: Optional[tuple] = None) -> list[tuple]:
         """Execute query, returning query result.
 
         Opens cursor and commits transaction. Intended for use with "SELECT" queries.
@@ -95,7 +115,7 @@ class PiDBConnection:
             INSERT INTO autopi.user (username)
             VALUES (%s);
         """
-        self._commit_simple_query(query, (username,))
+        self._commit(query, (username,))
 
     def add_raspi(self, username: str) -> str:
         """Add a new row to the raspi table for a given user.
@@ -111,10 +131,7 @@ class PiDBConnection:
             VALUES (%s)
             RETURNING device_id;
         """
-        with self._connection:
-            with self._connection.cursor() as cur:
-                cur.execute(query, (username,))
-                return cur.fetchone()[0]
+        return self._fetchone(query, (username,))[0]
 
     def get_unregistered_devid(self, username: str) -> str:
         """Obtain an unregistered ID, creating one if none exist.
@@ -126,7 +143,7 @@ class PiDBConnection:
             str: the device UUID.
         """
         fetch_query = """SELECT device_id FROM autopi.raspi WHERE username=%s AND registered=false;"""
-        result = self._fetch_simple_query(fetch_query, (username,))
+        result = self._fetchall(fetch_query, (username,))
         # TODO could check that only one id is unregistered, maybe log it
         if len(result) != 0:
             return result[0][0]
@@ -146,7 +163,7 @@ class PiDBConnection:
         query = """
             SELECT device_id FROM autopi.raspi WHERE device_id=%s;
         """
-        results = self._fetch_simple_query(query, (devid,))
+        results = self._fetchall(query, (devid,))
         return len(results)
 
     def query_hardware_id(self, devid: str) -> str:
@@ -159,11 +176,11 @@ class PiDBConnection:
             str: the device's hardware ID.
         """
         query = """
-            SELECT hardware_id FROM autopi.raspi WHERE device_id=%s;
+            SELECT hardware_id FROM autopi.raspi WHERE device_id=%s LIMIT 1;
         """
-        results = self._fetch_simple_query(query, (devid,))
+        results = self._fetchall(query, (devid,))
         if len(results) == 0:
-            pass  # FIXME does not properly handle the id not existing
+            raise ValueError("device ID does not exist")
         return results[0][0]
 
     def update_status_general(self, status: StatusModel):
@@ -178,21 +195,21 @@ class PiDBConnection:
         """
         data = [status.hwid]
         if status.ip is not None:
-            query += """, ip_addr=%s"""
+            query += ", ip_addr=%s"
             data.append(status.ip)
         if status.ssh is not None:
-            query += """, ssh=%s"""
+            query += ", ssh=%s"
             data.append(status.ssh)
         if status.vnc is not None:
-            query += """, vnc=%s"""
+            query += ", vnc=%s"
             data.append(status.vnc)
         if status.ssid is not None:
-            query += """, ssid=%s"""
+            query += ", ssid=%s"
             data.append(status.ssid)
-        query += """ WHERE device_id=%s;"""
+        query += " WHERE device_id=%s;"
         data.append(status.devid)
 
-        self._commit_simple_query(query, tuple(data))
+        self._commit(query, tuple(data))
 
     def update_status_shutdown(self, status: StatusModel):
         """Update device row in database with device shutdown.
@@ -205,7 +222,7 @@ class PiDBConnection:
             SET hardware_id=%s, power='off'
             WHERE device_id=%s;
         """
-        self._commit_simple_query(query, (status.hwid, status.devid))
+        self._commit(query, (status.hwid, status.devid))
 
     def has_timed_out(self, devid: str) -> bool:
         """Check if device ID entry has been updated in less than timeout period.
@@ -216,13 +233,15 @@ class PiDBConnection:
         Returns:
             bool: whether it has timed out.
         """
-        TIMEOUT_DURATION = "5 minute"  # TODO maybe this shouldn't be defined here...
+        TIMEOUT_DURATION = (
+            "2 minute 30 second"  # TODO maybe this shouldn't be defined here...
+        )
         query = """
             SELECT true FROM autopi.raspi
             WHERE device_id=%s
             AND updated_at + interval %s < now();
         """  # TODO perhaps the timeout should not be handled by the database query
-        result = self._fetch_simple_query(query, (devid, TIMEOUT_DURATION))
+        result = self._fetchall(query, (devid, TIMEOUT_DURATION))
         return len(result) > 0
 
     def add_raspi_warning(self, devid: str, warning: str):
@@ -236,7 +255,7 @@ class PiDBConnection:
             INSERT INTO autopi.raspi_warning (device_id, warning)
             VALUES (%s, %s);
         """
-        self._commit_simple_query(query, (devid, warning))
+        self._commit(query, (devid, warning))
 
     def get_device_warnings(self, devid: str) -> list:
         """Return list of warnings for a specific device.
@@ -251,7 +270,7 @@ class PiDBConnection:
             SELECT warning, added_at FROM autopi.raspi_warning
             WHERE device_id=%s;
         """
-        return self._fetch_simple_query(query, (devid,))
+        return self._fetchall(query, (devid,))
 
     def get_raspi_warnings(self, username: str) -> list:
         """Return list of warnings for a specific device.
@@ -264,7 +283,7 @@ class PiDBConnection:
             FROM autopi.raspi_warning as w, autopi.raspi as r
             WHERE w.device_id = r.device_id AND r.username = %s;
         """
-        return self._fetch_simple_query(query, (username,))
+        return self._fetchall(query, (username,))
 
 
 @contextmanager
