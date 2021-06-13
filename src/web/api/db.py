@@ -108,14 +108,53 @@ class PiDBConnection:
     def add_user_query(self, username: str):
         """Add new user to database on first login.
 
+        Args:
+            username (str): the username it will be connected to.
+
         Raises:
-            SOME type of exceptioN??? on user exists
+            pyscopg2.ProgrammingError: on user exists, probably...
         """  # FIXME
         query = """
             INSERT INTO autopi.user (username)
             VALUES (%s);
         """
         self._commit(query, (username,))
+
+    def user_exists(self, username: str) -> bool:
+        """Check if user exists.
+
+        Args:
+            username (str): the username to check.
+
+        Returns:
+            bool: user exists.
+        """
+        query = """
+            SELECT true FROM autopi.user
+            WHERE username = %s LIMIT 1;
+        """
+        return self._fetchone(query, (username,)) is not None
+
+    def is_admin(self, username: str) -> bool:
+        """Check if user is an admin.
+
+        Args:
+            username (str): the username to check.
+
+        Returns:
+            bool: user is an admin.
+
+        Raises:
+            ValueError: on user does not exist.
+        """
+        query = """
+            SELECT is_admin FROM autopi.user
+            WHERE username = %s LIMIT 1;
+        """
+        result = self._fetchone(query, (username,))
+        if result is None:
+            return result[0]
+        raise ValueError("invalid username supplied")
 
     def add_raspi(self, username: str) -> str:
         """Add a new row to the raspi table for a given user.
@@ -132,6 +171,34 @@ class PiDBConnection:
             RETURNING device_id;
         """
         return self._fetchone(query, (username,))[0]
+
+    def get_raspis(
+        self, username: Optional[str] = None, registered_only=True
+    ) -> list[tuple]:
+        """Return a list of Raspberry Pis.
+
+        Args:
+            username (optional, str): restrict list to Pis belonging to a specific user.
+            registered (bool, default: True): restrict list to those Pis that are registered.
+
+        Returns:
+            list: Raspberry Pis.
+        """
+        # build query
+        data = tuple()
+        condition = ""
+        if username is not None and registered_only:
+            data = (username,)
+            condition = "WHERE username = %s, registered = true"
+        elif username is not None:
+            condition = "WHERE username = %s"
+        elif registered_only:
+            condition = "WHERE registered = true"
+        query = f"""
+            SELECT * FROM autopi.raspi {condition};
+        """
+        # execute query
+        return self._fetchall(query, data)
 
     def get_unregistered_devid(self, username: str) -> str:
         """Obtain an unregistered ID, creating one if none exist.
@@ -174,6 +241,9 @@ class PiDBConnection:
 
         Returns:
             str: the device's hardware ID.
+
+        Raises:
+            ValueError: on device id does not exist.
         """
         query = """
             SELECT hardware_id FROM autopi.raspi WHERE device_id=%s LIMIT 1;

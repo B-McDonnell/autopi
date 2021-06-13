@@ -9,20 +9,53 @@ from .db import connect
 app = FastAPI()
 
 
-# TODO it may simplify things to have Caddy guarantee that the user is authenticated
-@app.get("/", response_class=HTMLResponse)
-def root():
-    """Serve homepage."""
-    content = """
+def compose_homepage(username: str) -> str:
+    """Return homepage."""
+
+    def add_pi_rows(pi_list: list):
+        table = "\n".join([str(pi) for pi in pi_list])
+        return table + "\n"
+
+    body = ""
+    with connect() as db:
+        if db.user_exists(username):
+            db.add_user(username)
+
+        user_pis = db.get_raspis(username)
+        body += add_pi_rows(user_pis)
+
+        if db.is_admin(username):
+            other_pis = [pi for pi in db.get_raspis() if pi not in user_pis]
+            body += add_pi_rows(other_pis)
+
+    title = "RaspberryPi List"
+    content = f"""
     <html>
         <head>
-            <title>Hello world home page</title>
+            <title>{title}</title>
         </head>
         <body>
-            <h1>Hello world! This is the home page</h1>
+            {body}
         </body>
     </html>
     """
+    return content
+
+
+# TODO it may simplify things to have Caddy guarantee that the user is authenticated
+@app.get("/", response_class=HTMLResponse)
+def root(
+    username: str = Cookie(None),
+):
+    """Serve raspi list."""
+    if username is None:
+        raise HTTPException(
+            status_code=401, detail="Please log in..."
+        )  # TODO A redirect would probably be better
+
+    content = compose_homepage(username)
+    return HTMLResponse(content=content, status_code=200)
+
     # TODO: This comment block is just to remind me when this is implemented properly
     # @app.post("/api/add_user")
     # def add_user(user: UserModel):
@@ -33,7 +66,6 @@ def root():
     #     # Ensure proper error logging
     #     print("Error:", e)
     # return {"response text": "It didn't crash!!"}
-    return HTMLResponse(content=content, status_code=200)
 
 
 @app.get("/help", response_class=HTMLResponse)
