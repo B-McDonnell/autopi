@@ -9,13 +9,6 @@ from .core import StatusModel
 
 
 # FIXME plaintext credentials
-def connect_default():
-    """Open a database connection and return it."""
-    return psycopg2.connect(
-        host="autopi_db", database="autopi", user="autopi", password="password"
-    )
-
-
 def default_credentials() -> dict:
     """Return default credentials for connection."""
     return {
@@ -29,7 +22,7 @@ def default_credentials() -> dict:
 class PiDBConnection:
     """An object representing a single connection with the database, providing needed database queries."""
 
-    def __init__(self, credentials):
+    def __init__(self, credentials: dict = default_credentials()):
         """Initialize members and opens database connection.
 
         Args:
@@ -40,7 +33,7 @@ class PiDBConnection:
 
     def __del__(self):
         """Close connection on delete."""
-        if self._connection is not None:
+        if self._connection is not None and not self._connection.closed():
             self.close()
 
     def connect(self, credentials: dict = default_credentials()):
@@ -57,7 +50,7 @@ class PiDBConnection:
 
     def close(self):
         """Close database connection."""
-        if self._connection is not None:
+        if self._connection is not None and not self._connection.closed():
             self._connection.close()
             self._connection = None
 
