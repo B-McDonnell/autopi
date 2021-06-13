@@ -4,7 +4,7 @@ import enum
 import os
 from dataclasses import dataclass
 from tempfile import NamedTemporaryFile
-from typing import Iterable, List, Union
+from typing import Iterable, List, Optional, Union
 
 from airium import Airium
 
@@ -46,18 +46,8 @@ class Row:
         return Klass.DEAD in (item.klass for item in self.items)
 
 
-def check_html(html_str: str, print_out: bool = False):
-    """Development function to preview HTML locally."""
-    # TODO: remove
-    if print_out:
-        print(html_str)
-    with NamedTemporaryFile("w", delete=False) as tmp:
-        tmp.write(html_str)
-        os.system(f"firefox --new-window {tmp.name}")
-
-
 def _table_klassify(s: str) -> str:
-    """Preface CSS class with 'table_' if it is not not preficed already.
+    """Preface CSS class with 'table_' if it is not not prefixed already.
 
     Args:
         s (str): CSS class to add prefix to. Must be a single class.
@@ -69,6 +59,60 @@ def _table_klassify(s: str) -> str:
     if not s.startswith("table_"):
         return "table_" + s
     return s
+
+
+def _pretty_datetime(iso_datetime: datetime.datetime) -> str:
+    return iso_datetime.strftime("%B %d, %Y %I:%M %p")
+
+
+def _seconds_since_iso(iso_datetime: datetime.datetime) -> int:
+    dt = datetime.datetime.now(iso_datetime.tzinfo) - iso_datetime
+    return dt.total_seconds()
+
+
+def construct_row(
+    items: tuple[tuple[str]], device_id: str, hw_warning: bool = False
+) -> Row:
+    """Construct a Row from a tuple of column headers/values.
+
+    Args:
+        items (tuple[tuple[str]]): sequence of row items (key: str, value: str)
+        device_id (str): device ID of the RasPi
+        hw_warning (bool, optional): row has a warning. Defaults to False.
+
+    Returns:
+        Row: [description]
+    """
+    row_items: list[RowItem] = []
+    for key, value in items:
+        if key == "Name":
+            row_items.append(
+                RowItem(key, value, Klass.WARNING if hw_warning else Klass.NEUTRAL)
+            )
+        elif key in ("IP Address", "SSID"):
+            row_items.append(RowItem(key, value, Klass.NEUTRAL))
+        elif key in ("SSH", "VNC"):
+            row_items.append(
+                RowItem(key, value, Klass.GOOD if value == "up" else Klass.BAD)
+            )
+        elif key == "Last Updated":
+            age = _seconds_since_iso(value)
+            row_items.append(
+                RowItem(
+                    key,
+                    _pretty_datetime(value),
+                    Klass.NEUTRAL
+                    if age < 2.5 * 60
+                    else Klass.WARNING
+                    if age < 5 * 60
+                    else Klass.DEAD,
+                )
+            )  # TODO get delta from config
+        elif key == "Power":
+            row_items.append(
+                RowItem(key, value, Klass.GOOD if value == "on" else Klass.DEAD)
+            )
+    return Row(items=row_items)
 
 
 def make_klass(s: Union[str, List[str]]) -> str:
@@ -116,7 +160,9 @@ def build_table(a: Airium, rows: Iterable[Row]) -> Airium:
                 raise ValueError("Row item keys much match in order")
             dead_row = row.is_dead
             with a.tr():
+                print()
                 for item in row.items:
+                    print(item)
                     a.td(
                         klass=make_klass(
                             [
@@ -130,55 +176,45 @@ def build_table(a: Airium, rows: Iterable[Row]) -> Airium:
     return a
 
 
-def _pretty_datetime(iso_datetime: datetime.datetime) -> str:
-    return iso_datetime.strftime("%B %d, %Y %I:%M %p")
-
-
-def _seconds_since_iso(iso_datetime: str) -> int:
-    dt = datetime.datetime.now(iso_datetime.tzinfo) - iso_datetime
-    return dt.total_seconds()
-
-
-def construct_row(
-    items: tuple[tuple[str]], device_id: str, hw_warning: bool = False
-) -> Row:
-    """Construct a Row from a tuple of column headers/values.
+def build_page(
+    pi_rows: list[Row], warning_rows: list[Row], style_file: Optional[str] = None
+) -> str:
+    """Construct the HTML of a homepage.
 
     Args:
-        items (tuple[tuple[str]]): sequence of row items (key: str, value: str)
-        device_id (str): device ID of the RasPi
-        hw_warning (bool, optional): row has a warning. Defaults to False.
+        pi_rows (list[Row]): RasPi rows
+        warning_rows (list[Row]): warning rows
+        style_file (str | None): css file for html styling. Defaults to None.
 
     Returns:
-        Row: [description]
+        str: generated HTML
     """
-    row_items: list[RowItem] = []
-    for key, value in items:
-        if key == "Name":
-            row_items.append(
-                RowItem(key, value, Klass.WARNING if hw_warning else Klass.NEUTRAL)
+    if style_file is not None:
+        with open(style_file) as fin:
+            style = fin.read()
+
+    a = Airium()
+    with a.html():
+        with a.head():
+            if style_file is not None:
+                a.style(_t=style)
+            a.meta(
+                http_equiv="content-type",
+                content="text/html; charset=UTF-8;charset=utf-8",
             )
-        elif key in ("IP Address", "SSID"):
-            row_items.append(RowItem(key, value, Klass.NEUTRAL))
-        elif key in ("SSH", "VNC"):
-            row_items.append(
-                RowItem(key, value, Klass.GOOD if value == "up" else Klass.BAD)
-            )
-        elif key == "Last Updated":
-            row_items.append(
-                RowItem(
-                    key,
-                    _pretty_datetime(value),
-                    Klass.NEUTRAL
-                    if _seconds_since_iso(value) < 5 * 60
-                    else Klass.WARNING,
-                )
-            )  # TODO get delta from config
-        elif key == "Power":
-            row_items.append(
-                RowItem(key, value, Klass.GOOD if value == "on" else Klass.DEAD)
-            )
-    return Row(items=row_items)
+        with a.body():
+            with a.div(klass="topnav"):
+                with a.ul():
+                    a.li().a(href="/").h2(_t="Home")
+                    a.li().a(href="register").h2(_t="Register")
+                    a.li().a(href="help").h2(_t="Help")
+            with a.div(klass="content-wrapper"):
+                if len(warning_rows) > 0:
+                    a.h1(_t="Warnings")
+                    a = build_table(a, warning_rows)
+                a.h1(_t="Raspberry Pis")
+                a = build_table(a, pi_rows)
+    return str(a)
 
 
 def get_raspis() -> list[tuple[str]]:
@@ -190,30 +226,40 @@ def get_raspis() -> list[tuple[str]]:
             "hyper_bunny",
             "10.0.0.69",
             "SomeFunnyJoke",
-            "ON",
-            "ON",
-            "2021-06-20 08:01:39.123456+00",
-            "ON",
+            "up",
+            "up",
+            datetime.datetime.now(),
+            "on",
         ),
         (
             "asdfghjkl",
             "lazy_dog",
             "192.168.1.52",
             "SomeLameJokeWith32CharactersLmao",
-            "OFF",
-            "OFF",
-            "2021-01-10 08:01:02.987654+22",
-            "ON",
+            "down",
+            "down",
+            datetime.datetime.fromisoformat("2021-01-10 08:01:02.987654+22:00"),
+            "on",
+        ),
+        (
+            "1234567890",
+            "slippery_seal",
+            "138.67.3.93",
+            "tinyssid",
+            "down",
+            "up",
+            datetime.datetime.now() - datetime.timedelta(minutes=3),
+            "on",
         ),
         (
             "zxcvbnm",
             "cute_kitten",
             "172.16.13.37",
             "Another SSID",
-            "OFF",
-            "OFF",
-            "2021-08-10 00:00:00.000000+00",
-            "OFF",
+            "down",
+            "down",
+            datetime.datetime.fromisoformat("2021-08-10 00:00:00.000000+00:00"),
+            "off",
         ),
     ]
 
@@ -226,40 +272,14 @@ def get_warnings() -> list[tuple[str]]:
     ]
 
 
-def build_page(rows: list[Row], warnings: list[Row]) -> str:
-    """Construct the HTML of a homepage.
-
-    Args:
-        rows (list[Row]): RasPi rows
-        warnings (list[Row]): warning rows
-
-    Returns:
-        str: generated HTML
-    """
-    with open("/app/style.css") as fin:
-        style = fin.read()
-
-    a = Airium()
-    with a.html():
-        with a.head():
-            a.style(_t=style)
-            a.meta(
-                http_equiv="content-type",
-                content="text/html; charset=UTF-8;charset=utf-8",
-            )
-        with a.body():
-            with a.div(klass="topnav"):
-                with a.ul():
-                    a.li().a(href="/").h2(_t="Home")
-                    a.li().a(href="register").h2(_t="Register")
-                    a.li().a(href="help").h2(_t="Help")
-            with a.div(klass="content-wrapper"):
-                if len(warnings) > 0:
-                    a.h1(_t="Warnings")
-                    a = build_table(a, warnings)
-                a.h1(_t="Raspberry Pis")
-                a = build_table(a, rows)
-    return str(a)
+def check_html(html_str: str, print_out: bool = False):
+    """Development function to preview HTML locally."""
+    # TODO: remove
+    if print_out:
+        print(html_str)
+    with NamedTemporaryFile("w", delete=False) as tmp:
+        tmp.write(html_str)
+        os.system(f"firefox --new-window {tmp.name}")
 
 
 def main(username: str) -> str:
@@ -288,5 +308,9 @@ def main(username: str) -> str:
         for items in raspis
     ]
 
-    content = build_page(rows, warning_rows)
+    content = build_page(rows, warning_rows, style_file="/app/style.css")
     return content
+
+
+if __name__ == "__main__":
+    check_html(main("username"))
