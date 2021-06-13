@@ -17,6 +17,7 @@ services:
     networks:
       - db_net
     volumes:
+      - './src/web/database/postgresql.conf:/etc/postgresql/postgresql.conf'
       - db_data:/var/lib/postgresql/data
       - db_log:/log
 
