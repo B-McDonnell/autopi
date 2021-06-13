@@ -93,7 +93,7 @@ def update_status(status: StatusModel):
 
         prev_hwid = db.query_hardware_id(status.devid)
         if prev_hwid != status.hwid:
-            msg = "New hardware ID detected!"
+            msg = "The hardware of this device has changed. If this was not you, contact your instructor."
             db.add_raspi_warning(status.devid, msg)  # TODO handle message properly
 
         if status.event == "shutdown":
@@ -101,4 +101,4 @@ def update_status(status: StatusModel):
         else:
             db.update_status_general(status)
         print(status)
-        return {"response text": "I got the status update!", "status": status}
+        return {}
