@@ -95,7 +95,7 @@ class PiDBConnection:
             INSERT INTO autopi.user (username)
             VALUES (%s);
         """
-        self.commit_simple_query(query, (username,))
+        self._commit_simple_query(query, (username,))
 
     def add_raspi(self, username: str) -> str:
         """Add a new row to the raspi table for a given user.
@@ -126,7 +126,7 @@ class PiDBConnection:
             str: the device UUID.
         """
         fetch_query = """SELECT device_id FROM autopi.raspi WHERE username=%s AND registered=false;"""
-        result = self.fetch_simple_query(fetch_query, (username,))
+        result = self._fetch_simple_query(fetch_query, (username,))
         # TODO could check that only one id is unregistered, maybe log it
         if len(result) != 0:
             return result[0][0]
@@ -146,7 +146,7 @@ class PiDBConnection:
         query = """
             SELECT device_id FROM autopi.raspi WHERE device_id=%s;
         """
-        results = self.fetch_simple_query(query, (devid,))
+        results = self._fetch_simple_query(query, (devid,))
         return len(results)
 
     def query_hardware_id(self, devid: str) -> str:
@@ -161,7 +161,7 @@ class PiDBConnection:
         query = """
             SELECT hardware_id FROM autopi.raspi WHERE device_id=%s;
         """
-        results = self.fetch_simple_query(query, (devid,))
+        results = self._fetch_simple_query(query, (devid,))
         if len(results) == 0:
             pass  # FIXME does not properly handle the id not existing
         return results[0][0]
@@ -192,7 +192,7 @@ class PiDBConnection:
         query += """ WHERE device_id=%s;"""
         data.append(status.devid)
 
-        self.commit_simple_query(query, tuple(data))
+        self._commit_simple_query(query, tuple(data))
 
     def update_status_shutdown(self, status: StatusModel):
         """Update device row in database with device shutdown.
@@ -205,7 +205,7 @@ class PiDBConnection:
             SET hardware_id=%s, power='off'
             WHERE device_id=%s;
         """
-        self.commit_simple_query(query, (status.hwid, status.devid))
+        self._commit_simple_query(query, (status.hwid, status.devid))
 
     def has_timed_out(self, devid: str) -> bool:
         """Check if device ID entry has been updated in less than timeout period.
@@ -222,7 +222,7 @@ class PiDBConnection:
             WHERE device_id=%s
             AND updated_at + interval %s < now();
         """  # TODO perhaps the timeout should not be handled by the database query
-        result = self.fetch_simple_query(query, (devid, TIMEOUT_DURATION))
+        result = self._fetch_simple_query(query, (devid, TIMEOUT_DURATION))
         return len(result) > 0
 
     def add_raspi_warning(self, devid: str, warning: str):
@@ -236,7 +236,7 @@ class PiDBConnection:
             INSERT INTO autopi.raspi_warning (device_id, warning)
             VALUES (%s, %s);
         """
-        self.commit_simple_query(query, (devid, warning))
+        self._commit_simple_query(query, (devid, warning))
 
     def get_device_warnings(self, devid: str) -> list:
         """Return list of warnings for a specific device.
@@ -251,7 +251,7 @@ class PiDBConnection:
             SELECT warning, added_at FROM autopi.raspi_warning
             WHERE device_id=%s;
         """
-        return self.fetch_simple_query(query, (devid,))
+        return self._fetch_simple_query(query, (devid,))
 
     def get_raspi_warnings(self, username: str) -> list:
         """Return list of warnings for a specific device.
@@ -264,7 +264,7 @@ class PiDBConnection:
             FROM autopi.raspi_warning as w, autopi.raspi as r
             WHERE w.device_id = r.device_id AND r.username = %s;
         """
-        return self.fetch_simple_query(query, (username,))
+        return self._fetch_simple_query(query, (username,))
 
 
 @contextmanager
