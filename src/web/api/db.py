@@ -1,20 +1,23 @@
 """Test API server."""
 
+from contextlib import contextmanager
 from typing import Optional
 
-from psycopg2 import connect
+import psycopg2
 
 from .core import StatusModel
 
 
 # FIXME plaintext credentials
 def connect_default():
-    return connect(
+    """Open a database connection and return it."""
+    return psycopg2.connect(
         host="autopi_db", database="autopi", user="autopi", password="password"
     )
 
 
 def default_credentials() -> dict:
+    """Return default credentials for connection."""
     return {
         "host": "autopi_db",
         "database": "autopi",
@@ -23,27 +26,38 @@ def default_credentials() -> dict:
     }
 
 
-class PiDB:
-    def __init__(self, credentials: list = default_credentials()):
+class PiDBConnection:
+    """An object representing a single connection with the database, providing needed database queries."""
+
+    def __init__(self, credentials: dict = default_credentials()):
+        """Initialize members and opens database connection.
+
+        Args:
+            credentials (dict): dictionary with database credentials for opening connection.
+        """
         self._connection = None
         self._credentials = credentials
+        self._connect(credentials)
 
-    def __enter__(self):
-        self.connect(self._credentials)
-        return self
-
-    def __exit__(self):
-        self.close()
-
-    def connect(self, credentials: dict):
-        self._connection = connect(**credentials)
+    def _connect(self, credentials: dict):
+        """Open new database connection."""
+        self._connection = psycopg2.connect(**credentials)
 
     def close(self):
+        """Close database connection."""
         # FIXME these functions may be poorly architected
         self._connection.close()
         self._connection = None
 
     def _commit_simple_query(self, query: str, data: Optional[tuple] = None):
+        """Execute query.
+
+        Opens cursor and commits transaction. Intended for modification queries.
+
+        Args:
+            query (str): the query to be executed.
+            data (Optional[tuple]): parameters to be used (safely) in the query. It is passed directly to the execute call.
+        """
         with self._connection:
             with self._connection.cursor() as cur:
                 if data is None:
@@ -51,7 +65,18 @@ class PiDB:
                 else:
                     cur.execute(query, data)
 
-    def _fetch_simple_query(self, query: str, data: Optional[tuple] = None):
+    def _fetch_simple_query(self, query: str, data: Optional[tuple] = None) -> list:
+        """Execute query, returning query result.
+
+        Opens cursor and commits transaction. Intended for use with "SELECT" queries.
+
+        Args:
+            query (str): the query to be executed.
+            data (Optional[tuple]): parameters to be used (safely) in the query. It is passed directly to the execute call.
+
+        Returns:
+            list: all response rows.
+        """
         with self._connection:
             with self._connection.cursor() as cur:
                 if data is None:
@@ -65,7 +90,7 @@ class PiDB:
 
         Raises:
             SOME type of exceptioN??? on user exists
-        """
+        """  # FIXME
         query = """
             INSERT INTO autopi.user (username)
             VALUES (%s);
@@ -73,6 +98,14 @@ class PiDB:
         self.commit_simple_query(query, (username,))
 
     def add_raspi(self, username: str) -> str:
+        """Add a new row to the raspi table for a given user.
+
+        Args:
+            username (str): the username it will be connected to.
+
+        Returns:
+            str: the new device's UUID.
+        """
         query = """
             INSERT INTO autopi.raspi (username)
             VALUES (%s)
@@ -81,9 +114,17 @@ class PiDB:
         with self._connection:
             with self._connection.cursor() as cur:
                 cur.execute(query, (username,))
-                return cur.fetchone()[0]  # Ensure this works
+                return cur.fetchone()[0]
 
     def get_unregistered_devid(self, username: str) -> str:
+        """Obtain an unregistered ID, creating one if none exist.
+
+        Args:
+            username (str)
+
+        Returns:
+            str: the device UUID.
+        """
         fetch_query = """SELECT device_id FROM autopi.raspi WHERE username=%s AND registered=false;"""
         result = self.fetch_simple_query(fetch_query, (username,))
         # TODO could check that only one id is unregistered, maybe log it
@@ -94,6 +135,14 @@ class PiDB:
         return self.add_raspi(username)
 
     def devid_exists(self, devid: str) -> bool:
+        """Check if the given device ID is present in the table.
+
+        Args:
+            devid (str): the device ID.
+
+        Returns:
+            bool: whether the device exists.
+        """
         query = """
             SELECT device_id FROM autopi.raspi WHERE device_id=%s;
         """
@@ -101,14 +150,28 @@ class PiDB:
         return len(results)
 
     def query_hardware_id(self, devid: str) -> str:
+        """Get the hardware ID for a given device.
+
+        Args:
+            devid (str): the device ID.
+
+        Returns:
+            str: the device's hardware ID.
+        """
         query = """
             SELECT hardware_id FROM autopi.raspi WHERE device_id=%s;
         """
         results = self.fetch_simple_query(query, (devid,))
-        # FIXME does not check that the id exists; assumes that it does
+        if len(results) == 0:
+            pass  # FIXME does not properly handle the id not existing
         return results[0][0]
 
     def update_status_general(self, status: StatusModel):
+        """Update device row in database.
+
+        Args:
+            status (StatusModel): the POST data from the API request, containing at least the device and hardware IDs.
+        """
         query = """
             UPDATE autopi.raspi
             SET hardware_id=%s, power='on'
@@ -132,6 +195,11 @@ class PiDB:
         self.commit_simple_query(query, tuple(data))
 
     def update_status_shutdown(self, status: StatusModel):
+        """Update device row in database with device shutdown.
+
+        Args:
+            status (StatusModel): the POST data from the API request, containing at least the device and hardware IDs.
+        """
         query = """
             UPDATE autopi.raspi
             SET hardware_id=%s, power='off'
@@ -140,24 +208,41 @@ class PiDB:
         self.commit_simple_query(query, (status.hwid, status.devid))
 
     def has_timed_out(self, devid: str) -> bool:
+        """Check if device ID entry has been updated in less than timeout period.
+
+        Args:
+            devid (str): device ID.
+
+        Returns:
+            bool: whether it has timed out.
+        """
         TIMEOUT_DURATION = "5 minute"  # TODO maybe this shouldn't be defined here...
         query = """
             SELECT true FROM autopi.raspi
             WHERE device_id=%s
             AND updated_at + interval %s < now();
-        """  # TODO perhaps the timeout should not be handled by the
+        """  # TODO perhaps the timeout should not be handled by the database query
         result = self.fetch_simple_query(query, (devid, TIMEOUT_DURATION))
         return len(result) > 0
 
     def add_raspi_warning(self, devid: str, warning: str):
+        """Add warning for specific device.
+
+        Args:
+            devid (str): device ID.
+            warning (str): warning string to add.
+        """
         query = """
             INSERT INTO autopi.raspi_warning (device_id, warning)
             VALUES (%s, %s);
         """
         self.commit_simple_query(query, (devid, warning))
 
-    def get_raspi_warnings(self, devid: str) -> list:
+    def get_device_warnings(self, devid: str) -> list:
         """Return list of warnings for a specific device.
+
+        Args:
+            devid (str): device ID.
 
         Returns:
             list[(warning: str, added_at: datetime.datetime)]: the list of warnings if any
@@ -167,3 +252,26 @@ class PiDB:
             WHERE device_id=%s;
         """
         return self.fetch_simple_query(query, (devid,))
+
+    def get_raspi_warnings(self, username: str) -> list:
+        """Return list of warnings for a specific device.
+
+        Returns:
+            list[(warning: str, added_at: datetime.datetime)]: the list of warnings if any
+        """
+        query = """
+            SELECT w.device_id, w.warning, w.added_at
+            FROM autopi.raspi_warning as w, autopi.raspi as r
+            WHERE w.device_id = r.device_id AND r.username = %s;
+        """
+        return self.fetch_simple_query(query, (username,))
+
+
+@contextmanager
+def connect(credentials: list = default_credentials()) -> PiDBConnection:
+    """Create PIDBConnection instance for 'with' statement."""
+    db = PiDBConnection(credentials)
+    try:
+        yield db
+    finally:
+        db.close()
