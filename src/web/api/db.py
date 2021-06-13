@@ -44,7 +44,7 @@ class PiDBConnection:
         """
         self._credentials = credentials
 
-        if self._connection is not None:
+        if self._connection is not None and not self._connection.closed():
             self.close()
         self._connection = psycopg2.connect(**credentials)
 
@@ -70,7 +70,7 @@ class PiDBConnection:
                 else:
                     cur.execute(query, data)
 
-    def _fetchcell(self, query: str, data: Optional[tuple] = None) -> Optional:
+    def _fetch_single_cell(self, query: str, data: Optional[tuple] = None) -> Optional:
         """Execute query, returning query result.
 
         Opens cursor and commits transaction. Intended for use with "SELECT" queries.
@@ -139,7 +139,7 @@ class PiDBConnection:
             SELECT true FROM autopi.user
             WHERE username = %s LIMIT 1;
         """
-        return self._fetchcell(query, (username,))
+        return self._fetch_single_cell(query, (username,))
 
     def is_admin(self, username: str) -> bool:
         """Check if user is an admin.
@@ -157,7 +157,7 @@ class PiDBConnection:
             SELECT is_admin FROM autopi.user
             WHERE username = %s LIMIT 1;
         """
-        result = self._fetchcell(query, (username,))
+        result = self._fetch_single_cell(query, (username,))
         if result is None:
             return result
         raise ValueError("invalid username supplied")
@@ -176,7 +176,7 @@ class PiDBConnection:
             VALUES (%s)
             RETURNING device_id;
         """
-        return self._fetchcell(query, (username,))
+        return self._fetch_single_cell(query, (username,))
 
     def get_raspis(
         self, username: Optional[str] = None, registered_only=True
@@ -216,7 +216,7 @@ class PiDBConnection:
             str: the device UUID.
         """
         fetch_query = """SELECT device_id FROM autopi.raspi WHERE username=%s AND registered=false;"""
-        result = self._fetchcell(fetch_query, (username,))
+        result = self._fetch_single_cell(fetch_query, (username,))
         # TODO could check that only one id is unregistered, maybe log it
         # TODO maybe determine that ID is not expired
         if result is not None:
@@ -255,7 +255,7 @@ class PiDBConnection:
         query = """
             SELECT hardware_id FROM autopi.raspi WHERE device_id=%s LIMIT 1;
         """
-        results = self._fetchcell(query, (devid,))
+        results = self._fetch_single_cell(query, (devid,))
         if results is None:
             raise ValueError("device ID does not exist")
         return results
