@@ -38,16 +38,8 @@ def root():
 @app.get("/help", response_class=HTMLResponse)
 def help():
     """Serve help page."""
-    content = """
-    <html>
-        <head>
-            <title>Help page</title>
-        </head>
-        <body>
-            <h1>Hello world! This is the help page</h1>
-        </body>
-    </html>
-    """
+    with open("/app/help.html") as f:
+        content = f.read()
     return HTMLResponse(content=content, status_code=200)
 
 
