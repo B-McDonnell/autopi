@@ -134,5 +134,5 @@ def update_status(status: StatusModel):
             db.update_status_shutdown(status)
         else:
             db.update_status_general(status)
-        print(status)
+        print(status)  # TODO Maybe don't do this...
         return {}

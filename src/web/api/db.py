@@ -223,10 +223,11 @@ class PiDBConnection:
             str: the device UUID.
         """
         fetch_query = """SELECT device_id FROM autopi.raspi WHERE username=%s AND registered=false;"""
-        result = self._fetchall(fetch_query, (username,))
+        result = self._fetchcell(fetch_query, (username,))
         # TODO could check that only one id is unregistered, maybe log it
-        if len(result) != 0:
-            return result[0][0]
+        # TODO maybe determine that ID is not expired
+        if result is not None:
+            return result
 
         # no un-registered entry yet; add one
         return self.add_raspi(username)
