@@ -29,7 +29,7 @@ CREATE TABLE autopi.raspi_warning(
 	added_at timestamptz NOT NULL DEFAULT NOW(),
 	device_id uuid,
 	PRIMARY KEY(device_id, warning),
-	FOREIGN KEY(device_id) REFERENCES autopi.raspi(device_id)
+	FOREIGN KEY(device_id) REFERENCES autopi.raspi(device_id) ON DELETE CASCADE
 );
 
 
