@@ -1,3 +1,4 @@
+/* PAGE STYLINGS */
 body {
     font-family: sans-serif;
 }
@@ -45,6 +46,7 @@ body {
     color: rgb(67, 95, 185);
 }
 
+/* TABLE STYLINGS */
 table {
     border-collapse: collapse;
     font-size: 0.9em;
