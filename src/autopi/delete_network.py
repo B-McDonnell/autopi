@@ -15,9 +15,9 @@ def delete_ssid():
     )
     config_file = wpa.get_default_wpa_config_file()
     if _ssid_exists(ssid, config_file):
-        new_shit = _get_new_config(ssid, config_file)
+        new_text = _get_new_config(ssid, config_file)
         with open(config_file, "wt") as fin:
-            fin.write(new_shit)
+            fin.write(new_text)
             print(ssid + " has been deleted!")
     else:
         print("SSID not found.")
