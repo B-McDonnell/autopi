@@ -1,7 +1,9 @@
 """Test API server core functionality."""
 
-from pydantic import BaseModel
 from typing import Optional
+
+from pydantic import BaseModel
+
 
 class StatusModel(BaseModel):
     """Base class for status JSON."""
