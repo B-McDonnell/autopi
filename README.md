@@ -26,51 +26,52 @@ Custom networks can also be added to the Raspberry Pi.
 
 
 ### Network MAC Registration
-1. Connect the SD card.
-2. Boot the Raspberry Pi.
-3. Wait for TODO seconds.
+1. Put the SD card in the Raspberry Pi.
+2. Plug the Raspberry Pi into power.
+3. Wait for 3 minutes.
 4. Unplug the Raspberry Pi.
 5. Remove the SD card and connect it to your computer.
-6. Open the SD card drive.
-7. Open the file `CSM_mac_address.txt`.
-8. Go to `netreg.mines.edu` while connected `CSMwireless`.
+6. Open the SD card drive on your file explorer.
+7. Open the file `CSM_mac_address.txt` on the SD card.
+8. Go to `netreg.mines.edu` while connected to `CSMwireless`.
 9. Agree to the terms and conditions.
 10. On the next page, enter the MAC address from the file in step 7.
 11. Enter the rest of your information and click register.
-12. The Raspberry Pi's MAC address is now registered. 
+12. The Raspberry Pi's MAC address is now registered.
+13. Wait about 5 minutes to gain internet access.
 
 ### Device Registration
 1. Connect the SD card to your computer.
 2. Open the SD card drive in file explorer.
 3. Open the file `CSM_device_id.txt`
-4. Connect to the web server at `https://SERVER.mines.edu/`. 
+4. Go to `https://autopi.mines.edu/`. 
 5. Login with multipass.
 6. If you have not previously registered a Raspberry Pi, click `Register`.
-7. Copy the `DEVID` into the file opened in step 3.
+7. Copy the `device_id` into the file opened in step 3.
 8. Save the file.
 9. Eject the SD card and plug it into the Raspberry Pi.
-10. Boot the Raspberry Pi. 
-11. Device registration should be complete.
+10. Plug the Raspberry Pi into power.
+11. Device registration is complete.
 
 ### Home Network Registration
-There are two methods for adding a Home network to the RPi.
+There are two methods for adding a Home network to the Raspberry Pi.
 - The first method is as follows:
-  1. Run `CSM_add_home_network` on the RPi.
+  1. Type `CSM_add_home_network` into a terminal window on the Raspberry Pi.
   2. Follow the prompts and enter network information.
   3. Once completed, network settings will reconfigure.
 
 - Alternative method
-  1. Insert SD card into Windows machine.
-  2. Find file `CSM_new_network.txt`.
-  3. Fill out listed fields.
-  4. Remove SD card from Windows machine.
-  5. Insert SD card into RPi.
-  6. Boot RPi, network settings will reconfigure.
-  7. `CSM_new_network.txt` will be reset to blank parameters.
+  1. Insert SD card into your computer.
+  2. Find file `CSM_new_network.txt` on SD card.
+  3. Read comments and fill out listed fields.
+  4. Eject SD card from your computer.
+  5. Insert SD card into Raspberry Pi.
+  6. Turn on Raspberry Pi, and network settings will reconfigure.
+  7. `CSM_new_network.txt` will be reset to blank parameters for adding future networks.
 
 ## Get IP/status information
 In order to see the IP and status information for the Raspberry Pi, do the following:
-1. Connect to the web server at `https://SERVER.mines.edu/`. 
+1. Go to `https://autopi.mines.edu/`. 
 2. Login with multipass.
 3. Your registered Raspberry Pi will be displayed with all corresponding IP, network, and status information.
    If you have multiple Raspberry Pi's, they will all be displayed.
