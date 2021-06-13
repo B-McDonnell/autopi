@@ -9,7 +9,7 @@ from .db import connect
 app = FastAPI()
 
 
-def compose_homepage(username: str) -> str:
+def compose_homepage(username: str) -> str:  # TODO Temporary
     """Return homepage."""
 
     def add_pi_rows(pi_list: list):
@@ -42,7 +42,7 @@ def compose_homepage(username: str) -> str:
     return content
 
 
-# TODO it may simplify things to have Caddy guarantee that the user is authenticated
+# TODO it may simplify things to have Caddy/Apache guarantee that the user is authenticated before reaching this point
 @app.get("/", response_class=HTMLResponse)
 def root(
     username: str = Cookie(None),
@@ -100,13 +100,14 @@ def register(
 
     # FIXME Return a nicer page!
     # TODO The contents of the page have a baked in assumption about the device file name
+    filename = "/boot/CSM_device_id.txt"
     content = f"""
     <html>
         <head>
             <title>Register</title>
         </head>
         <body>
-            Enter the following ID in '/boot/CSM_device_id.txt'
+            Enter the following ID in '{filename}'
             <h1>{devid}</h1>
         </body>
     </html>
@@ -123,10 +124,11 @@ def update_status(status: StatusModel):
                 status_code=403
             )  # TODO ascertain proper response to bad id; minimal information is preferable
 
-        prev_hwid = db.query_hardware_id(status.devid)
+        prev_hwid = db.get_hardware_id(status.devid)
         if prev_hwid != status.hwid:
+            # TODO message should maybe not be defined in code??
             msg = "The hardware of this device has changed. If this was not you, contact your instructor."
-            db.add_raspi_warning(status.devid, msg)  # TODO handle message properly
+            db.add_raspi_warning(status.devid, msg)
 
         if status.event == "shutdown":
             db.update_status_shutdown(status)

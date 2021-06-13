@@ -29,25 +29,37 @@ def default_credentials() -> dict:
 class PiDBConnection:
     """An object representing a single connection with the database, providing needed database queries."""
 
-    def __init__(self, credentials: dict = default_credentials()):
+    def __init__(self, credentials):
         """Initialize members and opens database connection.
 
         Args:
             credentials (dict): dictionary with database credentials for opening connection.
         """
         self._connection = None
-        self._credentials = credentials
-        self._connect(credentials)
+        self.connect(credentials)
 
-    def _connect(self, credentials: dict):
-        """Open new database connection."""
+    def __del__(self):
+        """Close connection on delete."""
+        if self._connection is not None:
+            self.close()
+
+    def connect(self, credentials: dict = default_credentials()):
+        """Open a new connection, closing the previouus connection if applicable.
+
+        Args:
+            credentials (dict): dictionary with database credentials for opening connection.
+        """
+        self._credentials = credentials
+
+        if self._connection is not None:
+            self.close()
         self._connection = psycopg2.connect(**credentials)
 
     def close(self):
         """Close database connection."""
-        # FIXME these functions may be poorly architected
-        self._connection.close()
-        self._connection = None
+        if self._connection is not None:
+            self._connection.close()
+            self._connection = None
 
     def _commit(self, query: str, data: Optional[tuple] = None):
         """Execute query.
@@ -60,12 +72,12 @@ class PiDBConnection:
         """
         with self._connection:
             with self._connection.cursor() as cur:
-                if data is None:
+                if data is not None:
                     cur.execute(query)
                 else:
                     cur.execute(query, data)
 
-    def _fetchone(self, query: str, data: Optional[tuple] = None) -> Optional[tuple]:
+    def _fetchcell(self, query: str, data: Optional[tuple] = None) -> Optional[tuple]:
         """Execute query, returning query result.
 
         Opens cursor and commits transaction. Intended for use with "SELECT" queries.
@@ -83,7 +95,8 @@ class PiDBConnection:
                     cur.execute(query)
                 else:
                     cur.execute(query, data)
-                return cur.fetchone()
+                result = cur.fetchone()
+                return result if result is None else result[0]
 
     def _fetchall(self, query: str, data: Optional[tuple] = None) -> list[tuple]:
         """Execute query, returning query result.
@@ -133,7 +146,7 @@ class PiDBConnection:
             SELECT true FROM autopi.user
             WHERE username = %s LIMIT 1;
         """
-        return self._fetchone(query, (username,)) is not None
+        return self._fetchcell(query, (username,))
 
     def is_admin(self, username: str) -> bool:
         """Check if user is an admin.
@@ -151,9 +164,9 @@ class PiDBConnection:
             SELECT is_admin FROM autopi.user
             WHERE username = %s LIMIT 1;
         """
-        result = self._fetchone(query, (username,))
+        result = self._fetchcell(query, (username,))
         if result is None:
-            return result[0]
+            return result
         raise ValueError("invalid username supplied")
 
     def add_raspi(self, username: str) -> str:
@@ -170,7 +183,7 @@ class PiDBConnection:
             VALUES (%s)
             RETURNING device_id;
         """
-        return self._fetchone(query, (username,))[0]
+        return self._fetchcell(query, (username,))
 
     def get_raspis(
         self, username: Optional[str] = None, registered_only=True
@@ -187,11 +200,11 @@ class PiDBConnection:
         # build query
         data = tuple()
         condition = ""
-        if username is not None and registered_only:
+        if username is not None:
             data = (username,)
-            condition = "WHERE username = %s, registered = true"
-        elif username is not None:
             condition = "WHERE username = %s"
+            if registered_only:
+                condition += ", registered = true"
         elif registered_only:
             condition = "WHERE registered = true"
         query = f"""
@@ -233,7 +246,7 @@ class PiDBConnection:
         results = self._fetchall(query, (devid,))
         return len(results)
 
-    def query_hardware_id(self, devid: str) -> str:
+    def get_hardware_id(self, devid: str) -> str:
         """Get the hardware ID for a given device.
 
         Args:
@@ -248,10 +261,10 @@ class PiDBConnection:
         query = """
             SELECT hardware_id FROM autopi.raspi WHERE device_id=%s LIMIT 1;
         """
-        results = self._fetchall(query, (devid,))
-        if len(results) == 0:
+        results = self._fetchcell(query, (devid,))
+        if results is None:
             raise ValueError("device ID does not exist")
-        return results[0][0]
+        return results
 
     def update_status_general(self, status: StatusModel):
         """Update device row in database.
@@ -342,7 +355,7 @@ class PiDBConnection:
         """
         return self._fetchall(query, (devid,))
 
-    def get_raspi_warnings(self, username: str) -> list:
+    def get_user_warnings(self, username: str) -> list:
         """Return list of warnings for a specific device.
 
         Returns:
