@@ -3,8 +3,8 @@
 from fastapi import Cookie, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 
-from .core import StatusModel, UserModel
-from .db import PiDB
+from .core import StatusModel
+from .db import connect
 
 app = FastAPI()
 
@@ -23,6 +23,16 @@ def root():
         </body>
     </html>
     """
+    # TODO: This comment block is just to remind me when this is implemented properly
+    # @app.post("/api/add_user")
+    # def add_user(user: UserModel):
+    # try:
+    #     with connect() as db:
+    #         db.add_user_query(user.username)
+    # except Exception as e:
+    #     # Ensure proper error logging
+    #     print("Error:", e)
+    # return {"response text": "It didn't crash!!"}
     return HTMLResponse(content=content, status_code=200)
 
 
@@ -52,7 +62,7 @@ def register(
             status_code=401, detail="Please log in..."
         )  # TODO A redirect would probably be better
 
-    with PiDB() as db:
+    with connect() as db:
         devid = db.get_unregistered_devid(username)
 
     # FIXME Return a nicer page!
@@ -71,22 +81,10 @@ def register(
     return HTMLResponse(content=content, status_code=200)
 
 
-# TODO this endpoint is primarily for testing; may not be in final product
-@app.post("/api/add_user")
-def add_user(user: UserModel):
-    try:
-        with PiDB() as db:
-            db.add_user_query(user.username)
-    except Exception as e:
-        # Ensure proper error logging
-        print("Error:", e)
-    return {"response text": "It didn't crash!!"}
-
-
 @app.post("/api/status")
 def update_status(status: StatusModel):
     """Print status received."""
-    with PiDB() as db:
+    with connect() as db:
         if not db.devid_exists(status.devid):
             raise HTTPException(
                 status_code=403
