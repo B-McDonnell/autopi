@@ -101,6 +101,7 @@ def help():
         </body>
     </html>
     """
+    content = build_page(title="Autopi Help", body_content=content, style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
 
@@ -125,11 +126,12 @@ def register(
             <title>Register</title>
         </head>
         <body>
-            Enter the following ID in '{filename}'
+            <p>Enter the following ID in '{filename}'. Visit the <a href="help">help page</a> for more in-depth instructions.</p>
             <h1>{devid}</h1>
         </body>
     </html>
     """
+    content = build_page(title="Autopi Registration", body_content=content, style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
 

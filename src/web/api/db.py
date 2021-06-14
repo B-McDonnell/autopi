@@ -184,7 +184,7 @@ class PiDBConnection:
             registered (bool, default: True): restrict list to those Pis that are registered.
 
         Returns:
-            list: Raspberry Pis.
+            list: Raspberry Pis (device_id: str, alias: str, ip_addrress: str, ssid: str, ssh: str, vnc: str, updated_at: datetime, power: str).
         """
         # build query
         data = tuple()
@@ -197,7 +197,7 @@ class PiDBConnection:
         elif registered_only:
             condition = "WHERE registered = true"
         query = f"""
-            SELECT * FROM autopi.raspi {condition};
+            SELECT device_id, alias, ip_addr, ssid, ssh, vnc, updated_at, power FROM autopi.raspi {condition};
         """
         # execute query
         return self._fetchall(query, data)
