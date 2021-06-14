@@ -54,7 +54,7 @@ def root(
 
     with connect() as db:
         raspis = db.get_raspis(username if not db.is_admin(username) else None)
-        warnings = db.get_user_wanings(username)
+        warnings = db.get_user_warnings(username)
     warning_ids = [warning[0] for warning in warnings]
     warning_rows = tuple(
         Row(
@@ -72,7 +72,7 @@ def root(
     ]
 
     body = build_homepage_content(raspi_rows, warning_rows)
-    content = build_page(title="Autopi", body_content=str(body), style_file="src/web/api/style.css")
+    content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
 
@@ -101,6 +101,7 @@ def help():
         </body>
     </html>
     """
+    content = build_page(title="Autopi Help", body_content=content, style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
 
@@ -125,11 +126,12 @@ def register(
             <title>Register</title>
         </head>
         <body>
-            Enter the following ID in '{filename}'
+            <p>Enter the following ID in '{filename}'. Visit the <a href="help">help page</a> for more in-depth instructions.</p>
             <h1>{devid}</h1>
         </body>
     </html>
     """
+    content = build_page(title="Autopi Registration", body_content=content, style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
 
