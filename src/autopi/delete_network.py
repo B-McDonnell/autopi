@@ -29,7 +29,7 @@ def main():
         print("Mutiple networks with SSID: " + ssid)
         deletion_choice = ui.get_input(
             "Delete none or all of networks with SSID: " + ssid + "? (all/none)",
-            validator=_is_all_or_none
+            validator=_is_all_or_none,
         )
         if deletion_choice.lower() == "all":
             while ni.check_duplicate_ssid(ssid, wpa.get_default_wpa_config_file()):
