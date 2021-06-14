@@ -56,7 +56,8 @@ services:
       - proxy_log:/log
     secrets:
       - proxy_cert
-      - proxy_pkey
+      - source: proxy_pkey
+        mode: 0440
 
 
 networks:
