@@ -3,6 +3,7 @@
 import subprocess
 from ipaddress import ip_address
 from typing import List, Optional, Tuple
+import util.wpa_interface as wpa
 
 import netifaces
 
@@ -117,3 +118,56 @@ def get_ssid(interface: str) -> Optional[str]:
         return None
     output = result.stdout.decode("utf-8").strip()
     return output if len(output) > 0 else None
+
+
+def get_updated_config(ssid: str, config_file: str) -> str:
+    """Create new configuration after deletion.
+
+    Args:
+        ssid (str): SSID of network
+        config_file (str): Fill path of network configuration
+
+    Returns:
+        str: Text of new configuration file
+    """
+    with open(config_file, "r") as fin:
+        current_contents = fin.read()
+        position = current_contents.find('ssid="' + ssid + '"')
+        start = current_contents.rfind("\n\nnetwork={", 0, position)
+        end = current_contents.find("}", position)
+        new_config = current_contents[0:start] + current_contents[end + 1:]
+        return new_config
+
+
+def ssid_exists(ssid: str, config_file: str) -> bool:
+    """Check to see if SSID exists in config.
+
+    Args:
+        ssid (str): SSID of network
+        config_file (str): File path of network configuration
+
+    Returns:
+        bool: Exists
+    """
+    with open(config_file, "r") as fin:
+        current_contents = fin.read()
+        if current_contents.find('ssid="' + ssid + '"') == -1:
+            return False
+        return True
+
+
+def delete_ssid(ssid: str):
+    """Delete network after check if exists.
+
+    Args:
+        ssid (str): SSID to be deleted.
+    """
+    #config_file = wpa.get_default_wpa_config_file()
+    config_file = "/home/iradley/autopi/src/autopi/wpa_sup.txt"
+    if ssid_exists(ssid, config_file):
+        new_text = get_updated_config(ssid, config_file)
+        with open(config_file, "wt") as fin:
+            fin.write(new_text)
+            print(ssid + " has been deleted!")
+    else:
+        print("SSID not found.")
