@@ -54,7 +54,7 @@ CREATE OR REPLACE FUNCTION check_expired() RETURNS TRIGGER
 	$BODY$
 	BEGIN
 		DELETE FROM autopi.user WHERE (NOW() - last_login) >= INTERVAL '365 days'
-			AND (autopi.user.is_admin == False);
+			AND (autopi.user.is_admin = False);
 		RETURN NULL; 
 	END;
 	$BODY$
