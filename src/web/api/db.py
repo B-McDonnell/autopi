@@ -33,7 +33,7 @@ class PiDBConnection:
 
     def __del__(self):
         """Close connection on delete."""
-        if self._connection is not None and not self._connection.closed():
+        if self._connection is not None and not self._connection.closed:
             self.close()
 
     def connect(self, credentials: dict = default_credentials()):
@@ -44,13 +44,13 @@ class PiDBConnection:
         """
         self._credentials = credentials
 
-        if self._connection is not None and not self._connection.closed():
+        if self._connection is not None and not self._connection.closed:
             self.close()
         self._connection = psycopg2.connect(**credentials)
 
     def close(self):
         """Close database connection."""
-        if self._connection is not None and not self._connection.closed():
+        if self._connection is not None and not self._connection.closed:
             self._connection.close()
             self._connection = None
 
@@ -197,7 +197,7 @@ class PiDBConnection:
             data = (username,)
             condition = "WHERE username = %s"
             if registered_only:
-                condition += ", registered = true"
+                condition += " AND registered = true"
         elif registered_only:
             condition = "WHERE registered = true"
         query = f"""
