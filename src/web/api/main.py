@@ -52,12 +52,9 @@ def root(
     if username is None:
         raise HTTPException(status_code=401, detail="Please log in...")  # TODO A redirect would probably be better
 
-
-def main(username: str) -> str:
-    """Temporary function demonstrating the page generation logic."""
     with connect() as db:
         raspis = db.get_raspis(username if not db.is_admin(username) else None)
-        warnings = db.get_user_wanings(username)
+        warnings = db.get_user_warnings(username)
     warning_ids = [warning[0] for warning in warnings]
     warning_rows = tuple(
         Row(
@@ -75,7 +72,7 @@ def main(username: str) -> str:
     ]
 
     body = build_homepage_content(raspi_rows, warning_rows)
-    content = build_page(title="Autopi", body_content=str(body), style_file="src/web/api/style.css")
+    content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
 
