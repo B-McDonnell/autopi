@@ -49,8 +49,9 @@ Custom networks can also be added to the Raspberry Pi.
 21. Save the close file.
 22. Eject the SD card and plug it into the Raspberry Pi.
 23. Plug in the Raspberry Pi, lights will turn on.
-24. Device registration is complete. 
-25. To add additional networks, see *Home Network Registration* procedure.
+24. Device registration is complete.
+25. See *Get IP/status information* to retrieve Raspberry Pi's IP address. 
+26. To add additional networks, see *Home Network Registration* procedure.
 
 ### Home Network Registration
 There are two methods for adding a Home network to the Raspberry Pi.
