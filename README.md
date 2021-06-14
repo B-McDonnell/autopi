@@ -20,13 +20,14 @@ TODO: will be done via Docker volume management (the containers are ephemeral).
 
 # Usage instructions
 ## Setup
-There are two required setups steps. First, the Raspberry Pi must have its MAC address registered with the school so it can connect to the internet on `CSMwireless`. Second, the Raspberry Pi must be registered with the IP/Status discovery system. This registration can only occur once the Raspberry Pi is connected to the network (i.e. has performed network registration).
+There are two required setups steps. First, the Raspberry Pi must have its MAC address registered with the school so it can 
+to the internet on `CSMwireless`. Second, the Raspberry Pi must be registered with the IP/Status discovery system. This registration can only occur once the Raspberry Pi is connected to the network (i.e. has performed network registration).
 
 Custom networks can also be added to the Raspberry Pi.
 
 
-### Network MAC Registration
-1. Put the SD card in the Raspberry Pi.
+### Device and MAC Registration
+1. Insert the SD card into the Raspberry Pi.
 2. Plug in the Raspberry Pi, lights will turn on.
 3. Wait for 2 minutes.
 4. Unplug the Raspberry Pi.
@@ -39,20 +40,16 @@ Custom networks can also be added to the Raspberry Pi.
 11. On the next page, enter the MAC address from the file in step 7.
 12. Enter the rest of your information and click register.
 13. The Raspberry Pi's MAC address is now registered.
-14. Wait up to 5 minutes to gain internet access.
-
-### Device Registration
-1. Connect the SD card to your computer.
-2. Open the SD card drive in file explorer.
-3. Open the file `CSM_device_id.txt`
-4. Go to `https://autopi.mines.edu/`. 
-5. Login with Mines MultiPass.
-6. Click `Register` at the top of the page.
-7. Copy the `device_id` into the file opened in step 3.
-8. Save the file.
-9. Eject the SD card and plug it into the Raspberry Pi.
-10. Plug in the Raspberry Pi, lights will turn on.
-11. Device registration is complete.
+14. The Raspberry Pi will be able to access internet in up to 5 minutes, meanwhile, continue steps.
+15. Open the file `CSM_device_id.txt` on the SD card.
+16. Go to `https://autopi.mines.edu/`. 
+17. Login with Mines MultiPass.
+18. Click `Register` at the top of the page.
+19. Copy the `device_id` into the file opened in step 3.
+20. Save the file.
+21. Eject the SD card and plug it into the Raspberry Pi.
+22. Plug in the Raspberry Pi, lights will turn on.
+23. Device registration is complete. 
 
 ### Home Network Registration
 There are two methods for adding a Home network to the Raspberry Pi.
