@@ -52,9 +52,6 @@ def root(
     if username is None:
         raise HTTPException(status_code=401, detail="Please log in...")  # TODO A redirect would probably be better
 
-
-def main(username: str) -> str:
-    """Temporary function demonstrating the page generation logic."""
     with connect() as db:
         raspis = db.get_raspis(username if not db.is_admin(username) else None)
         warnings = db.get_user_wanings(username)
