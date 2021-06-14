@@ -13,7 +13,10 @@ def main():
         validator=wpa.is_valid_ssid,
         error_message=wpa.SSIDLengthError.constraint_msg,
     )
-    ni.delete_ssid(ssid)
+    if ni.delete_ssid(ssid):
+        print(ssid+ " deleted!")
+    else:
+        print("Error: None or mutiple networks with name: "+ssid)
 
 
 if __name__ == "__main__":
