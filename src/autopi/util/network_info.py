@@ -3,9 +3,10 @@
 import subprocess
 from ipaddress import ip_address
 from typing import List, Optional, Tuple
-import util.wpa_interface as wpa
+
 
 import netifaces
+import util.wpa_interface as wpa
 
 
 def get_default_gateway() -> Tuple[str, str]:
@@ -120,7 +121,7 @@ def get_ssid(interface: str) -> Optional[str]:
     return output if len(output) > 0 else None
 
 
-def get_updated_config(ssid: str, config_file: str) -> str:
+def get_new_config_after_del(ssid: str, config_file: str) -> str:
     """Create new configuration after deletion.
 
     Args:
@@ -150,24 +151,39 @@ def ssid_exists(ssid: str, config_file: str) -> bool:
         bool: Exists
     """
     with open(config_file, "r") as fin:
-        current_contents = fin.read()
-        if current_contents.find('ssid="' + ssid + '"') == -1:
-            return False
-        return True
+        return f"ssid=\"{ssid}\"" in fin.read()
 
 
-def delete_ssid(ssid: str):
+def check_duplicate_ssid(ssid: str, config_file: str) -> bool:
+    """Check for multiple networks with same SSID.
+
+    Args:
+        ssid (str): SSID of network
+        config_file (str): File path of network configuration
+
+    Returns:
+        bool: Multiple networks with same SSID
+    """
+    with open(config_file, "r") as fin:
+        if (fin.read().count('ssid="' + ssid + '"')) > 1:
+            return True
+        return False
+
+
+def delete_ssid(ssid: str) -> bool:
     """Delete network after check if exists.
 
     Args:
         ssid (str): SSID to be deleted.
+
+    Returns:
+        bool: Deletion successful.
     """
-    #config_file = wpa.get_default_wpa_config_file()
-    config_file = "/home/iradley/autopi/src/autopi/wpa_sup.txt"
+    config_file = wpa.get_default_wpa_config_file()
     if ssid_exists(ssid, config_file):
-        new_text = get_updated_config(ssid, config_file)
-        with open(config_file, "wt") as fin:
-            fin.write(new_text)
-            print(ssid + " has been deleted!")
-    else:
-        print("SSID not found.")
+        if not check_duplicate_ssid(ssid, config_file):
+            new_text = get_new_config_after_del(ssid, config_file)
+            with open(config_file, "wt") as fin:
+                fin.write(new_text)
+                return True
+    return False
