@@ -165,9 +165,7 @@ def check_duplicate_ssid(ssid: str, config_file: str) -> bool:
         bool: Multiple networks with same SSID
     """
     with open(config_file, "r") as fin:
-        if (fin.read().count('ssid="' + ssid + '"')) > 1:
-            return True
-        return False
+        return fin.read().count('ssid="' + ssid + '"') > 1
 
 
 def delete_ssid(ssid: str) -> bool:

@@ -9,7 +9,7 @@ import util.wpa_interface as wpa
 
 
 def _is_all_or_none(user_input: str) -> bool:
-    return (user_input.lower() == "all") or (user_input.lower() == "none")
+    return user_input.lower() in ("all" or "none")
 
 def _process_output(ssid: str, deleted: bool):
     if deleted:
@@ -29,11 +29,8 @@ def main():
         deletion_choice = ui.get_input("Delete none or all of networks with SSID: " + ssid + "? (all/none)",
         validator=_is_all_or_none)
         if deletion_choice.lower() == "all":
-            while True:
-                if ni.check_duplicate_ssid(ssid, wpa.get_default_wpa_config_file()):
-                    ni.delete_ssid(ssid)
-                else:
-                    break
+            while ni.check_duplicate_ssid(ssid, wpa.get_default_wpa_config_file()):
+                ni.delete_ssid(ssid)
             _process_output(ssid, ni.delete_ssid(ssid))
         else:
             print("No networks deleted!")
