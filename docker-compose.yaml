@@ -77,6 +77,6 @@ volumes:
 
 secrets:
   proxy_cert:
-    file: ./keys/autopi_server.cer
+    file: ./tls/autopi_server.cer
   proxy_pkey:
-    file: ./keys/autopi_server.key
+    file: ./tls/autopi_server.key
