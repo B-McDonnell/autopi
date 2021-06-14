@@ -49,7 +49,7 @@ CREATE TRIGGER onupdate BEFORE UPDATE ON autopi.raspi FOR EACH ROW EXECUTE PROCE
 
 -- Add function and trigger to automatically delete users in users column if inactive for >= 1 year.
 
-CREATE OR REPLACE FUNCTION check_expired() RETURNS TRIGGER
+CREATE OR REPLACE FUNCTION delete_expired() RETURNS TRIGGER
 	AS
 	$BODY$
 	BEGIN
@@ -59,4 +59,4 @@ CREATE OR REPLACE FUNCTION check_expired() RETURNS TRIGGER
 	END;
 	$BODY$
 	LANGUAGE plpgsql;
-CREATE TRIGGER expired AFTER INSERT ON autopi.user FOR EACH STATEMENT EXECUTE PROCEDURE check_expired();
+CREATE TRIGGER expired AFTER INSERT ON autopi.user FOR EACH STATEMENT EXECUTE PROCEDURE delete_expired();
