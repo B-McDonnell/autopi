@@ -181,9 +181,8 @@ def delete_ssid(ssid: str) -> bool:
     """
     config_file = wpa.get_default_wpa_config_file()
     if ssid_exists(ssid, config_file):
-        if not check_duplicate_ssid(ssid, config_file):
-            new_text = get_new_config_after_del(ssid, config_file)
-            with open(config_file, "wt") as fin:
-                fin.write(new_text)
-                return True
+        new_text = get_new_config_after_del(ssid, config_file)
+        with open(config_file, "wt") as fin:
+            fin.write(new_text)
+            return True
     return False
