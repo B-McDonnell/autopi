@@ -178,7 +178,9 @@ class PiDBConnection:
         """
         return self._fetch_first_cell(query, (username,))
 
-    def get_raspis(self, username: Optional[str] = None, registered_only=True) -> list[tuple]:
+    def get_raspis(
+        self, username: Optional[str] = None, registered_only=True
+    ) -> list[tuple]:
         """Return a list of Raspberry Pis.
 
         Args:
@@ -308,7 +310,9 @@ class PiDBConnection:
         Returns:
             bool: whether it has timed out.
         """
-        TIMEOUT_DURATION = "2 minute 30 second"  # TODO maybe this shouldn't be defined here...
+        TIMEOUT_DURATION = (
+            "2 minute 30 second"  # TODO maybe this shouldn't be defined here...
+        )
         query = """
             SELECT true FROM autopi.raspi
             WHERE device_id=%s
@@ -349,7 +353,7 @@ class PiDBConnection:
         """Return list of warnings for a specific device.
 
         Returns:
-            list[(device_id: str, warning: str, added_at: datetime.datetime)]: the list of warnings if any
+            list[(warning: str, added_at: datetime.datetime)]: the list of warnings if any
         """
         query = """
             SELECT w.device_id, w.warning, w.added_at
