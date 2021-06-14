@@ -33,8 +33,7 @@ class PiDBConnection:
 
     def __del__(self):
         """Close connection on delete."""
-        if self._connection is not None and not self._connection.closed():
-            self.close()
+        self.close()
 
     def connect(self, credentials: dict = default_credentials()):
         """Open a new connection, closing the previouus connection if applicable.
@@ -44,13 +43,12 @@ class PiDBConnection:
         """
         self._credentials = credentials
 
-        if self._connection is not None and not self._connection.closed():
-            self.close()
+        self.close()
         self._connection = psycopg2.connect(**credentials)
 
     def close(self):
-        """Close database connection."""
-        if self._connection is not None and not self._connection.closed():
+        """Close database connection if it exists."""
+        if self._connection is not None and not self._connection.closed:
             self._connection.close()
             self._connection = None
 
@@ -158,7 +156,7 @@ class PiDBConnection:
             WHERE username = %s LIMIT 1;
         """
         result = self._fetch_first_cell(query, (username,))
-        if result is None:
+        if result is not None:
             return result
         raise ValueError("invalid username supplied")
 
@@ -195,7 +193,7 @@ class PiDBConnection:
             data = (username,)
             condition = "WHERE username = %s"
             if registered_only:
-                condition += ", registered = true"
+                condition += "AND registered = true"
         elif registered_only:
             condition = "WHERE registered = true"
         query = f"""

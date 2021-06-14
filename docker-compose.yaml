@@ -48,9 +48,9 @@ services:
       - api_net
     volumes:
       - "./Caddyfile:/etc/caddy/Caddyfile"
-      - "./caddy_data:/data"
+        #- "./caddy_data:/data"
       - proxy_config:/config
-        #- proxy_data:/data
+      - proxy_data:/data
       - proxy_log:/log
 
 
