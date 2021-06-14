@@ -358,3 +358,5 @@ MigrationBackup/
 
 # RStudio
 .Rhistory
+
+caddy_data/
