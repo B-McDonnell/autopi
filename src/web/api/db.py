@@ -330,7 +330,8 @@ class PiDBConnection:
         """
         query = """
             INSERT INTO autopi.raspi_warning (device_id, warning)
-            VALUES (%s, %s);
+            VALUES (%s, %s)
+            ON CONFLICT (device_id, warning) DO UPDATE SET added_at=NOW();
         """
         self._commit(query, (devid, warning))
 

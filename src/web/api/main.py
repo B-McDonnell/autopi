@@ -1,6 +1,5 @@
 """Test API server."""
 
-import psycopg2
 from fastapi import Cookie, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 
@@ -129,10 +128,7 @@ def update_status(status: StatusModel):
         if prev_hwid != status.hwid:
             # TODO message should maybe not be defined in code??
             msg = "The hardware of this device has changed. If this was not you, contact your instructor."
-            try:
-                db.add_raspi_warning(status.devid, msg)
-            except psycopg2.errors.UniqueViolation:
-                pass  # warning already exists
+            db.add_raspi_warning(status.devid, msg)
 
         if status.event == "shutdown":
             db.update_status_shutdown(status)
