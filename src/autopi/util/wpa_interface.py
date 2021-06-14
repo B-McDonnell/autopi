@@ -4,6 +4,8 @@ import itertools
 import subprocess
 from typing import Iterable, List, Optional
 
+from util.config import Config
+
 
 class PasswordLengthError(RuntimeError):
     """Password does not meet wpa_password length requirements."""
@@ -45,11 +47,6 @@ def is_valid_passwd(passwd: str) -> bool:
     """Check if wpa password is valid."""
     n = len(passwd)
     return 8 <= n <= 63
-
-
-def get_default_wpa_config_file() -> str:
-    """Get default wpa config file."""
-    return "/etc/wpa_supplicant/wpa_supplicant.conf"  # TODO: get from config
 
 
 def _make_network_with_passwd(ssid: str, passphrase: str) -> str:
@@ -123,7 +120,7 @@ def _strip_comment_lines(network_config: str) -> str:
 
 def network_exists(
     network_config: str,
-    config_file: str,
+    config_file: str = Config.WPA_CONFIG_FILE,
     ignore_comments: bool = True,
     ignore_empty_lines: bool = True,
 ) -> bool:
@@ -131,7 +128,7 @@ def network_exists(
 
     Args:
         network_config (str): network config to check for
-        config_file (str): wpa config to check in
+        config_file (str, optional): wpa config to check in. Defaults to Config.WPA_CONFIG_FILE.
         ignore_comments (bool, optional): exclude lines starting with '#' from the check. Defaults to True.
         ignore_empty_lines (bool, optional): exclude empty lines from the check. Defaults to True.
 
@@ -203,13 +200,15 @@ def make_network(
 
 
 def add_network(
-    network_config: str, config_file: str, drop_comments: bool = True
+    network_config: str,
+    config_file: str = Config.WPA_CONFIG_FILE,
+    drop_comments: bool = True,
 ) -> bool:
     """Add a new network config to a wpa config file.
 
     Args:
         network_config (str): network config to add
-        config_file (str): filename of wpa config file
+        config_file (str, optional): filename of wpa config file. Defaults to Config.WPA_CONFIG_FILE.
         drop_comments (bool, optional): remove any comments before adding to config. Defaults to True.
 
     Raises:
@@ -249,17 +248,17 @@ def run_reconfigure(interface: Optional[str]) -> bool:
     return response.stdout == b"OK\n"
 
 
-def get_country(config_file: str) -> Optional[str]:
+def get_country(config_file: str = Config.WPA_CONFIG_FILE) -> Optional[str]:
     """Get the country code from a wpa config file.
 
     Args:
-        config_file (str): filename of wpa config file
+        config_file (str, optional): filename of wpa config file. Defaults to Config.WPA_CONFIG_FILE.
 
     Raises:
         OSError: config_file could not be opened.
 
     Returns:
-        str | None: country code from config_file or None if it does not exist
+        str | None: country code from util.config_file or None if it does not exist
     """
     with open(config_file, "r") as fin:
         # get country
@@ -296,14 +295,14 @@ def _without_trailing_empty_lines(lines: List[str]) -> Iterable[str]:
     return (line for i, line in enumerate(lines) if i not in bad_indices)
 
 
-def update_country(config_file: str, country: str):
+def update_country(country: str, config_file: str = Config.WPA_CONFIG_FILE):
     """Add or replace country code in a wpa config file.
 
     Undefined behavior may occur with a broken wpa config file.
 
     Args:
-        config_file (str): filename of wpa config file
         country (str): country code to add or update to
+        config_file (str, optional): filename of wpa config file. Defaults to Config.WPA_CONFIG_FILE.
 
     Raises:
         OSError: config_file is not a valid file
