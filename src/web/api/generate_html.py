@@ -148,9 +148,7 @@ def build_table(a: Airium, rows: Iterable[Row]) -> Airium:
                 raise ValueError("Row item keys much match in order")
             dead_row = row.is_dead
             with a.tr():
-                print()
                 for item in row.items:
-                    print(item)
                     a.td(
                         klass=make_klass(
                             [
