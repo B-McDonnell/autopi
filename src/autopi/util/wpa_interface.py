@@ -67,9 +67,7 @@ def _make_network_with_passwd(ssid: str, passphrase: str) -> str:
     Returns:
         str: wpa network configuration.
     """
-    result = subprocess.run(
-        ["wpa_passphrase", ssid, passphrase], capture_output=True, check=True
-    )
+    result = subprocess.run(["wpa_passphrase", ssid, passphrase], capture_output=True, check=True)
     return str(result.stdout, encoding="utf8")
 
 
@@ -150,18 +148,10 @@ def network_exists(
 
     if ignore_empty_lines:
         current_contents = "\n".join(
-            [
-                line
-                for line in current_contents.splitlines()
-                if len(line) > 0 and not line.isspace()
-            ]
+            [line for line in current_contents.splitlines() if len(line) > 0 and not line.isspace()]
         )
         network_config = "\n".join(
-            [
-                line
-                for line in network_config.splitlines()
-                if len(line) > 0 and not line.isspace()
-            ]
+            [line for line in network_config.splitlines() if len(line) > 0 and not line.isspace()]
         )
 
     return network_config in current_contents
@@ -189,11 +179,7 @@ def make_network(
     if passwd is not None and not is_valid_passwd(passwd):
         raise PasswordLengthError()
 
-    network_str = (
-        _make_network_with_passwd(ssid, passwd)
-        if passwd is not None
-        else _make_network_without_passwd(ssid)
-    )
+    network_str = _make_network_with_passwd(ssid, passwd) if passwd is not None else _make_network_without_passwd(ssid)
     if drop_comments:
         network_str = _strip_comment_lines(network_str)
     if priority is not None:
@@ -202,9 +188,7 @@ def make_network(
     return network_str
 
 
-def add_network(
-    network_config: str, config_file: str, drop_comments: bool = True
-) -> bool:
+def add_network(network_config: str, config_file: str, drop_comments: bool = True) -> bool:
     """Add a new network config to a wpa config file.
 
     Args:
@@ -312,11 +296,7 @@ def update_country(config_file: str, country: str):
     header = list(_without_trailing_empty_lines(header))
 
     country_code_index = next(
-        (
-            index
-            for index, line in enumerate(header)
-            if line.strip().startswith("country=")
-        ),
+        (index for index, line in enumerate(header) if line.strip().startswith("country=")),
         None,
     )
     if country_code_index is not None:
