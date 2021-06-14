@@ -4,7 +4,6 @@ import subprocess
 from ipaddress import ip_address
 from typing import List, Optional, Tuple
 
-
 import netifaces
 import util.wpa_interface as wpa
 
@@ -136,7 +135,7 @@ def get_new_config_after_del(ssid: str, config_file: str) -> str:
         position = current_contents.find('ssid="' + ssid + '"')
         start = current_contents.rfind("\n\nnetwork={", 0, position)
         end = current_contents.find("}", position)
-        new_config = current_contents[0:start] + current_contents[end + 1:]
+        new_config = current_contents[0:start] + current_contents[end + 1 :]
         return new_config
 
 
@@ -151,7 +150,7 @@ def ssid_exists(ssid: str, config_file: str) -> bool:
         bool: Exists
     """
     with open(config_file, "r") as fin:
-        return f"ssid=\"{ssid}\"" in fin.read()
+        return f'ssid="{ssid}"' in fin.read()
 
 
 def check_duplicate_ssid(ssid: str, config_file: str) -> bool:
