@@ -27,18 +27,19 @@ Custom networks can also be added to the Raspberry Pi.
 
 ### Network MAC Registration
 1. Put the SD card in the Raspberry Pi.
-2. Plug the Raspberry Pi into power.
-3. Wait for 3 minutes.
+2. Plug in the Raspberry Pi, lights will turn on.
+3. Wait for 2 minutes.
 4. Unplug the Raspberry Pi.
-5. Remove the SD card and connect it to your computer.
-6. Open the SD card drive on your file explorer.
-7. Open the file `CSM_mac_address.txt` on the SD card.
-8. Go to `netreg.mines.edu` while connected to `CSMwireless`.
-9. Agree to the terms and conditions.
-10. On the next page, enter the MAC address from the file in step 7.
-11. Enter the rest of your information and click register.
-12. The Raspberry Pi's MAC address is now registered.
-13. Wait up to 5 minutes to gain internet access.
+5. Remove the SD card from Raspberry Pi.
+6. Insert SD card into your computer.
+7. Open the SD card drive on your file explorer.
+8. Open the file `CSM_mac_address.txt` on the SD card.
+9. Go to `netreg.mines.edu` while connected to `CSMwireless`.
+10. Agree to the terms and conditions.
+11. On the next page, enter the MAC address from the file in step 7.
+12. Enter the rest of your information and click register.
+13. The Raspberry Pi's MAC address is now registered.
+14. Wait up to 5 minutes to gain internet access.
 
 ### Device Registration
 1. Connect the SD card to your computer.
@@ -50,7 +51,7 @@ Custom networks can also be added to the Raspberry Pi.
 7. Copy the `device_id` into the file opened in step 3.
 8. Save the file.
 9. Eject the SD card and plug it into the Raspberry Pi.
-10. Plug the Raspberry Pi into power.
+10. Plug in the Raspberry Pi, lights will turn on.
 11. Device registration is complete.
 
 ### Home Network Registration
@@ -67,7 +68,7 @@ There are two methods for adding a Home network to the Raspberry Pi.
   4. Eject SD card from your computer.
   5. Insert SD card into Raspberry Pi.
   6. Turn on Raspberry Pi, and network settings will reconfigure.
-  7. `CSM_new_network.txt` will be reset to blank parameters for adding future networks.
+  7. `CSM_new_network.txt` will be reset to blank parameters for adding additional networks.
 
 ## Get IP/status information
 In order to see the IP and status information for the Raspberry Pi, do the following:
