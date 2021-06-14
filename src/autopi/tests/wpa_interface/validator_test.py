@@ -46,7 +46,9 @@ class TestPassword(unittest.TestCase):
         """Check valid passwords."""
         self.assertTrue(wpa_interface.is_valid_passwd("a" * 8))
         self.assertTrue(wpa_interface.is_valid_passwd("a" * 63))
-        self.assertTrue(wpa_interface.is_valid_passwd("!@#$%^&*()_+=-.!/?><\";:'\\|{}[]"))
+        self.assertTrue(
+            wpa_interface.is_valid_passwd("!@#$%^&*()_+=-.!/?><\";:'\\|{}[]")
+        )
         self.assertTrue(wpa_interface.is_valid_passwd("abcdefghijklmnopqrstuvwxyz"))
         self.assertTrue(wpa_interface.is_valid_passwd("ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
         self.assertTrue(wpa_interface.is_valid_passwd("0123456789"))

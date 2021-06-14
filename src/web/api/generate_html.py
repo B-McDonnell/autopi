@@ -70,7 +70,9 @@ def _seconds_since_iso(iso_datetime: datetime.datetime) -> int:
     return dt.total_seconds()
 
 
-def construct_row(items: tuple[tuple[str]], device_id: str, hw_warning: bool = False) -> Row:
+def construct_row(
+    items: tuple[tuple[str]], device_id: str, hw_warning: bool = False
+) -> Row:
     """Construct a Row from a tuple of column headers/values.
 
     Args:
@@ -84,22 +86,32 @@ def construct_row(items: tuple[tuple[str]], device_id: str, hw_warning: bool = F
     row_items: list[RowItem] = []
     for key, value in items:
         if key == "Name":
-            row_items.append(RowItem(key, value, Klass.WARNING if hw_warning else Klass.NEUTRAL))
+            row_items.append(
+                RowItem(key, value, Klass.WARNING if hw_warning else Klass.NEUTRAL)
+            )
         elif key in ("IP Address", "SSID"):
             row_items.append(RowItem(key, value, Klass.NEUTRAL))
         elif key in ("SSH", "VNC"):
-            row_items.append(RowItem(key, value, Klass.GOOD if value == "up" else Klass.BAD))
+            row_items.append(
+                RowItem(key, value, Klass.GOOD if value == "up" else Klass.BAD)
+            )
         elif key == "Last Updated":
             age = _seconds_since_iso(value)
             row_items.append(
                 RowItem(
                     key,
                     _pretty_datetime(value),
-                    Klass.NEUTRAL if age < 2.5 * 60 else Klass.WARNING if age < 5 * 60 else Klass.DEAD,
+                    Klass.NEUTRAL
+                    if age < 2.5 * 60
+                    else Klass.WARNING
+                    if age < 5 * 60
+                    else Klass.DEAD,
                 )
             )  # TODO get delta from config
         elif key == "Power":
-            row_items.append(RowItem(key, value, Klass.GOOD if value == "on" else Klass.DEAD))
+            row_items.append(
+                RowItem(key, value, Klass.GOOD if value == "on" else Klass.DEAD)
+            )
     return Row(items=row_items)
 
 
@@ -164,7 +176,9 @@ def build_table(a: Airium, rows: Iterable[Row]) -> Airium:
     return a
 
 
-def build_homepage_content(pi_rows: list[Row], warning_rows: list[Row], airium: Optional[Airium] = None) -> Airium:
+def build_homepage_content(
+    pi_rows: list[Row], warning_rows: list[Row], airium: Optional[Airium] = None
+) -> Airium:
     """Construct the warning and raspi tables.
 
     Args:
@@ -306,10 +320,17 @@ def main(username: str) -> str:
     )
 
     columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated", "Power"]
-    rows = [construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids) for items in raspis]
+    rows = [
+        construct_row(
+            zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids
+        )
+        for items in raspis
+    ]
 
     body = build_homepage_content(rows, warning_rows)
-    content = build_page(title="home page", body_content=str(body), style_file="src/web/api/style.css")
+    content = build_page(
+        title="home page", body_content=str(body), style_file="src/web/api/style.css"
+    )
     return content
 
 
