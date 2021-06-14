@@ -17,7 +17,7 @@ def get_dev_id() -> str:
     # TODO at some point, this path might be in a config file
     with open("/boot/CSM_device_id.txt") as f:
         lines = f.readlines()
-    return "".join(lines)
+    return "".join(lines).strip()
 
 
 def get_hw_info() -> list:
