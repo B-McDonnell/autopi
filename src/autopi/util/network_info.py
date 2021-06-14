@@ -89,7 +89,9 @@ def is_wireless_active(interface: str) -> bool:
         bool: Interface is wireless and active.
     """
     try:
-        result = subprocess.run(["iwconfig", interface], capture_output=True, check=False)
+        result = subprocess.run(
+            ["iwconfig", interface], capture_output=True, check=False
+        )
     except FileNotFoundError:
         # TODO Probably log this
         return "", False  # iwconfig not present
@@ -107,7 +109,9 @@ def get_ssid(interface: str) -> Optional[str]:
         str | None: ssid of the network interface. If the interface cannot be obtained, False
     """
     try:
-        result = subprocess.run(["iwgetid", interface, "-r"], capture_output=True, check=True)
+        result = subprocess.run(
+            ["iwgetid", interface, "-r"], capture_output=True, check=True
+        )
     except (FileNotFoundError, subprocess.CalledProcessError):
         # TODO Log this
         return None

@@ -87,7 +87,9 @@ def main():
     cli_args = _parse_args()
 
     try:
-        new_network = wpa.make_network(cli_args.ssid, cli_args.password, cli_args.priority)
+        new_network = wpa.make_network(
+            cli_args.ssid, cli_args.password, cli_args.priority
+        )
     except (RuntimeError, subprocess.CalledProcessError) as e:
         # TODO: log error
         print(e, file=sys.stderr)
