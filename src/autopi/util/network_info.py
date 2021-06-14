@@ -135,7 +135,7 @@ def get_new_config_after_del(ssid: str, config_file: str) -> str:
         position = current_contents.find('ssid="' + ssid + '"')
         start = current_contents.rfind("\n\nnetwork={", 0, position)
         end = current_contents.find("}", position)
-        new_config = current_contents[0:start] + current_contents[end + 1 :]
+        new_config = current_contents[0:start] + current_contents[end + 1:]
         return new_config
 
 
