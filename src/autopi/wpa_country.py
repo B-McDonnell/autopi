@@ -14,9 +14,7 @@ def main():
 
     shared_parser = argparse.ArgumentParser(add_help=False)
 
-    subparsers = parser.add_subparsers(
-        dest="subparser", required=True, title="subcommands", metavar="(get | update)"
-    )
+    subparsers = parser.add_subparsers(dest="subparser", required=True, title="subcommands", metavar="(get | update)")
     shared_parser.add_argument(
         "FILENAME",
         nargs="?",
@@ -29,9 +27,7 @@ def main():
         help="get the current country code. Fails if country code does not exist",
         parents=[shared_parser],
     )
-    update_parser = subparsers.add_parser(
-        "update", help="change the current country code", parents=[shared_parser]
-    )
+    update_parser = subparsers.add_parser("update", help="change the current country code", parents=[shared_parser])
     update_parser.add_argument("COUNTRY_CODE", help="ISO 3166-1 country code")
 
     args = parser.parse_args()
