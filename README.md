@@ -34,22 +34,23 @@ Custom networks can also be added to the Raspberry Pi.
 5. Remove the SD card from Raspberry Pi.
 6. Insert SD card into your computer.
 7. Open the SD card drive on your file explorer.
-8. Open the file `CSM_mac_address.txt` on the SD card.
+8. Open the file `CSM_mac_address.txt`.
 9. Go to `netreg.mines.edu` while connected to `CSMwireless`.
 10. Agree to the terms and conditions.
 11. On the next page, enter the MAC address from the file in step 7.
 12. Enter the rest of your information and click register.
 13. The Raspberry Pi's MAC address is now registered.
 14. The Raspberry Pi will be able to access internet in up to 5 minutes, meanwhile, continue steps.
-15. Open the file `CSM_device_id.txt` on the SD card.
-16. Go to `https://autopi.mines.edu/`. 
-17. Login with Mines MultiPass.
-18. Click `Register` at the top of the page.
-19. Copy the `device_id` into the file opened in step 3.
-20. Save the file.
-21. Eject the SD card and plug it into the Raspberry Pi.
-22. Plug in the Raspberry Pi, lights will turn on.
-23. Device registration is complete. 
+15. Reopen the SD card drive on your file explorer.
+16. Open the file `CSM_device_id.txt`.
+17. Go to `https://autopi.mines.edu/`. 
+18. Login with Mines MultiPass.
+19. Click `Register` at the top of the page.
+20. Copy the `device_id` into the file opened in step 3.
+21. Save the close file.
+22. Eject the SD card and plug it into the Raspberry Pi.
+23. Plug in the Raspberry Pi, lights will turn on.
+24. Device registration is complete. 
 
 ### Home Network Registration
 There are two methods for adding a Home network to the Raspberry Pi.
@@ -73,6 +74,7 @@ In order to see the IP and status information for the Raspberry Pi, do the follo
 2. Login with Mines MultiPass.
 3. Your registered Raspberry Pi will be displayed with all corresponding IP, network, and status information.
    If you have multiple Raspberry Pi's, they will all be displayed.
+4. Refresh page for status changes.
 
 ## Common issues
 
