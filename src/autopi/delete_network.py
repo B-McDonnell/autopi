@@ -33,7 +33,7 @@ def main():
         )
         if deletion_choice.lower() == "all":
             while ni.check_duplicate_ssid(ssid, wpa.get_default_wpa_config_file()):
-                ni.delete_ssid(ssid)
+                _process_output(ssid, ni.delete_ssid(ssid))
             _process_output(ssid, ni.delete_ssid(ssid))
         else:
             print("No networks deleted!")
