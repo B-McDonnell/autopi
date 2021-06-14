@@ -46,7 +46,7 @@ Custom networks can also be added to the Raspberry Pi.
 18. Login with your Mines MultiPass.
 19. Click `Register` at the top of the page.
 20. Copy the `ID` into the file opened in step 3.
-21. Save an close the close file.
+21. Save and close the close file.
 22. Eject the SD card and plug it into the Raspberry Pi.
 23. Plug in the Raspberry Pi, lights will turn on.
 24. See *Get IP/status information* to confirm successful registration. 
@@ -76,7 +76,7 @@ In order to see the IP and status information for the Raspberry Pi, do the follo
 3. Your registered Raspberry Pi will be displayed with all corresponding IP, network, and status information.
    If you have multiple Raspberry Pi's, they will all be displayed.
 4. Refresh page for status changes.
-5. Note that Raspberry Pis highlighted in yellow are off or cannot be contacted for some other reason. If this occurs, try      restarting the Raspberry Pi.
+5. Note that Raspberry Pis highlighted in yellow are off or cannot be contacted for some other reason. If this occurs, try restarting the Raspberry Pi.
 
 ## Common issues
 
