@@ -11,9 +11,10 @@ import util.wpa_interface as wpa
 def _is_all_or_none(user_input: str) -> bool:
     return user_input.lower() in ("all" or "none")
 
+
 def _process_output(ssid: str, deleted: bool):
     if deleted:
-        print(ssid+ " deleted!")
+        print(ssid + " deleted!")
     else:
         print("Failed deleting: " + ssid)
 
@@ -21,8 +22,8 @@ def _process_output(ssid: str, deleted: bool):
 def main():
     ssid = ui.get_input(
         "What is the SSID of the network to be deleted? (case sensitive)",
-        validator=wpa.is_valid_ssid,
-        error_message=wpa.SSIDLengthError.constraint_msg,
+            validator=wpa.is_valid_ssid,
+            error_message=wpa.SSIDLengthError.constraint_msg,
     )
     if ni.check_duplicate_ssid(ssid, wpa.get_default_wpa_config_file()):
         print("Mutiple networks with SSID: " + ssid)
@@ -36,7 +37,6 @@ def main():
             print("No networks deleted!")
     else:
         _process_output(ssid, ni.delete_ssid(ssid))
-
 
 
 if __name__ == "__main__":
