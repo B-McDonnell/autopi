@@ -20,7 +20,7 @@ TODO: will be done via Docker volume management (the containers are ephemeral).
 
 # Usage instructions
 ## Setup
-There are two required setups steps. First, the Raspberry Pi must have its MAC address registered with the school so it can to the internet on `CSMwireless`. Second, the Raspberry Pi must be registered with the IP/Status discovery system. This registration can only occur once the Raspberry Pi is connected to the network (i.e. has performed network registration).
+There are two required setup steps. First, the Raspberry Pi must have its MAC address registered with the school so it can connect to the internet on `CSMwireless`. Second, the Raspberry Pi must be registered with the IP/Status discovery system. This registration can only occur once the Raspberry Pi is connected to the network (i.e. has performed network registration).
 
 Custom networks can also be added to the Raspberry Pi.
 
@@ -45,22 +45,21 @@ Custom networks can also be added to the Raspberry Pi.
 17. Go to `https://autopi.mines.edu/`. 
 18. Login with your Mines MultiPass.
 19. Click `Register` at the top of the page.
-20. Copy the `device_id` into the file opened in step 3.
-21. Save the close file.
+20. Copy the `ID` into the file opened in step 3.
+21. Save an close the close file.
 22. Eject the SD card and plug it into the Raspberry Pi.
 23. Plug in the Raspberry Pi, lights will turn on.
-24. Device registration is complete.
-25. See *Get IP/status information* to retrieve Raspberry Pi's IP address. 
-26. To add additional networks, see *Home Network Registration* procedure.
+24. See *Get IP/status information* to confirm successful registration. 
+25. To add additional networks, see *Home Network Registration* procedure.
 
 ### Home Network Registration
 There are two methods for adding a Home network to the Raspberry Pi.
-- The first method is as follows:
+- If you can SSH into Raspberry Pi:
   1. Type `CSM_add_home_network` into a terminal window on the Raspberry Pi.
   2. Follow the prompts and enter network information.
   3. Once completed, network settings will reconfigure.
 
-- Alternative method
+- If you *cannot* SSH into the Raspberry Pi:
   1. Insert SD card into your computer.
   2. Open the SD card drive on your file explorer (named `boot`).
   3. Find file `CSM_new_network.txt`.
@@ -77,6 +76,7 @@ In order to see the IP and status information for the Raspberry Pi, do the follo
 3. Your registered Raspberry Pi will be displayed with all corresponding IP, network, and status information.
    If you have multiple Raspberry Pi's, they will all be displayed.
 4. Refresh page for status changes.
+5. Note that Raspberry Pis highlighted in yellow are off or cannot be contacted for some other reason. If this occurs, try      restarting the Raspberry Pi.
 
 ## Common issues
 
