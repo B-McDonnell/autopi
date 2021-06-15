@@ -120,9 +120,9 @@ function add_systemd_unit() {
 # add units for startup+shutdown+periodic IP Discovery requests
 add_systemd_unit /opt/autopi/hooks/autopi_periodic.service noenable
 add_systemd_unit /opt/autopi/hooks/autopi_periodic.timer enable
-add_systemd_unit /opt/autopi/hooks/autopi_shutdown.service enable
 add_systemd_unit /opt/autopi/hooks/autopi_startup.service enable
-_
+#add_systemd_unit /opt/autopi/hooks/autopi_shutdown.service enable
+
 
 # =============================================================
 #             Add hooks for SSH+VNC status change
@@ -148,3 +148,10 @@ systemctl daemon-reload
 # =============================================================
 
 cp /opt/autopi/hooks/99-autopi-ip-hook.sh /lib/dhcpcd/dhcpcd-hooks/99-autopi-ip-hook
+
+
+# =============================================================
+#		   Add blank device id file
+# =============================================================
+
+touch /boot/CSM_device_id.txt
