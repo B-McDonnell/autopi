@@ -238,8 +238,8 @@ class PiDBConnection:
         query = """
             SELECT device_id FROM autopi.raspi WHERE device_id=%s;
         """
-        results = self._fetchall(query, (devid,))
-        return len(results)
+        result = self._fetch_first_cell(query, (devid,))
+        return result is not None
 
     def get_hardware_id(self, devid: str) -> str:
         """Get the hardware ID for a given device.
