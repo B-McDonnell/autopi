@@ -5,7 +5,6 @@ from ipaddress import ip_address
 from typing import List, Optional, Tuple
 
 import netifaces
-import util.wpa_interface as wpa
 
 
 def get_default_gateway() -> Tuple[str, str]:
@@ -118,68 +117,3 @@ def get_ssid(interface: str) -> Optional[str]:
         return None
     output = result.stdout.decode("utf-8").strip()
     return output if len(output) > 0 else None
-
-
-def get_new_config_after_del(ssid: str, config_file: str) -> str:
-    """Create new configuration after deletion.
-
-    Args:
-        ssid (str): SSID of network
-        config_file (str): Fill path of network configuration
-
-    Returns:
-        str: Text of new configuration file
-    """
-    with open(config_file, "r") as fin:
-        current_contents = fin.read()
-        position = current_contents.find('ssid="' + ssid + '"')
-        start = current_contents.rfind("\n\nnetwork={", 0, position)
-        end = current_contents.find("}", position) + 1
-        new_config = current_contents[0:start] + current_contents[end:]
-        return new_config
-
-
-def ssid_exists(ssid: str, config_file: str) -> bool:
-    """Check to see if SSID exists in config.
-
-    Args:
-        ssid (str): SSID of network
-        config_file (str): File path of network configuration
-
-    Returns:
-        bool: Exists
-    """
-    with open(config_file, "r") as fin:
-        return f'ssid="{ssid}"' in fin.read()
-
-
-def check_duplicate_ssid(ssid: str, config_file: str) -> bool:
-    """Check for multiple networks with same SSID.
-
-    Args:
-        ssid (str): SSID of network
-        config_file (str): File path of network configuration
-
-    Returns:
-        bool: Multiple networks with same SSID
-    """
-    with open(config_file, "r") as fin:
-        return fin.read().count('ssid="' + ssid + '"') > 1
-
-
-def delete_ssid(ssid: str) -> bool:
-    """Delete network after check if exists.
-
-    Args:
-        ssid (str): SSID to be deleted.
-
-    Returns:
-        bool: Deletion successful.
-    """
-    config_file = wpa.get_default_wpa_config_file()
-    if ssid_exists(ssid, config_file):
-        new_text = get_new_config_after_del(ssid, config_file)
-        with open(config_file, "wt") as fin:
-            fin.write(new_text)
-            return True
-    return False

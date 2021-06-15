@@ -326,3 +326,70 @@ def update_country(country: str, config_file: str = Config.WPA_CONFIG_FILE):
 
     with open(config_file, "w") as fout:
         fout.writelines(header + contents)
+
+
+def get_new_config_after_del(
+    ssid: str, config_file: str = Config.WPA_CONFIG_FILE
+) -> str:
+    """Create new configuration after deletion.
+
+    Args:
+        ssid (str): SSID of network
+        config_file (str): File path of network configuration. Defaults to Config.WPA_CONFIG_FILE.
+
+    Returns:
+        str: Text of new configuration file
+    """
+    with open(config_file, "r") as fin:
+        current_contents = fin.read()
+        position = current_contents.find('ssid="' + ssid + '"')
+        start = current_contents.rfind("\n\nnetwork={", 0, position)
+        end = current_contents.find("}", position) + 1
+        new_config = current_contents[0:start] + current_contents[end:]
+        return new_config
+
+
+def check_duplicate_ssid(ssid: str, config_file: str = Config.WPA_CONFIG_FILE) -> bool:
+    """Check for multiple networks with same SSID.
+
+    Args:
+        ssid (str): SSID of network
+        config_file (str, optional): File path of network configuration. Defaults to Config.WPA_CONFIG_FILE.
+
+    Returns:
+        bool: Multiple networks with same SSID
+    """
+    with open(config_file, "r") as fin:
+        return fin.read().count('ssid="' + ssid + '"') > 1
+
+
+def ssid_exists(ssid: str, config_file: str = Config.WPA_CONFIG_FILE) -> bool:
+    """Check to see if SSID exists in config.
+
+    Args:
+        ssid (str): SSID of network
+        config_file (str, optional): File path of network configuration. Defaults to Config.WPA_CONFIG_FILE.
+
+    Returns:
+        bool: Exists
+    """
+    with open(config_file, "r") as fin:
+        return f'ssid="{ssid}"' in fin.read()
+
+
+def delete_ssid(ssid: str, config_file=Config.WPA_CONFIG_FILE) -> bool:
+    """Delete network after check if exists.
+
+    Args:
+        ssid (str): SSID to be deleted.
+        config_file (str, optional): File path of network configuration. Defaults to Config.WPA_CONFIG_FILE.
+
+    Returns:
+        bool: Deletion successful.
+    """
+    if ssid_exists(ssid, config_file):
+        new_text = get_new_config_after_del(ssid, config_file)
+        with open(config_file, "wt") as fin:
+            fin.write(new_text)
+            return True
+    return False
