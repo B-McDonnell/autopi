@@ -233,13 +233,17 @@ class PiDBConnection:
             devid (str): the device ID.
 
         Returns:
-            bool: whether the device exists.
+            bool: whether the device exists (false if invalid ID).
         """
         query = """
             SELECT device_id FROM autopi.raspi WHERE device_id=%s;
         """
-        result = self._fetch_first_cell(query, (devid,))
-        return result is not None
+        try:
+            result = self._fetch_first_cell(query, (devid,))
+            return result is not None
+        except psycopg2.errors.InvalidTextRepresentation:
+            # Not a valid ID
+            return False
 
     def get_hardware_id(self, devid: str) -> str:
         """Get the hardware ID for a given device.
