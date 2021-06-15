@@ -89,7 +89,7 @@ class PiDBConnection:
                 else:
                     cur.execute(query, data)
                 result = cur.fetchone()
-                return result if result is None else result[0]
+                return result if result is not None else result[0]
 
     def _fetchall(self, query: str, data: Optional[tuple] = None) -> list[tuple]:
         """Execute query, returning query result.
