@@ -193,7 +193,7 @@ class PiDBConnection:
             data = (username,)
             condition = "WHERE username = %s"
             if registered_only:
-                condition += "AND registered = true"
+                condition += " AND registered = true"
         elif registered_only:
             condition = "WHERE registered = true"
         query = f"""
