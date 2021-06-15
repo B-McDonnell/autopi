@@ -45,8 +45,8 @@ Custom networks can also be added to the Raspberry Pi.
 17. Go to `https://autopi.mines.edu/`. 
 18. Login with your Mines MultiPass.
 19. Click `Register` at the top of the page.
-20. Copy the `ID` into the file opened in step 3.
-21. Save and close the close file.
+20. Copy the `ID` into the file opened in step 16.
+21. Save and close the file.
 22. Eject the SD card and plug it into the Raspberry Pi.
 23. Plug in the Raspberry Pi, lights will turn on.
 24. See *Get IP/status information* to confirm successful registration. 
