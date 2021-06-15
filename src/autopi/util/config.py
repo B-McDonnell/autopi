@@ -8,7 +8,7 @@ from typing import ClassVar, Optional
 class Config(object):
     """Contains configuration settings."""
 
-    API_URL: ClassVar[str] = "https://autopi.mines.edu/api/"
+    API_URL: ClassVar[str] = "https://autopi.mines.edu/api/status"
     WPA_CONFIG_FILE: ClassVar[str] = "/etc/wpa_supplicant/wpa_supplicant.conf"
     ROOT_DIR: ClassVar[str] = "/var/opt/autopi"
     NEW_NETWORK_FILE: ClassVar[str] = "/boot/CSM_new_network.txt"
