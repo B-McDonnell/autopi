@@ -1,14 +1,12 @@
 # Modifying Help Page
 
-If a change to the help page is required, it can be done with the server up or down. 
-If the change is needed while the server is up use *Temporary change*, and if a permament change is desired, 
-complete procedure *Permanent change* afterward.
+If a change to the help page is required, the modification will become persistent after rebuilding the API image. Below are two procedures to make changes to the help page. It can be done with the server up or down. 
 
-Tempororary change(keeps server up):
+Live (keeps server up):
 1. Modify `src/web/api/help.html`
 2. Run `docker cp src/web/api/help.html api:/app/help.html`
 
-Permanent change (takes server down):
+Persistent (takes server down):
 1. Modify `src/web/api/help.html`
 2. Run `docker-compose down`
 3. Run `docker-compose up --build`
