@@ -1,10 +1,12 @@
 """Test API server."""
 
-from fastapi import Cookie, FastAPI, HTTPException
+from fastapi import Cookie, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
 from .core import StatusModel
 from .db import connect
+
+import pprint
 
 app = FastAPI()
 
@@ -18,8 +20,8 @@ def compose_homepage(username: str) -> str:  # TODO Temporary
 
     body = ""
     with connect() as db:
-        if db.user_exists(username):
-            db.add_user(username)
+        if not db.user_exists(username):
+            db.add_user_query(username)
 
         user_pis = db.get_raspis(username)
         body += add_pi_rows(user_pis)
@@ -45,15 +47,17 @@ def compose_homepage(username: str) -> str:  # TODO Temporary
 # TODO it may simplify things to have Caddy/Apache guarantee that the user is authenticated before reaching this point
 @app.get("/", response_class=HTMLResponse)
 def root(
-    username: str = Cookie(None),
+	request: Request
 ):
     """Serve raspi list."""
-    if username is None:
+    if 'uid' not in request.headers:
         raise HTTPException(
             status_code=401, detail="Please log in..."
         )  # TODO A redirect would probably be better
+	
+    username = request.headers['uid']
 
-    content = compose_homepage(username)
+    content = compose_homepage(username)  # TODO Temporary
     return HTMLResponse(content=content, status_code=200)
 
     # TODO: This comment block is just to remind me when this is implemented properly
@@ -86,14 +90,15 @@ def help():
 
 @app.get("/register", response_class=HTMLResponse)
 def register(
-    username: str = Cookie(None),
+    request: Request,
 ):  # FIXME this is probably not how the username cookie is passed, if that is how shibboleth works
     """Serve register page."""
-    if username is None:
+    if 'uid' not in request.headers:
         raise HTTPException(
             status_code=401, detail="Please log in..."
         )  # TODO A redirect would probably be better
 
+    username = request.headers['uid']
     devid = None
     with connect() as db:
         devid = db.get_unregistered_devid(username)

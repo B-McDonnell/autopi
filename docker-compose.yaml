@@ -51,6 +51,9 @@ services:
         #- proxy_config:/config
         #- proxy_data:/data
       - proxy_log:/log
+    secrets:
+      - proxy_cert
+      - proxy_pkey
 
 
 networks:
@@ -67,3 +70,9 @@ volumes:
   proxy_config:
   proxy_data:
   proxy_log:
+
+secrets:
+  proxy_cert:
+    file: ./tls/autopi_server.cer
+  proxy_pkey:
+    file: ./tls/autopi_server.key
