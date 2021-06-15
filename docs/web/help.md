@@ -1,9 +1,9 @@
 # Modifying Help Page
 
 If a change to the help page is required, it can be done with the server up or down. 
-If the change is made while the server is up (*While server is live*), and a permament change is desired, complete procedure *Permanent change*.
+If the change is needed while the server is up (*Temporary change*), and a permament change is desired, complete procedure *Permanent change*.
 
-While server is live (only tempororary change):
+Tempororary change(keeps server up):
 1. Modify src/web/api/help.html
 2. Run `docker cp src/web/api/help.html api:/app/help.html`
 
