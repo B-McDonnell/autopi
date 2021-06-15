@@ -8,7 +8,7 @@ While server is live (only tempororary change):
 2. Run `docker cp src/web/api/help.html api:/app/help.html`
 
 Permanent change (takes server down):
-1. Modify src/web/api/help.html
+1. Modify `src/web/api/help.html`
 2. Run `docker-compose down`
-3. Run 'docker-compose up --build`
+3. Run `docker-compose up --build`
 
