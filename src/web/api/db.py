@@ -65,7 +65,7 @@ class PiDBConnection:
         """
         with self._connection:
             with self._connection.cursor() as cur:
-                if data is not None:
+                if data is None:
                     cur.execute(query)
                 else:
                     cur.execute(query, data)
@@ -124,6 +124,7 @@ class PiDBConnection:
             INSERT INTO autopi.user (username)
             VALUES (%s);
         """
+        print(username)
         self._commit(query, (username,))
 
     def user_exists(self, username: str) -> bool:
@@ -158,7 +159,7 @@ class PiDBConnection:
             WHERE username = %s LIMIT 1;
         """
         result = self._fetch_first_cell(query, (username,))
-        if result is None:
+        if result is not None:
             return result
         raise ValueError("invalid username supplied")
 

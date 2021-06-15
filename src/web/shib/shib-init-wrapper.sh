@@ -1,16 +1,14 @@
 #!/bin/bash
 
 PROC_HTTP='/usr/sbin/httpd'
-#PROC_SHIB='/usr/sbin/shibd'
-PROC_SHIB='true'
+PROC_SHIB='/usr/sbin/shibd'
 
 # Start the first process
 $PROC_HTTP
 status=$?
 if [ $status -ne 0 ]; then
   echo "Failed to start httpd: $status"
-  bash
-  #exit $status
+  exit $status
 fi
 
 # Start the second process
@@ -18,7 +16,7 @@ $PROC_SHIB
 status=$?
 if [ $status -ne 0 ]; then
   echo "Failed to start shibd: $status"
-  exit $status
+  #exit $status
 fi
 
 # Naive check runs checks once a minute to see if either of the processes exited.
@@ -31,7 +29,7 @@ while sleep 60; do
   ps aux |grep $PROC_HTTP |grep -q -v grep
   PROCESS_1_STATUS=$?
   ps aux |grep $PROC_SHIB |grep -q -v grep
-  PROCESS_2_STATUS=$?
+  PROCESS_2_STATUS=0
   # If the greps above find anything, they exit with 0 status
   # If they are not both 0, then something is wrong
   #if [ $PROCESS_1_STATUS -ne 0 -o $PROCESS_2_STATUS -ne 0 ]; then
