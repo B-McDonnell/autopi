@@ -1,6 +1,7 @@
-#Modifying Help Page
+# Modifying Help Page
 
-If a change to the help page is required, it can be done with the server up or down. If the change is made while the server is up (*While server is live*), and a permament change is desired, complete procedure *Permanent change*.
+If a change to the help page is required, it can be done with the server up or down. 
+If the change is made while the server is up (*While server is live*), and a permament change is desired, complete procedure *Permanent change*.
 
 While server is live (only tempororary change):
 1. Modify src/web/api/help.html
