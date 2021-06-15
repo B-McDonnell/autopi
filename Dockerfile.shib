@@ -17,8 +17,8 @@ COPY "./src/web/shib/shib-init-wrapper.sh" "/sbin/shib-init-wrapper.sh"
 RUN chmod +x /sbin/shib-init-wrapper.sh
 
 # Install shibboleth configurations
-COPY ./keys/autopi_server.cer /etc/ssl/cert/
-COPY ./keys/autopi_server.key /etc/ssl/private/
+#COPY ./keys/autopi_server.cer /etc/ssl/cert/
+#COPY ./keys/autopi_server.key /etc/ssl/private/
 # RUN chmod 640 /etc/ssl/private/autopi_server.key
 # RUN chown root:ssl-cert /etc/ssl/private/autopi_server.key
 

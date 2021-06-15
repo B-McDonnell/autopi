@@ -1,6 +1,8 @@
 """Test API server."""
 
-from fastapi import Cookie, FastAPI, HTTPException, Request
+from typing import Optional
+
+from fastapi import Cookie, FastAPI, HTTPException, Header
 from fastapi.responses import HTMLResponse
 
 from .core import StatusModel
@@ -47,17 +49,15 @@ def compose_homepage(username: str) -> str:  # TODO Temporary
 # TODO it may simplify things to have Caddy/Apache guarantee that the user is authenticated before reaching this point
 @app.get("/", response_class=HTMLResponse)
 def root(
-	request: Request
+	uid: Optional[str] = Header(None)
 ):
     """Serve raspi list."""
-    if 'uid' not in request.headers:
+    if uid is None:
         raise HTTPException(
             status_code=401, detail="Please log in..."
         )  # TODO A redirect would probably be better
 	
-    username = request.headers['uid']
-
-    content = compose_homepage(username)  # TODO Temporary
+    content = compose_homepage(uid)  # TODO Temporary
     return HTMLResponse(content=content, status_code=200)
 
     # TODO: This comment block is just to remind me when this is implemented properly
@@ -90,15 +90,15 @@ def help():
 
 @app.get("/register", response_class=HTMLResponse)
 def register(
-    request: Request,
+    uid: Optional[str] = Header(None),
 ):  # FIXME this is probably not how the username cookie is passed, if that is how shibboleth works
     """Serve register page."""
-    if 'uid' not in request.headers:
+    if uid is None:
         raise HTTPException(
             status_code=401, detail="Please log in..."
         )  # TODO A redirect would probably be better
 
-    username = request.headers['uid']
+    username = uid
     devid = None
     with connect() as db:
         devid = db.get_unregistered_devid(username)
