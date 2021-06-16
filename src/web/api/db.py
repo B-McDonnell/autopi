@@ -65,7 +65,7 @@ class PiDBConnection:
         """
         with self._connection:
             with self._connection.cursor() as cur:
-                if data is not None:
+                if data is None:
                     cur.execute(query)
                 else:
                     cur.execute(query, data)
@@ -331,49 +331,28 @@ class PiDBConnection:
         """
         self._commit(query, (devid, warning))
 
-    def get_device_warnings(self, devid: str, remove: bool = True) -> list:
-        """Return list of warnings for a specific device.
-
-        Args:
-            devid (str): device ID.
-            remove (bool): delete warnings after retrieval
-
-        Returns:
-            list[(warning: str, added_at: datetime.datetime)]: the list of warnings if any
-        """
-        query = """
-            SELECT warning, added_at FROM autopi.raspi_warning
-            WHERE device_id=%s;
-        """
-        remove_query = """
-            DELETE FROM autopi.raspi_warnings WHERE device_id=%s;
-        """
-        warnings = self._fetchall(query, (devid,))
-        if remove:
-            self._commit(remove_query, (devid,))
-        return warnings
-
-    def get_user_warnings(self, username: str, remove: bool = True) -> list:
+    def get_user_warnings(self, username: str, get_alias: bool = False, remove: bool = True) -> list:
         """Return list of warnings for a specific device.
 
         Args:
             username (str): username
+            get_alias (bool): get the device alias matching the warning's devid
             remove (bool): delete warnings after retrieval
 
         Returns:
             list[(device_id: str, warning: str, added_at: datetime.datetime)]: the list of warnings if any
         """
-        query = """
-            SELECT w.device_id, w.warning, w.added_at
+        query = f"""
+            SELECT {"r.alias, " if get_alias else ""}w.device_id, w.warning, w.added_at
             FROM autopi.raspi_warning as w, autopi.raspi as r
             WHERE w.device_id = r.device_id AND r.username = %s;
         """
         remove_query = """
-            DELETE FROM autopi.raspi_warning
+            DELETE FROM autopi.raspi_warning w
             WHERE w.device_id IN (
-                SELECT device_id
-                FROM autopi.raspi
-                WHERE username = %s
+                SELECT r.device_id
+                FROM autopi.raspi r
+                WHERE r.username = %s
             );
         """
         warnings = self._fetchall(query, (username,))

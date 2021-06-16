@@ -21,17 +21,26 @@ def root(
 
     with connect() as db:
         raspis = db.get_raspis(username if not db.is_admin(username) else None)
-        warnings = db.get_user_warnings(username)
-    warning_ids = [warning[0] for warning in warnings]
+        warnings = db.get_user_warnings(username, get_alias=True)
+    warning_ids = [warning[1] for warning in warnings]
     warning_rows = tuple(
         Row(
             items=(
-                RowItem("Name", next(filter(lambda x: x[0] == warning[0], raspis), None)[1], Klass.WARNING),
-                RowItem("Warning Description", warning[1], Klass.WARNING),
+                RowItem("Name", warning[0], Klass.WARNING),
+                RowItem("Warning Description", warning[2], Klass.WARNING),
             )
         )
         for warning in warnings
     )
+    # warning_rows = tuple(
+    #     Row(
+    #         items=(
+    #             RowItem("Name", [name for devid, name, *_ in raspis if devid == warning[0]][0], Klass.WARNING),
+    #             RowItem("Warning Description", warning[1], Klass.WARNING),
+    #         )
+    #     )
+    #     for warning in warnings if warning is not None
+    # )
 
     raspis = raspis[-1:]  # remove the power column
 
