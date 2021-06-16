@@ -185,7 +185,7 @@ class PiDBConnection:
         for i in range(1000):  # unlikely to fail this many times
             animal = random.choice(animals)
             adjective = random.choice(adjectives)
-            alias = animal + "-" + adjective
+            alias = adjective + "-" + animal
 
             if alias in aliases:
                 continue
