@@ -6,12 +6,14 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import HTMLResponse
 
 from .core import StatusModel
-from .db import connect
+from .db import PiDBConnection, connect
 from .generate_html import Klass, Row, RowItem, build_homepage_content, build_page, construct_row
 
 app = FastAPI()
 
+
 def user_login(db: PiDBConnection, username: str):
+    """Perform user login tasks."""
     if not db.user_exists(username):
         db.add_user(username)
     # else update login time
@@ -26,7 +28,7 @@ def root(uid: Optional[str] = Header(None)):
 
     with connect() as db:
         user_login(db, username)
-        
+
         raspis = db.get_raspis(username if not db.is_admin(username) else None)
         warnings = db.get_user_warnings(username)
     warning_ids = [warning[0] for warning in warnings]
@@ -63,9 +65,7 @@ def help():
 
 
 @app.get("/register", response_class=HTMLResponse)
-def register(
-    uid: Optional[str] = Header(None),
-):  # FIXME this is probably not how the username cookie is passed, if that is how shibboleth works
+def register(uid: Optional[str] = Header(None)):
     """Serve register page."""
     if uid is None:
         raise HTTPException(status_code=401, detail="Please log in...")  # TODO A redirect would probably be better
