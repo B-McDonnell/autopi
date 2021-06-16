@@ -76,7 +76,7 @@ The only port that must be exposed is port `:443`. Only the `proxy` service expo
 ## Migrating the web server
 Migration is simple, as the Docker containers are ephemeral. Migrating each volume ensures the server state remains constant.
 
-For each named volume (whcih can be found under the global `volumes` directive in `docker-compose.yaml`), follow the [official Docker documentation](https://docs.docker.com/storage/volumes/#backup-restore-or-migrate-data-volumes) on backing up, migrating, and restoring with named volumes.
+For each named volume (which can be found under the global `volumes` directive in `docker-compose.yaml`), follow the [official Docker documentation](https://docs.docker.com/storage/volumes/#backup-restore-or-migrate-data-volumes) on backing up, migrating, and restoring with named volumes.
 
 For the database backups, it is as simple as copying the contents of the backup directory from the old host machine to the new host machine
 
