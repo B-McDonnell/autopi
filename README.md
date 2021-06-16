@@ -47,6 +47,7 @@ The bind must be configured:
     db_backup:
       volumes:
         - your_dir_here:/backups
+    ```
 
 Backup timings are set in the `db_backup.env` file. Currently, standard defaults are used:
  - backups are made daily
@@ -55,15 +56,19 @@ Backup timings are set in the `db_backup.env` file. Currently, standard defaults
  - monthly backups are kept 6 months
 
 ### TLS certificates
-TODO
+There are two sets of certificates needed. First, the actual autopi.mines.edu certificates are expected to be in a folder called 'tls', this folder should be in the same directory as 'docker-compose.yaml', that is the project root. There should be three files here:
 
-T
+```
+tls/
+|
+| - autopi_chain.pem
+| - autopi_server.cer
+| - autopi_server.key
+```
 
-O
+The chain file consists of the intermediate certificates. The cer file is a pem certificate with the actual autopi.mines.edu certificate. The key is the private key. These are not stored in the repository and must be supplied.
 
-D
-
-O
+Additionally, SHibboleth requires a key and certificate as well. These are very specific files, but they are not provided in the repo. When obtained, they should be placed in the folder `src/web/shib/` and should be called `sp-cert.pem` and `sp-key.pem` for the certificate and key respectively. Without these, MultiPass cannot function; the image will also fail to build.
 
 ### Firewall rules
 The only port that must be exposed is port `:443`. Only the `proxy` service exposes external ports, and it only accepts `https` traffic; all other traffic are in segmented internally managed networks that cannot be accessed from outside the Docker service stack.
@@ -88,7 +93,7 @@ See `docker-compose --help` for more details usage instructions.
 Other useful commands include `sudo docker-compose logs` to view the service logs and `sudo docker-compose down` to stop the server.
 
 ## Database administration
-To access the database, `sudo docker exec -it autopi_db psql -U autopi -d autopi` should be run. This will put you into `psql` inside the database service. Some useful administrative commands are described in `docs/web/database/admin.md`.
+To access the database, `sudo docker-compose exec db psql -U autopi -d autopi` should be run. This will put you into `psql` inside the database service. Some useful administrative commands are described in `docs/web/database/admin.md`.
 
 For example, `INSERT INTO autopi.user (username, is_admin) VALUES ('minesusername', true);` will add an administrator.
 
