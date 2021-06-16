@@ -62,11 +62,7 @@ def _get_interface() -> str:
     if len(connected_interfaces) == 0:
         raise RuntimeError("No connected network interfaces")
     default_interface = network_info.get_default_interface()
-    return (
-        connected_interfaces[0]
-        if default_interface not in connected_interfaces
-        else default_interface
-    )
+    return connected_interfaces[0] if default_interface not in connected_interfaces else default_interface
 
 
 def get_network_fields(interface: str) -> dict:
@@ -208,9 +204,7 @@ def send_request(api_url: str, request: dict) -> HTTPResponse:
     return requests.post(api_url, json=request)
 
 
-def generate_and_send_request(
-    event: str = "general", force: bool = False, verbose: bool = False
-):
+def generate_and_send_request(event: str = "general", force: bool = False, verbose: bool = False):
     """Generate the specified request, compare it to previous request if applicable, and send it.
 
     Args:
@@ -245,9 +239,7 @@ def parse_commandline() -> (str, bool, bool):
         bool: force request to be sent without comparing last update.
         bool: verbose
     """
-    parser = argparse.ArgumentParser(
-        description="Generate a POST request for a given event."
-    )
+    parser = argparse.ArgumentParser(description="Generate a POST request for a given event.")
     parser.add_argument("--verbose", "-v", action="count", default=0)
     parser.add_argument(
         "type",

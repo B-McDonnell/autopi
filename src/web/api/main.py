@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse
 
 from .core import StatusModel
 from .db import connect
+from .generate_html import Klass, Row, RowItem, build_homepage_content, build_page, construct_row
 
 app = FastAPI()
 
@@ -49,23 +50,44 @@ def root(
 ):
     """Serve raspi list."""
     if username is None:
-        raise HTTPException(
-            status_code=401, detail="Please log in..."
-        )  # TODO A redirect would probably be better
+        raise HTTPException(status_code=401, detail="Please log in...")  # TODO A redirect would probably be better
 
-    content = compose_homepage(username)
+    with connect() as db:
+        raspis = db.get_raspis(username if not db.is_admin(username) else None)
+        warnings = db.get_user_warnings(username)
+    warning_ids = [warning[0] for warning in warnings]
+    warning_rows = tuple(
+        Row(
+            items=(
+                RowItem("Name", next(filter(lambda x: x[0] == warning[0], raspis), None)[1], Klass.WARNING),
+                RowItem("Warning Description", warning[1], Klass.WARNING),
+            )
+        )
+        for warning in warnings
+    )
+
+    raspis = raspis[-1:]  # remove the power column
+
+    columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated"]
+    raspi_rows = [
+        construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids) for items in raspis
+    ]
+
+    body = build_homepage_content(raspi_rows, warning_rows)
+    content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
-    # TODO: This comment block is just to remind me when this is implemented properly
-    # @app.post("/api/add_user")
-    # def add_user(user: UserModel):
-    # try:
-    #     with connect() as db:
-    #         db.add_user_query(user.username)
-    # except Exception as e:
-    #     # Ensure proper error logging
-    #     print("Error:", e)
-    # return {"response text": "It didn't crash!!"}
+
+# TODO: This comment block is just to remind me when this is implemented properly
+# @app.post("/api/add_user")
+# def add_user(user: UserModel):
+# try:
+#     with connect() as db:
+#         db.add_user_query(user.username)
+# except Exception as e:
+#     # Ensure proper error logging
+#     print("Error:", e)
+# return {"response text": "It didn't crash!!"}
 
 
 @app.get("/help", response_class=HTMLResponse)
@@ -81,6 +103,7 @@ def help():
         </body>
     </html>
     """
+    content = build_page(title="Autopi Help", body_content=content, style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
 
@@ -90,9 +113,7 @@ def register(
 ):  # FIXME this is probably not how the username cookie is passed, if that is how shibboleth works
     """Serve register page."""
     if username is None:
-        raise HTTPException(
-            status_code=401, detail="Please log in..."
-        )  # TODO A redirect would probably be better
+        raise HTTPException(status_code=401, detail="Please log in...")  # TODO A redirect would probably be better
 
     devid = None
     with connect() as db:
@@ -107,11 +128,12 @@ def register(
             <title>Register</title>
         </head>
         <body>
-            Enter the following ID in '{filename}'
+            <p>Enter the following ID in '{filename}'. Visit the <a href="help">help page</a> for more in-depth instructions.</p>
             <h1>{devid}</h1>
         </body>
     </html>
     """
+    content = build_page(title="Autopi Registration", body_content=content, style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
 

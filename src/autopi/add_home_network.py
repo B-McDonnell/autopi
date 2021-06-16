@@ -31,11 +31,7 @@ def set_home_network():
     )
 
     # password
-    if _is_yes(
-        ui.get_input(
-            "Does this network have a password? (y/n)", validator=_is_yes_or_no
-        )
-    ):
+    if _is_yes(ui.get_input("Does this network have a password? (y/n)", validator=_is_yes_or_no)):
         password = ui.get_secret(
             "What is the password? (It will be encrypted)",
             validator=wpa.is_valid_passwd,
@@ -55,15 +51,10 @@ def set_home_network():
             "Would you like low, medium, or high priority?",
             validator=lambda l: l.lower() in ("l", "m", "h", "low", "medium", "high"),
         )
-        priority = (
-            "1"
-            if priority in ("l", "low")
-            else "2"
-            if priority in ("m", "medium")
-            else "3"
-        )
+        priority = "1" if priority in ("l", "low") else "2" if priority in ("m", "medium") else "3"
     else:
         priority = None
+
 
     wpa.add_network(network_config=wpa.make_network(ssid, password, priority))
     if wpa.get_country() is None:
