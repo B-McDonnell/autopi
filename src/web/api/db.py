@@ -178,9 +178,9 @@ class PiDBConnection:
         query = """SELECT alias FROM raspi WHERE username=%s;"""
         aliases = [row[0] for row in self._fetchall(query, (username,))]
         with open("/app/dictionaries/animals", "r") as fin:
-            animals = [line for line in fin.readlines().strip()]
+            animals = [line.strip() for line in fin.readlines()]
         with open("/app/dictionaries/adjectives", "r") as fin:
-            adjectives = [line for line in fin.readlines().strip()]
+            adjectives = [line.strip() for line in fin.readlines()]
 
         for i in range(1000):  # unlikely to fail this many times
             animal = random.choice(animals)
