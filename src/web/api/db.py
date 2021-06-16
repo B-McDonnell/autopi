@@ -1,5 +1,6 @@
 """Test API server."""
 
+import os
 from contextlib import contextmanager
 from typing import Optional
 
@@ -11,11 +12,24 @@ from .core import StatusModel
 # FIXME plaintext credentials
 def default_credentials() -> dict:
     """Return default credentials for connection."""
+    return get_db_credentials()
     return {
         "host": "autopi_db",
         "database": "autopi",
         "user": "autopi",
         "password": "password",
+    }
+
+
+def get_db_credentials() -> dict:
+    """Get db credentials from environment."""
+    with open(os.environ["POSTGRES_PASSWORD_FILE"], "r") as fin:
+        password = fin.read().strip()
+    return {
+        "host": os.environ["POSTGRES_HOST"],
+        "database": os.environ["POSTGRES_DB"],
+        "user": os.environ["POSTGRES_USER"],
+        "password": password,
     }
 
 
