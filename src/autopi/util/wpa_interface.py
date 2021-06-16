@@ -210,7 +210,7 @@ def add_network(
         network_config = _strip_comment_lines(network_config)
 
     with open(config_file, "a") as fout:
-        fout.write(network_config)
+        fout.write("\n\n" + network_config + "\n")
     return True
 
 
