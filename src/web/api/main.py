@@ -2,13 +2,11 @@
 
 from typing import Optional
 
-from fastapi import Cookie, FastAPI, HTTPException, Header
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import HTMLResponse
 
 from .core import StatusModel
 from .db import connect
-
-import pprint
 
 app = FastAPI()
 
@@ -48,15 +46,13 @@ def compose_homepage(username: str) -> str:  # TODO Temporary
 
 # TODO it may simplify things to have Caddy/Apache guarantee that the user is authenticated before reaching this point
 @app.get("/", response_class=HTMLResponse)
-def root(
-	uid: Optional[str] = Header(None)
-):
+def root(uid: Optional[str] = Header(None)):
     """Serve raspi list."""
     if uid is None:
         raise HTTPException(
             status_code=401, detail="Please log in..."
         )  # TODO A redirect would probably be better
-	
+
     content = compose_homepage(uid)  # TODO Temporary
     return HTMLResponse(content=content, status_code=200)
 
