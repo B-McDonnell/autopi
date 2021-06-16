@@ -45,7 +45,5 @@ def is_service_up(service: str) -> bool:
     Returns:
         bool: service is up
     """
-    result = subprocess.run(
-        ["service", service, "status"], capture_output=True, check=False
-    )
+    result = subprocess.run(["service", service, "status"], capture_output=True, check=False)
     return result.returncode == 0

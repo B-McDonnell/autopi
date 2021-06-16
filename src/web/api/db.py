@@ -43,7 +43,7 @@ class PiDBConnection:
             credentials (dict): dictionary with database credentials for opening connection.
         """
         self._credentials = credentials
-
+        
         if self._connection is not None and not self._connection.closed:
             self.close()
         self._connection = psycopg2.connect(**credentials)
@@ -158,7 +158,7 @@ class PiDBConnection:
             WHERE username = %s LIMIT 1;
         """
         result = self._fetch_first_cell(query, (username,))
-        if result is None:
+        if result is not None:
             return result
         raise ValueError("invalid username supplied")
 
@@ -178,9 +178,7 @@ class PiDBConnection:
         """
         return self._fetch_first_cell(query, (username,))
 
-    def get_raspis(
-        self, username: Optional[str] = None, registered_only=True
-    ) -> list[tuple]:
+    def get_raspis(self, username: Optional[str] = None, registered_only=True) -> list[tuple]:
         """Return a list of Raspberry Pis.
 
         Args:
@@ -188,7 +186,7 @@ class PiDBConnection:
             registered (bool, default: True): restrict list to those Pis that are registered.
 
         Returns:
-            list: Raspberry Pis.
+            list: Raspberry Pis (device_id: str, alias: str, ip_addrress: str, ssid: str, ssh: str, vnc: str, updated_at: datetime, power: str).
         """
         # build query
         data = tuple()
@@ -201,7 +199,7 @@ class PiDBConnection:
         elif registered_only:
             condition = "WHERE registered = true"
         query = f"""
-            SELECT * FROM autopi.raspi {condition};
+            SELECT device_id, alias, ip_addr, ssid, ssh, vnc, updated_at, power FROM autopi.raspi {condition};
         """
         # execute query
         return self._fetchall(query, data)
@@ -310,9 +308,7 @@ class PiDBConnection:
         Returns:
             bool: whether it has timed out.
         """
-        TIMEOUT_DURATION = (
-            "2 minute 30 second"  # TODO maybe this shouldn't be defined here...
-        )
+        TIMEOUT_DURATION = "2 minute 30 second"  # TODO maybe this shouldn't be defined here...
         query = """
             SELECT true FROM autopi.raspi
             WHERE device_id=%s
@@ -354,7 +350,7 @@ class PiDBConnection:
         """Return list of warnings for a specific device.
 
         Returns:
-            list[(warning: str, added_at: datetime.datetime)]: the list of warnings if any
+            list[(device_id: str, warning: str, added_at: datetime.datetime)]: the list of warnings if any
         """
         query = """
             SELECT w.device_id, w.warning, w.added_at
