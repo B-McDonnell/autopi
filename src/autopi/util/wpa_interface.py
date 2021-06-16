@@ -4,6 +4,8 @@ import itertools
 import subprocess
 from typing import Iterable, List, Optional
 
+from util.config import Config
+
 
 class PasswordLengthError(RuntimeError):
     """Password does not meet wpa_password length requirements."""
@@ -47,11 +49,6 @@ def is_valid_passwd(passwd: str) -> bool:
     return 8 <= n <= 63
 
 
-def get_default_wpa_config_file() -> str:
-    """Get default wpa config file."""
-    return "/etc/wpa_supplicant/wpa_supplicant.conf"  # TODO: get from config
-
-
 def _make_network_with_passwd(ssid: str, passphrase: str) -> str:
     """Create an encrypted network config information for an ssid/passphrase pair.
 
@@ -67,9 +64,7 @@ def _make_network_with_passwd(ssid: str, passphrase: str) -> str:
     Returns:
         str: wpa network configuration.
     """
-    result = subprocess.run(
-        ["wpa_passphrase", ssid, passphrase], capture_output=True, check=True
-    )
+    result = subprocess.run(["wpa_passphrase", ssid, passphrase], capture_output=True, check=True)
     return str(result.stdout, encoding="utf8")
 
 
@@ -123,7 +118,7 @@ def _strip_comment_lines(network_config: str) -> str:
 
 def network_exists(
     network_config: str,
-    config_file: str,
+    config_file: str = Config.WPA_CONFIG_FILE,
     ignore_comments: bool = True,
     ignore_empty_lines: bool = True,
 ) -> bool:
@@ -131,7 +126,7 @@ def network_exists(
 
     Args:
         network_config (str): network config to check for
-        config_file (str): wpa config to check in
+        config_file (str, optional): wpa config to check in. Defaults to Config.WPA_CONFIG_FILE.
         ignore_comments (bool, optional): exclude lines starting with '#' from the check. Defaults to True.
         ignore_empty_lines (bool, optional): exclude empty lines from the check. Defaults to True.
 
@@ -150,18 +145,10 @@ def network_exists(
 
     if ignore_empty_lines:
         current_contents = "\n".join(
-            [
-                line
-                for line in current_contents.splitlines()
-                if len(line) > 0 and not line.isspace()
-            ]
+            [line for line in current_contents.splitlines() if len(line) > 0 and not line.isspace()]
         )
         network_config = "\n".join(
-            [
-                line
-                for line in network_config.splitlines()
-                if len(line) > 0 and not line.isspace()
-            ]
+            [line for line in network_config.splitlines() if len(line) > 0 and not line.isspace()]
         )
 
     return network_config in current_contents
@@ -189,11 +176,7 @@ def make_network(
     if passwd is not None and not is_valid_passwd(passwd):
         raise PasswordLengthError()
 
-    network_str = (
-        _make_network_with_passwd(ssid, passwd)
-        if passwd is not None
-        else _make_network_without_passwd(ssid)
-    )
+    network_str = _make_network_with_passwd(ssid, passwd) if passwd is not None else _make_network_without_passwd(ssid)
     if drop_comments:
         network_str = _strip_comment_lines(network_str)
     if priority is not None:
@@ -201,15 +184,16 @@ def make_network(
 
     return network_str
 
-
 def add_network(
-    network_config: str, config_file: str, drop_comments: bool = True
+    network_config: str,
+    config_file: str = Config.WPA_CONFIG_FILE,
+    drop_comments: bool = True,
 ) -> bool:
     """Add a new network config to a wpa config file.
 
     Args:
         network_config (str): network config to add
-        config_file (str): filename of wpa config file
+        config_file (str, optional): filename of wpa config file. Defaults to Config.WPA_CONFIG_FILE.
         drop_comments (bool, optional): remove any comments before adding to config. Defaults to True.
 
     Raises:
@@ -249,17 +233,17 @@ def run_reconfigure(interface: Optional[str]) -> bool:
     return response.stdout == b"OK\n"
 
 
-def get_country(config_file: str) -> Optional[str]:
+def get_country(config_file: str = Config.WPA_CONFIG_FILE) -> Optional[str]:
     """Get the country code from a wpa config file.
 
     Args:
-        config_file (str): filename of wpa config file
+        config_file (str, optional): filename of wpa config file. Defaults to Config.WPA_CONFIG_FILE.
 
     Raises:
         OSError: config_file could not be opened.
 
     Returns:
-        str | None: country code from config_file or None if it does not exist
+        str | None: country code from util.config_file or None if it does not exist
     """
     with open(config_file, "r") as fin:
         # get country
@@ -296,14 +280,14 @@ def _without_trailing_empty_lines(lines: List[str]) -> Iterable[str]:
     return (line for i, line in enumerate(lines) if i not in bad_indices)
 
 
-def update_country(config_file: str, country: str):
+def update_country(country: str, config_file: str = Config.WPA_CONFIG_FILE):
     """Add or replace country code in a wpa config file.
 
     Undefined behavior may occur with a broken wpa config file.
 
     Args:
-        config_file (str): filename of wpa config file
         country (str): country code to add or update to
+        config_file (str, optional): filename of wpa config file. Defaults to Config.WPA_CONFIG_FILE.
 
     Raises:
         OSError: config_file is not a valid file
@@ -312,11 +296,7 @@ def update_country(config_file: str, country: str):
     header = list(_without_trailing_empty_lines(header))
 
     country_code_index = next(
-        (
-            index
-            for index, line in enumerate(header)
-            if line.strip().startswith("country=")
-        ),
+        (index for index, line in enumerate(header) if line.strip().startswith("country=")),
         None,
     )
     if country_code_index is not None:
@@ -327,3 +307,70 @@ def update_country(config_file: str, country: str):
 
     with open(config_file, "w") as fout:
         fout.writelines(header + contents)
+
+
+def get_new_config_after_del(
+    ssid: str, config_file: str = Config.WPA_CONFIG_FILE
+) -> str:
+    """Create new configuration after deletion.
+
+    Args:
+        ssid (str): SSID of network
+        config_file (str): File path of network configuration. Defaults to Config.WPA_CONFIG_FILE.
+
+    Returns:
+        str: Text of new configuration file
+    """
+    with open(config_file, "r") as fin:
+        current_contents = fin.read()
+        position = current_contents.find('ssid="' + ssid + '"')
+        start = current_contents.rfind("\n\nnetwork={", 0, position)
+        end = current_contents.find("}", position) + 1
+        new_config = current_contents[0:start] + current_contents[end:]
+        return new_config
+
+
+def check_duplicate_ssid(ssid: str, config_file: str = Config.WPA_CONFIG_FILE) -> bool:
+    """Check for multiple networks with same SSID.
+
+    Args:
+        ssid (str): SSID of network
+        config_file (str, optional): File path of network configuration. Defaults to Config.WPA_CONFIG_FILE.
+
+    Returns:
+        bool: Multiple networks with same SSID
+    """
+    with open(config_file, "r") as fin:
+        return fin.read().count('ssid="' + ssid + '"') > 1
+
+
+def ssid_exists(ssid: str, config_file: str = Config.WPA_CONFIG_FILE) -> bool:
+    """Check to see if SSID exists in config.
+
+    Args:
+        ssid (str): SSID of network
+        config_file (str, optional): File path of network configuration. Defaults to Config.WPA_CONFIG_FILE.
+
+    Returns:
+        bool: Exists
+    """
+    with open(config_file, "r") as fin:
+        return f'ssid="{ssid}"' in fin.read()
+
+
+def delete_ssid(ssid: str, config_file=Config.WPA_CONFIG_FILE) -> bool:
+    """Delete network after check if exists.
+
+    Args:
+        ssid (str): SSID to be deleted.
+        config_file (str, optional): File path of network configuration. Defaults to Config.WPA_CONFIG_FILE.
+
+    Returns:
+        bool: Deletion successful.
+    """
+    if ssid_exists(ssid, config_file):
+        new_text = get_new_config_after_del(ssid, config_file)
+        with open(config_file, "wt") as fin:
+            fin.write(new_text)
+            return True
+    return False

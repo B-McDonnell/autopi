@@ -1,7 +1,7 @@
 # Usage
-`add_network_from_txt.py`
+Script `add_network_from_txt.py`
 
-- Look in `/boot/CSM_new_network.txt` file, and use provided network details to add network.
+- Look in `/boot/CSM_new_network.txt` file on SD card, and use provided network details to add network.
 
 
 # Implementation
