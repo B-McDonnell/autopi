@@ -4,18 +4,15 @@ body {
 }
 
 .content-wrapper {
-    width: 1080px;
+    max-width: 1080px;
     margin: auto;
     clear: both;
 }
 
 .topnav {
     width: 100%;
-	/* float: left; */
-	margin: 0 0 1em 0;
-	padding: 0;
-	/* background-color: #fff; */
-	/* border-bottom: 1px solid #ccc; */
+    margin: 0 0 1em 0;
+    padding: 0;
 }
 
 .topnav ul {
@@ -23,8 +20,7 @@ body {
     text-align: center;
     margin-left: auto;
     margin-right: auto;
-    padding-top: -3em;
-	width: 600px;
+    width: 800px;
 }
 
 .topnav li {
@@ -33,10 +29,10 @@ body {
 
 .topnav li h2 {
     display: block;
-	padding: 4px 55px;
-	text-decoration: none;
-	color: #444;
-	border-right: 1px solid #ccc;
+    padding: 4px 55px;
+    text-decoration: none;
+    color: #444;
+    border-right: 1px solid #ccc;
 }
 
 .topnav li:first-child h2 {
