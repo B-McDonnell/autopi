@@ -19,3 +19,5 @@ Currently, aliases are generated from a list of 228 adjectives and 50 nouns. Whi
 
 ### Admin conttrols
 If user interaction was possible, it would not be too difficult to extend some admin controls. For example, showing currently active users, clearing warnings, etc., all without SSH and manual SQL.
+
+The most important feature for admins that is currently missing is linking Raspberry Pis to usernames on their home page; at the moment, there is not information linking a device to a user displayed to admins.
