@@ -1,9 +1,7 @@
 # Entering `psql`
-Run `sudo docker exec -it autopi_db psql -U autopi -d autopi`
+Run `sudo docker-compose exec db psql -U autopi -d autopi`
 
-# Automation
-Some administration is automated.
-
+# Automated administration
 All timestamps are created and update automatically, and should never need to be written directly.
 
 There are `CASCADE` deletion rules set so that a Raspberry Pi's deletion removes its warnings and a user's deletion removes their Raspberry Pis.
