@@ -10,14 +10,13 @@ from .generate_html import Klass, Row, RowItem, build_homepage_content, build_pa
 app = FastAPI()
 
 
-# TODO it may simplify things to have Caddy/Apache guarantee that the user is authenticated before reaching this point
 @app.get("/", response_class=HTMLResponse)
 def root(
     username: str = Cookie(None),
 ):
     """Serve raspi list."""
     if username is None:
-        raise HTTPException(status_code=401, detail="Please log in...")  # TODO A redirect would probably be better
+        raise HTTPException(status_code=401, detail="Not logged in")  # TODO A redirect would probably be better
 
     with connect() as db:
         raspis = db.get_raspis(username if not db.is_admin(username) else None)
@@ -43,18 +42,6 @@ def root(
     body = build_homepage_content(raspi_rows, warning_rows)
     content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
-
-
-# TODO: This comment block is just to remind me when this is implemented properly
-# @app.post("/api/add_user")
-# def add_user(user: UserModel):
-# try:
-#     with connect() as db:
-#         db.add_user_query(user.username)
-# except Exception as e:
-#     # Ensure proper error logging
-#     print("Error:", e)
-# return {"response text": "It didn't crash!!"}
 
 
 @app.get("/help", response_class=HTMLResponse)
@@ -83,15 +70,8 @@ def register(
     # TODO The contents of the page have a baked in assumption about the device file name
     filename = "/boot/CSM_device_id.txt"
     content = f"""
-    <html>
-        <head>
-            <title>Register</title>
-        </head>
-        <body>
-            <p>Enter the following ID in '{filename}'. Visit the <a href="help">help page</a> for more in-depth instructions.</p>
-            <h1>{devid}</h1>
-        </body>
-    </html>
+        <p>Enter the following ID in '{filename}'. Visit the <a href="help">help page</a> for more in-depth instructions.</p>
+        <h1>{devid}</h1>
     """
     content = build_page(title="Autopi Registration", body_content=content, style_file="/app/style.css")
 

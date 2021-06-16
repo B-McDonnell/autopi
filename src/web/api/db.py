@@ -1,5 +1,6 @@
 """Test API server."""
 
+import os
 from contextlib import contextmanager
 from typing import Optional
 
@@ -8,21 +9,22 @@ import psycopg2
 from .core import StatusModel
 
 
-# FIXME plaintext credentials
-def default_credentials() -> dict:
-    """Return default credentials for connection."""
+def get_db_credentials() -> dict:
+    """Get db credentials from environment."""
+    with open(os.environ["POSTGRES_PASSWORD_FILE"], "r") as fin:
+        password = fin.read().strip()
     return {
-        "host": "autopi_db",
-        "database": "autopi",
-        "user": "autopi",
-        "password": "password",
+        "host": os.environ["POSTGRES_HOST"],
+        "database": os.environ["POSTGRES_DB"],
+        "user": os.environ["POSTGRES_USER"],
+        "password": password,
     }
 
 
 class PiDBConnection:
     """An object representing a single connection with the database, providing needed database queries."""
 
-    def __init__(self, credentials: dict = default_credentials()):
+    def __init__(self, credentials: dict = get_db_credentials()):
         """Initialize members and opens database connection.
 
         Args:
@@ -36,7 +38,7 @@ class PiDBConnection:
         if self._connection is not None and not self._connection.closed:
             self.close()
 
-    def connect(self, credentials: dict = default_credentials()):
+    def connect(self, credentials: dict = get_db_credentials()):
         """Open a new connection, closing the previouus connection if applicable.
 
         Args:
@@ -216,7 +218,7 @@ class PiDBConnection:
         fetch_query = """SELECT device_id FROM autopi.raspi WHERE username=%s AND registered=false;"""
         result = self._fetch_first_cell(fetch_query, (username,))
         # TODO could check that only one id is unregistered, maybe log it
-        # TODO maybe determine that ID is not expired
+        # TODO expire unregistered device IDs after 2-3 days for improved security
         if result is not None:
             return result
 
@@ -299,24 +301,6 @@ class PiDBConnection:
         """
         self._commit(query, (status.hwid, status.devid))
 
-    def has_timed_out(self, devid: str) -> bool:
-        """Check if device ID entry has been updated in less than timeout period.
-
-        Args:
-            devid (str): device ID.
-
-        Returns:
-            bool: whether it has timed out.
-        """
-        TIMEOUT_DURATION = "2 minute 30 second"  # TODO maybe this shouldn't be defined here...
-        query = """
-            SELECT true FROM autopi.raspi
-            WHERE device_id=%s
-            AND updated_at + interval %s < now();
-        """  # TODO perhaps the timeout should not be handled by the database query
-        result = self._fetchall(query, (devid, TIMEOUT_DURATION))
-        return len(result) > 0
-
     def add_raspi_warning(self, devid: str, warning: str):
         """Add warning for specific device.
 
@@ -361,7 +345,7 @@ class PiDBConnection:
 
 
 @contextmanager
-def connect(credentials: list = default_credentials()) -> PiDBConnection:
+def connect(credentials: list = get_db_credentials()) -> PiDBConnection:
     """Create PIDBConnection instance for 'with' statement."""
     db = PiDBConnection(credentials)
     try:
