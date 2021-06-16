@@ -54,6 +54,7 @@ services:
     secrets:
       - proxy_cert
       - proxy_pkey
+      - proxy_ca_chain
 
 
 networks:
@@ -74,5 +75,7 @@ volumes:
 secrets:
   proxy_cert:
     file: ./tls/autopi_server.cer
+  proxy_ca_chain:
+    file: ./tls/autopi_chain.pem
   proxy_pkey:
     file: ./tls/autopi_server.key
