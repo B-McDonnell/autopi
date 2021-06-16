@@ -1,9 +1,7 @@
 """Generate webpage and webpage content."""
 import datetime
 import enum
-import os
 from dataclasses import dataclass
-from tempfile import NamedTemporaryFile
 from typing import Iterable, List, Optional, Union
 
 from airium import Airium
@@ -98,6 +96,8 @@ def construct_row(items: tuple[tuple[str]], device_id: str, hw_warning: bool = F
                     Klass.NEUTRAL if age < 2.5 * 60 else Klass.BAD if age < 5 * 60 else Klass.DEAD,
                 )
             )  # TODO get delta from config
+        elif key == "Username":
+            row_items.append(RowItem(key, value, Klass.NEUTRAL))
         elif key == "Power":
             row_items.append(RowItem(key, value, Klass.GOOD if value == "on" else Klass.DEAD))
     return Row(items=row_items)
@@ -219,102 +219,3 @@ def build_page(title: str, body_content: str, style_file: Optional[str] = None) 
                     a.li().a(href="help").h2(_t="Help")
             a.div(klass="content-wrapper", _t=body_content)
     return str(a)
-
-
-def get_raspis() -> list[tuple[str]]:
-    """Get placeholder raspi data. Broken, as postgres returns datetimes instead of strings."""
-    # TEMP
-    return [
-        (
-            "qwertyuiop",
-            "hyper_bunny",
-            "10.0.0.69",
-            "SomeFunnyJoke",
-            "up",
-            "up",
-            datetime.datetime.now(),
-            "on",
-        ),
-        (
-            "asdfghjkl",
-            "lazy_dog",
-            "192.168.1.52",
-            "SomeLameJokeWith32CharactersLmao",
-            "down",
-            "down",
-            datetime.datetime.fromisoformat("2021-01-10 08:01:02.987654+22:00"),
-            "on",
-        ),
-        (
-            "1234567890",
-            "slippery_seal",
-            "138.67.3.93",
-            "tinyssid",
-            "down",
-            "up",
-            datetime.datetime.now() - datetime.timedelta(minutes=3),
-            "on",
-        ),
-        (
-            "zxcvbnm",
-            "cute_kitten",
-            "172.16.13.37",
-            "Another SSID",
-            "down",
-            "down",
-            datetime.datetime.fromisoformat("2021-08-10 00:00:00.000000+00:00"),
-            "off",
-        ),
-    ]
-
-
-def get_warnings() -> list[tuple[str]]:
-    """Get placeholder warnings."""
-    # TEMP
-    return [
-        (
-            "qwertyuiop",
-            "hyper_bunny",
-            "An unrecognized device is using the ID of this Pi. If this is not you, contact your instructor",
-        )
-    ]
-
-
-def check_html(html_str: str, print_out: bool = False):
-    """Development function to preview HTML locally."""
-    # TODO: remove
-    if print_out:
-        print(html_str)
-    with NamedTemporaryFile("w", delete=False) as tmp:
-        tmp.write(html_str)
-        os.system(f"firefox --new-window {tmp.name}")
-
-
-def main(username: str) -> str:
-    """Temporary function demonstrating the page generation logic."""
-    # with PiDB() as db:
-    # warnings = db.get_user_wanings(username)
-    # raspis = db.get_raspis(username)
-    warnings = get_warnings()
-    raspis = get_raspis()
-    warning_ids = [warning[0] for warning in warnings]
-    warning_rows = tuple(
-        Row(
-            items=(
-                RowItem("Name", warning[1], Klass.WARNING),
-                RowItem("Warning Description", warning[2], Klass.WARNING),
-            )
-        )
-        for warning in warnings
-    )
-
-    columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated", "Power"]
-    rows = [construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids) for items in raspis]
-
-    body = build_homepage_content(rows, warning_rows)
-    content = build_page(title="home page", body_content=str(body), style_file="src/web/api/style.css")
-    return content
-
-
-if __name__ == "__main__":
-    check_html(main("username"))
