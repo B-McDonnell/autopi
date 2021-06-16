@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from util import wpa_interface as wpa
+from util.config import Config
 
 
 def main():
@@ -18,8 +19,8 @@ def main():
     shared_parser.add_argument(
         "FILENAME",
         nargs="?",
-        help="path to configuration file. Fails if file not not exist. Uses /etc/wpa_supplicant/wpa_supplicant.conf by default",
-        default="/etc/wpa_supplicant/wpa_supplicant.conf",
+        help=f"path to configuration file. Fails if file not not exist. Defaults to {Config.WPA_CONFIG_FILE}",
+        default=Config.WPA_CONFIG_FILE,
     )
 
     subparsers.add_parser(
