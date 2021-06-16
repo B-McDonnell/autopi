@@ -184,6 +184,7 @@ def make_network(
 
     return network_str
 
+
 def add_network(
     network_config: str,
     config_file: str = Config.WPA_CONFIG_FILE,
@@ -309,9 +310,7 @@ def update_country(country: str, config_file: str = Config.WPA_CONFIG_FILE):
         fout.writelines(header + contents)
 
 
-def get_new_config_after_del(
-    ssid: str, config_file: str = Config.WPA_CONFIG_FILE
-) -> str:
+def get_new_config_after_del(ssid: str, config_file: str = Config.WPA_CONFIG_FILE) -> str:
     """Create new configuration after deletion.
 
     Args:

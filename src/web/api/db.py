@@ -43,7 +43,7 @@ class PiDBConnection:
             credentials (dict): dictionary with database credentials for opening connection.
         """
         self._credentials = credentials
-        
+
         if self._connection is not None and not self._connection.closed:
             self.close()
         self._connection = psycopg2.connect(**credentials)
