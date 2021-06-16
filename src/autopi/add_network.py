@@ -7,6 +7,7 @@ import sys
 from dataclasses import dataclass
 
 from util import wpa_interface as wpa
+from util.config import Config
 
 
 @dataclass
@@ -39,8 +40,8 @@ def _parse_args():
         "--config-file",
         type=str,
         required=False,
-        help="path to the configuration file. Only for advanced users. Defaults to `/etc/wpa_supplicant/wpa_supplicant.conf",
-        default="/etc/wpa_supplicant/wpa_supplicant.conf",
+        help=f"path to the configuration file. Only for advanced users. Defaults to {Config.WPA_CONFIG_FILE}",
+        default=Config.WPA_CONFIG_FILE,
     )
     parser.add_argument(
         "--priority",
@@ -51,8 +52,8 @@ def _parse_args():
         "-i",
         "--interface",
         type=str,
-        default="wlan0",
-        help="interface to add network to. Defaults to `wlan0`",
+        default=Config.DEFAULT_WIRELESS_INTERFACE,
+        help=f"interface to add network to. Defaults to {Config.DEFAULT_WIRELESS_INTERFACE}",
     )
 
     pass_group = parser.add_mutually_exclusive_group(required=True)

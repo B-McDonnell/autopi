@@ -8,7 +8,8 @@ from http.client import HTTPResponse
 from pathlib import Path
 
 import requests
-from util import config, device_info, network_info
+from util import device_info, network_info
+from util.config import Config
 
 
 def generate_shutdown_request() -> dict:
@@ -35,13 +36,12 @@ def get_service_status(service: str) -> str:
 
 def _is_ssh_up() -> bool:
     """Check SSH service status."""
-    return device_info.is_service_up("sshd")
+    return device_info.is_service_up(Config.SSH_SERVICE)
 
 
 def _is_vnc_up() -> bool:
     """Check VNC service status."""
-    # TODO Currently, there are multiple services, I'm uncertain which one(s) matters
-    return device_info.is_service_up("vncserver-x11-serviced")
+    return device_info.is_service_up(Config.VNC_SERVICE)
 
 
 def _get_interface() -> str:
@@ -159,8 +159,7 @@ def generate_request(event: str, force: bool) -> dict:
     Raises:
         RuntimeError: if no network interface is connected to the network
     """
-    # TODO: get path from config
-    CSM_ROOT = Path("/var/opt/autopi/")
+    CSM_ROOT = Path(Config.ROOT_DIR)
     REQ_PATH = CSM_ROOT / "old_request.json"
 
     info_fields = {}
@@ -171,7 +170,7 @@ def generate_request(event: str, force: bool) -> dict:
         if force:
             save_request(REQ_PATH, info_fields)
         else:
-            # TODO: replace this implementation with a checksum
+            # TODO: possibly replace this implementation with a checksum
             # compare new request to previous
             old = load_request(REQ_PATH)
             if old == info_fields:
@@ -218,8 +217,7 @@ def generate_and_send_request(event: str = "general", force: bool = False, verbo
         RuntimeError: if no network interface is connected to the network
         URLError: if the connection failed
     """
-    # TODO get API URL from a configuration file/environment variable
-    api_url = config.get_api_url()
+    api_url = Config.API_URL
 
     request = generate_request(event, force)
     resp = send_request(api_url, request)

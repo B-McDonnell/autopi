@@ -12,11 +12,13 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=autopi
       - POSTGRES_INITDB_WALDIR=/log
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
     ports:
       - "5432:5432"
     networks:
       - db_net
     volumes:
+      - './src/web/database/postgresql.conf:/etc/postgresql/postgresql.conf'
       - db_data:/var/lib/postgresql/data
       - db_log:/log
 

@@ -1,8 +1,9 @@
 """Utilities to retrieve device information."""
 
-import os
 import subprocess
 from hashlib import sha256
+
+from util.config import Config
 
 
 def get_dev_id() -> str:
@@ -14,21 +15,16 @@ def get_dev_id() -> str:
     Raises:
         OSError: file in boot drive could not be read
     """
-    # TODO at some point, this path might be in a config file
-    with open("/boot/CSM_device_id.txt") as f:
+    with open(Config.DEV_ID_FILE) as f:
         lines = f.readlines()
-    return "".join(lines)
+    return "".join(lines).strip()
 
 
 def get_hw_info() -> list:
     """Return 4 lines of cpu serial and hardware data."""
-    info_file = "/proc/cpuinfo"
-    # TODO handle info file in config
-    if "DOCKER_HW_ID_PATH" in os.environ:
-        info_file = os.environ["DOCKER_HW_ID_PATH"]
-    with open(info_file) as f:
+    with open(Config.HW_ID_SOURCE_FILE) as f:
         lines = f.readlines()
-    return lines[-4:]
+    return lines[Config.HW_ID_START_LINE : Config.HW_ID_STOP_LINE]
 
 
 def get_hw_id() -> str:

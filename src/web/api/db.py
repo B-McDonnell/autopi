@@ -33,7 +33,8 @@ class PiDBConnection:
 
     def __del__(self):
         """Close connection on delete."""
-        self.close()
+        if self._connection is not None and not self._connection.closed:
+            self.close()
 
     def connect(self, credentials: dict = default_credentials()):
         """Open a new connection, closing the previouus connection if applicable.
@@ -42,12 +43,13 @@ class PiDBConnection:
             credentials (dict): dictionary with database credentials for opening connection.
         """
         self._credentials = credentials
-
-        self.close()
+        
+        if self._connection is not None and not self._connection.closed:
+            self.close()
         self._connection = psycopg2.connect(**credentials)
 
     def close(self):
-        """Close database connection if it exists."""
+        """Close database connection."""
         if self._connection is not None and not self._connection.closed:
             self._connection.close()
             self._connection = None
@@ -324,7 +326,8 @@ class PiDBConnection:
         """
         query = """
             INSERT INTO autopi.raspi_warning (device_id, warning)
-            VALUES (%s, %s);
+            VALUES (%s, %s)
+            ON CONFLICT (device_id, warning) DO UPDATE SET added_at=NOW();
         """
         self._commit(query, (devid, warning))
 
