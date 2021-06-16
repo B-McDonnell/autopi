@@ -26,6 +26,7 @@ services:
       - db_password
   
   db_backup:
+    container_name: autopi_db_backup
     image: prodrigestivill/postgres-backup-local
     restart: unless-stopped
     user: postgres:postgres
