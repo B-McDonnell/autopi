@@ -67,7 +67,7 @@ class PiDBConnection:
         """
         with self._connection:
             with self._connection.cursor() as cur:
-                if data is not None:
+                if data is None:
                     cur.execute(query)
                 else:
                     cur.execute(query, data)
@@ -91,7 +91,7 @@ class PiDBConnection:
                 else:
                     cur.execute(query, data)
                 result = cur.fetchone()
-                return result if result is None else result[0]
+                return result if result is not None else result[0]
 
     def _fetchall(self, query: str, data: Optional[tuple] = None) -> list[tuple]:
         """Execute query, returning query result.
@@ -113,7 +113,7 @@ class PiDBConnection:
                     cur.execute(query, data)
                 return cur.fetchall()
 
-    def add_user_query(self, username: str):
+    def add_user(self, username: str):
         """Add new user to database on first login.
 
         Args:
@@ -126,6 +126,7 @@ class PiDBConnection:
             INSERT INTO autopi.user (username)
             VALUES (%s);
         """
+        print(username)
         self._commit(query, (username,))
 
     def user_exists(self, username: str) -> bool:
@@ -232,13 +233,17 @@ class PiDBConnection:
             devid (str): the device ID.
 
         Returns:
-            bool: whether the device exists.
+            bool: whether the device exists (false if invalid ID).
         """
         query = """
             SELECT device_id FROM autopi.raspi WHERE device_id=%s;
         """
-        results = self._fetchall(query, (devid,))
-        return len(results)
+        try:
+            result = self._fetch_first_cell(query, (devid,))
+            return result is not None
+        except psycopg2.errors.InvalidTextRepresentation:
+            # Not a valid ID
+            return False
 
     def get_hardware_id(self, devid: str) -> str:
         """Get the hardware ID for a given device.
