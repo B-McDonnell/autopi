@@ -1,6 +1,7 @@
 """Test API server."""
 
 import os
+import random
 from contextlib import contextmanager
 from typing import Optional
 
@@ -144,6 +145,15 @@ class PiDBConnection:
         """
         return self._fetch_first_cell(query, (username,))
 
+    def update_user_login(self, username: str):
+        """Update the user login time to now.
+
+        Args:
+            username (str): the username whose last login time should be updated.
+        """
+        query = """UPDATE autopi.user SET last_login=NOW() WHERE username=%s;"""
+        self._commit(query, (username,))
+
     def is_admin(self, username: str) -> bool:
         """Check if user is an admin.
 
@@ -165,6 +175,33 @@ class PiDBConnection:
             return result
         raise ValueError("invalid username supplied")
 
+    def get_unique_alias(self, username: str) -> Optional[str]:
+        """Generate a unique alias for the Pi.
+
+        Args:
+            username (str): user to check uniqueness for.
+
+        Returns:
+            Optional[str]: alias or None if uniqueness check failed.
+        """
+        query = """SELECT alias FROM raspi WHERE username=%s;"""
+        aliases = [row[0] for row in self._fetchall(query, (username,))]
+        with open("/app/dictionaries/animals", "r") as fin:
+            animals = [line.strip() for line in fin.readlines()]
+        with open("/app/dictionaries/adjectives", "r") as fin:
+            adjectives = [line.strip() for line in fin.readlines()]
+
+        for i in range(1000):  # unlikely to fail this many times
+            animal = random.choice(animals)
+            adjective = random.choice(adjectives)
+            alias = adjective + "-" + animal
+
+            if alias in aliases:
+                continue
+
+            return alias
+        return None
+
     def add_raspi(self, username: str) -> str:
         """Add a new row to the raspi table for a given user.
 
@@ -175,11 +212,15 @@ class PiDBConnection:
             str: the new device's UUID.
         """
         query = """
-            INSERT INTO autopi.raspi (username)
-            VALUES (%s)
+            INSERT INTO autopi.raspi (username, alias)
+            VALUES (%s, %s)
             RETURNING device_id;
         """
-        return self._fetch_first_cell(query, (username,))
+        # TODO this alias generation is bad
+        alias = self.get_unique_alias(username)
+        # If no alias was obtained, get a random number
+        alias = alias if alias is not None else "ID: " + str(random.randint(0, 10000000))
+        return self._fetch_first_cell(query, (username, alias))
 
     def get_raspis(self, username: Optional[str] = None, registered_only=True) -> list[tuple]:
         """Return a list of Raspberry Pis.
@@ -320,33 +361,34 @@ class PiDBConnection:
         """
         self._commit(query, (devid, warning))
 
-    def get_device_warnings(self, devid: str) -> list:
+    def get_user_warnings(self, username: str, get_alias: bool = False, remove: bool = True) -> list:
         """Return list of warnings for a specific device.
 
         Args:
-            devid (str): device ID.
-
-        Returns:
-            list[(warning: str, added_at: datetime.datetime)]: the list of warnings if any
-        """
-        query = """
-            SELECT warning, added_at FROM autopi.raspi_warning
-            WHERE device_id=%s;
-        """
-        return self._fetchall(query, (devid,))
-
-    def get_user_warnings(self, username: str) -> list:
-        """Return list of warnings for a specific device.
+            username (str): username
+            get_alias (bool): get the device alias matching the warning's devid
+            remove (bool): delete warnings after retrieval
 
         Returns:
             list[(device_id: str, warning: str, added_at: datetime.datetime)]: the list of warnings if any
         """
-        query = """
-            SELECT w.device_id, w.warning, w.added_at
+        query = f"""
+            SELECT {"r.alias, " if get_alias else ""}w.device_id, w.warning, w.added_at
             FROM autopi.raspi_warning as w, autopi.raspi as r
             WHERE w.device_id = r.device_id AND r.username = %s;
         """
-        return self._fetchall(query, (username,))
+        remove_query = """
+            DELETE FROM autopi.raspi_warning w
+            WHERE w.device_id IN (
+                SELECT r.device_id
+                FROM autopi.raspi r
+                WHERE r.username = %s
+            );
+        """
+        warnings = self._fetchall(query, (username,))
+        if remove:
+            self._commit(remove_query, (username,))
+        return warnings
 
 
 @contextmanager
