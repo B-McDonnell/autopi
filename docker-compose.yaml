@@ -8,9 +8,10 @@ services:
       dockerfile: Dockerfile.db
       context: .
     restart: unless-stopped
+    env_file:
+      - db_public.env
     environment:
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_USER=autopi
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
       - POSTGRES_INITDB_WALDIR=/log
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
     ports:
@@ -21,6 +22,30 @@ services:
       - './src/web/database/postgresql.conf:/etc/postgresql/postgresql.conf'
       - db_data:/var/lib/postgresql/data
       - db_log:/log
+    secrets:
+      - db_password
+  
+  db_backup:
+    container_name: autopi_db_backup
+    image: prodrigestivill/postgres-backup-local
+    restart: unless-stopped
+    user: postgres:postgres
+    volumes:
+        - /var/opt/pgbackups:/backups # EDIT ME
+    links:
+        - db
+    depends_on:
+        - db
+    env_file:
+      - db_public.env
+      - db_backup.env
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+      - POSTGRES_HOST=autopi_db
+    networks:
+      - db_net
+    secrets:
+      - db_password
 
   api:
     container_name: autopi_api
@@ -35,6 +60,13 @@ services:
       - db_net
     volumes:
       - api_log:/log
+    env_file:
+      - db_public.env
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+      - POSTGRES_HOST=autopi_db
+    secrets:
+      - db_password
 
   proxy:
     container_name: autopi_rev_proxy
@@ -70,3 +102,7 @@ volumes:
   proxy_config:
   proxy_data:
   proxy_log:
+
+secrets:
+  db_password:
+    file: .db_password.secret # EDIT ME
