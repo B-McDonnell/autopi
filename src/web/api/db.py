@@ -144,6 +144,15 @@ class PiDBConnection:
         """
         return self._fetch_first_cell(query, (username,))
 
+    def update_user_login(self, username: str):
+        """Update the user login time to now.
+
+        Args:
+            username (str): the username whose last login time should be updated.
+        """
+        query = """UPDATE autopi.user SET last_login=NOW() WHERE username=%s;"""
+        self._commit(query, (username,))
+
     def is_admin(self, username: str) -> bool:
         """Check if user is an admin.
 
