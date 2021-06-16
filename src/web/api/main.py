@@ -7,7 +7,7 @@ from .core import StatusModel
 from .db import connect
 from .generate_html import Klass, Row, RowItem, build_homepage_content, build_page, construct_row
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None)
 
 
 # TODO it may simplify things to have Caddy/Apache guarantee that the user is authenticated before reaching this point
