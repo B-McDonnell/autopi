@@ -260,10 +260,10 @@ class PiDBConnection:
         query = """
             SELECT hardware_id FROM autopi.raspi WHERE device_id=%s LIMIT 1;
         """
-        results = self._fetch_first_cell(query, (devid,))
-        if results is None:
+        results = self._fetchall(query, (devid,))
+        if len(results) == 0:
             raise ValueError("device ID does not exist")
-        return results
+        return results[0][0]
 
     def update_status_general(self, status: StatusModel):
         """Update device row in database.
