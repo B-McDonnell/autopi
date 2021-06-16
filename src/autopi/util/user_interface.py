@@ -55,7 +55,7 @@ def _get_valid_input(
 def get_input(
     query: str,
     newline: bool = True,
-    validator: Optional[Callable[str, bool]] = None,
+    validator: Optional[Callable[[str], bool]] = None,
     error_message: Optional[str] = None,
 ) -> str:
     """Get input from user.
