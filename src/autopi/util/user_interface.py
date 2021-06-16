@@ -28,7 +28,7 @@ def print_header(header: str, pattern: str = "="):
 
 def _get_valid_input(
     inputer: Callable,
-    validator: Callable[str, bool],
+    validator: Callable[[str], bool],
     error_message: Optional[str] = "Invalid input",
 ) -> str:
     """Get input validated by a predicate, re-asking on failure.
@@ -55,7 +55,7 @@ def _get_valid_input(
 def get_input(
     query: str,
     newline: bool = True,
-    validator: Optional[Callable[str, bool]] = None,
+    validator: Optional[Callable[[str], bool]] = None,
     error_message: Optional[str] = None,
 ) -> str:
     """Get input from user.
@@ -78,7 +78,7 @@ def get_input(
 def get_secret(
     query: str,
     newline: bool = True,
-    validator: Optional[Callable[str, bool]] = None,
+    validator: Optional[Callable[[str], bool]] = None,
     error_message: Optional[str] = None,
     mask: str = "*",
     get_twice: bool = True,
