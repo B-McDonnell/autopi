@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from util import wpa_interface as wpa
+from util.config import Config
 
 
 def main():
@@ -14,14 +15,12 @@ def main():
 
     shared_parser = argparse.ArgumentParser(add_help=False)
 
-    subparsers = parser.add_subparsers(
-        dest="subparser", required=True, title="subcommands", metavar="(get | update)"
-    )
+    subparsers = parser.add_subparsers(dest="subparser", required=True, title="subcommands", metavar="(get | update)")
     shared_parser.add_argument(
         "FILENAME",
         nargs="?",
-        help="path to configuration file. Fails if file not not exist. Uses /etc/wpa_supplicant/wpa_supplicant.conf by default",
-        default="/etc/wpa_supplicant/wpa_supplicant.conf",
+        help=f"path to configuration file. Fails if file not not exist. Defaults to {Config.WPA_CONFIG_FILE}",
+        default=Config.WPA_CONFIG_FILE,
     )
 
     subparsers.add_parser(
@@ -29,9 +28,7 @@ def main():
         help="get the current country code. Fails if country code does not exist",
         parents=[shared_parser],
     )
-    update_parser = subparsers.add_parser(
-        "update", help="change the current country code", parents=[shared_parser]
-    )
+    update_parser = subparsers.add_parser("update", help="change the current country code", parents=[shared_parser])
     update_parser.add_argument("COUNTRY_CODE", help="ISO 3166-1 country code")
 
     args = parser.parse_args()

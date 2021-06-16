@@ -5,6 +5,7 @@
 from io import TextIOWrapper
 
 import util.wpa_interface as wpa
+from util.config import Config
 
 # TODO: get default file from config dir
 # on boot, run this, then rewrite file in format...
@@ -43,7 +44,7 @@ def get_dict(f: TextIOWrapper) -> dict:
 
 def main():
     """Perform main action and call helper functions."""
-    with open("/boot/CSM_new_network.txt", "r") as fin:
+    with open(Config.NEW_NETWORK_FILE, "r") as fin:
         d = get_dict(fin)
     if "ssid" not in d:
         # TODO: log
@@ -54,8 +55,7 @@ def main():
             ssid=d["ssid"],
             passwd=d["password"] if "password" in d else None,
             priority=d["priority"] if "priority" in d else None,
-        ),
-        config_file=wpa.get_default_wpa_config_file(),
+        )
     )
 
 
