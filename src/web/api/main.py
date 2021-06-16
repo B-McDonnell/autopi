@@ -26,11 +26,11 @@ def root(uid: Optional[str] = Header(None)):
     username = uid
     if username is None:
         raise HTTPException(status_code=401, detail="Not logged in")  # TODO A redirect would probably be better
-
     with connect() as db:
         user_login(db, username)
 
-        raspis = db.get_raspis(username if not db.is_admin(username) else None)
+        is_admin = db.is_admin(username)
+        raspis = db.get_raspis(username if not is_admin else None)
         warnings = db.get_user_warnings(username, get_alias=True)
     warning_ids = [warning[1] for warning in warnings]
     warning_rows = tuple(
@@ -43,12 +43,27 @@ def root(uid: Optional[str] = Header(None)):
         for warning in warnings
     )
 
-    columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated"]
-    raspi_rows = [
-        construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids) for items in raspis
-    ]
+    if not is_admin:
+        columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated"]
+        raspi_rows = [
+            construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids) for items in raspis
+        ]
+        body = build_homepage_content(raspi_rows, warning_rows)
+    else:
+        owned_raspis = [raspi for raspi in raspis if raspi[-2] == username]
+        other_raspis = [raspi for raspi in raspis if raspi[-2] != username]
+        columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated"]
+        raspi_rows = [
+            construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids)
+            for items in owned_raspis
+        ]
+        columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated", "Username"]
+        other_raspi_rows = [
+            construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids)
+            for items in other_raspis
+        ]
+        body = build_homepage_content(raspi_rows, warning_rows, other_raspi_rows)
 
-    body = build_homepage_content(raspi_rows, warning_rows)
     content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
