@@ -93,7 +93,7 @@ See `docker-compose --help` for more details usage instructions.
 Other useful commands include `sudo docker-compose logs` to view the service logs and `sudo docker-compose down` to stop the server.
 
 ## Database administration
-To access the database, `sudo docker exec -it autopi_db psql -U autopi -d autopi` should be run. This will put you into `psql` inside the database service. Some useful administrative commands are described in `docs/web/database/admin.md`.
+To access the database, `sudo docker-compose exec db psql -U autopi -d autopi` should be run. This will put you into `psql` inside the database service. Some useful administrative commands are described in `docs/web/database/admin.md`.
 
 For example, `INSERT INTO autopi.user (username, is_admin) VALUES ('minesusername', true);` will add an administrator.
 
