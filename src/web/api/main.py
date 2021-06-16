@@ -10,39 +10,6 @@ from .generate_html import Klass, Row, RowItem, build_homepage_content, build_pa
 app = FastAPI()
 
 
-def compose_homepage(username: str) -> str:  # TODO Temporary
-    """Return homepage."""
-
-    def add_pi_rows(pi_list: list):
-        table = "\n".join([str(pi) for pi in pi_list])
-        return table + "\n"
-
-    body = ""
-    with connect() as db:
-        if db.user_exists(username):
-            db.add_user(username)
-
-        user_pis = db.get_raspis(username)
-        body += add_pi_rows(user_pis)
-
-        if db.is_admin(username):
-            other_pis = [pi for pi in db.get_raspis() if pi not in user_pis]
-            body += add_pi_rows(other_pis)
-
-    title = "RaspberryPi List"
-    content = f"""
-    <html>
-        <head>
-            <title>{title}</title>
-        </head>
-        <body>
-            {body}
-        </body>
-    </html>
-    """
-    return content
-
-
 # TODO it may simplify things to have Caddy/Apache guarantee that the user is authenticated before reaching this point
 @app.get("/", response_class=HTMLResponse)
 def root(
@@ -93,16 +60,9 @@ def root(
 @app.get("/help", response_class=HTMLResponse)
 def help():
     """Serve help page."""
-    content = """
-    <html>
-        <head>
-            <title>Help page</title>
-        </head>
-        <body>
-            <h1>Hello world! This is the help page</h1>
-        </body>
-    </html>
-    """
+    with open("/app/help.html") as f:
+        content = f.read()
+
     content = build_page(title="Autopi Help", body_content=content, style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
@@ -134,6 +94,7 @@ def register(
     </html>
     """
     content = build_page(title="Autopi Registration", body_content=content, style_file="/app/style.css")
+
     return HTMLResponse(content=content, status_code=200)
 
 
