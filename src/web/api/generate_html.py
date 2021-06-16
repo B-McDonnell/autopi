@@ -95,7 +95,7 @@ def construct_row(items: tuple[tuple[str]], device_id: str, hw_warning: bool = F
                 RowItem(
                     key,
                     _pretty_datetime(value),
-                    Klass.NEUTRAL if age < 2.5 * 60 else Klass.WARNING if age < 5 * 60 else Klass.DEAD,
+                    Klass.NEUTRAL if age < 2.5 * 60 else Klass.BAD if age < 5 * 60 else Klass.DEAD,
                 )
             )  # TODO get delta from config
         elif key == "Power":
