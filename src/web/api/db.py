@@ -111,7 +111,7 @@ class PiDBConnection:
                     cur.execute(query, data)
                 return cur.fetchall()
 
-    def add_user_query(self, username: str):
+    def add_user(self, username: str):
         """Add new user to database on first login.
 
         Args:

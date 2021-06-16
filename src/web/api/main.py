@@ -21,7 +21,7 @@ def compose_homepage(username: str) -> str:  # TODO Temporary
     body = ""
     with connect() as db:
         if not db.user_exists(username):
-            db.add_user_query(username)
+            db.add_user(username)
 
         user_pis = db.get_raspis(username)
         body += add_pi_rows(user_pis)
@@ -55,17 +55,6 @@ def root(uid: Optional[str] = Header(None)):
 
     content = compose_homepage(uid)  # TODO Temporary
     return HTMLResponse(content=content, status_code=200)
-
-    # TODO: This comment block is just to remind me when this is implemented properly
-    # @app.post("/api/add_user")
-    # def add_user(user: UserModel):
-    # try:
-    #     with connect() as db:
-    #         db.add_user_query(user.username)
-    # except Exception as e:
-    #     # Ensure proper error logging
-    #     print("Error:", e)
-    # return {"response text": "It didn't crash!!"}
 
 
 @app.get("/help", response_class=HTMLResponse)
