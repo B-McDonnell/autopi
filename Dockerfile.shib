@@ -1,0 +1,33 @@
+#syntax=docker/dockerfile:1
+
+FROM centos:latest
+
+# Install http
+RUN yum -y install httpd mod_ssl
+EXPOSE 443
+
+# Configure yum to be able to get shibboleth
+COPY "./src/web/shib/autopi-shib.repo" "/etc/yum.repos.d/"
+RUN yum -y install yum-utils; yum-config-manager --enable shibboleth
+# Install shibboleth
+RUN yum -y install shibboleth.x86_64
+
+# Copy startup script
+COPY "./src/web/shib/shib-init-wrapper.sh" "/sbin/shib-init-wrapper.sh"
+RUN chmod +x /sbin/shib-init-wrapper.sh
+
+# Install shibboleth configurations
+COPY "./src/web/shib/shibboleth2.xml" "/etc/shibboleth/"
+COPY "./src/web/shib/sp-metadata.xml" "/etc/shibboleth/"
+COPY "./src/web/shib/idp-metadata.xml" "/etc/shibboleth/"
+COPY "./src/web/shib/attribute-map.xml" "/etc/shibboleth/"
+COPY "./src/web/shib/sp-cert.pem" "/etc/shibboleth/"
+COPY "./src/web/shib/sp-key.pem" "/etc/shibboleth/"
+# TODO RUN CHMOD?CHOWN ... sp-key.pem
+
+
+# Install apache configuration
+COPY "./src/web/shib/apache2.conf" "/etc/httpd/conf/httpd.conf"
+
+# Start up image
+CMD ["/sbin/shib-init-wrapper.sh"]

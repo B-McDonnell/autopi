@@ -1,5 +1,7 @@
 """Test API server."""
 
+import os
+import random
 from contextlib import contextmanager
 from typing import Optional
 
@@ -8,21 +10,22 @@ import psycopg2
 from .core import StatusModel
 
 
-# FIXME plaintext credentials
-def default_credentials() -> dict:
-    """Return default credentials for connection."""
+def get_db_credentials() -> dict:
+    """Get db credentials from environment."""
+    with open(os.environ["POSTGRES_PASSWORD_FILE"], "r") as fin:
+        password = fin.read().strip()
     return {
-        "host": "autopi_db",
-        "database": "autopi",
-        "user": "autopi",
-        "password": "password",
+        "host": os.environ["POSTGRES_HOST"],
+        "database": os.environ["POSTGRES_DB"],
+        "user": os.environ["POSTGRES_USER"],
+        "password": password,
     }
 
 
 class PiDBConnection:
     """An object representing a single connection with the database, providing needed database queries."""
 
-    def __init__(self, credentials: dict = default_credentials()):
+    def __init__(self, credentials: dict = get_db_credentials()):
         """Initialize members and opens database connection.
 
         Args:
@@ -36,7 +39,7 @@ class PiDBConnection:
         if self._connection is not None and not self._connection.closed:
             self.close()
 
-    def connect(self, credentials: dict = default_credentials()):
+    def connect(self, credentials: dict = get_db_credentials()):
         """Open a new connection, closing the previouus connection if applicable.
 
         Args:
@@ -89,7 +92,7 @@ class PiDBConnection:
                 else:
                     cur.execute(query, data)
                 result = cur.fetchone()
-                return result if result is None else result[0]
+                return result[0] if result is not None else None
 
     def _fetchall(self, query: str, data: Optional[tuple] = None) -> list[tuple]:
         """Execute query, returning query result.
@@ -111,7 +114,7 @@ class PiDBConnection:
                     cur.execute(query, data)
                 return cur.fetchall()
 
-    def add_user_query(self, username: str):
+    def add_user(self, username: str):
         """Add new user to database on first login.
 
         Args:
@@ -124,6 +127,7 @@ class PiDBConnection:
             INSERT INTO autopi.user (username)
             VALUES (%s);
         """
+        print(username)
         self._commit(query, (username,))
 
     def user_exists(self, username: str) -> bool:
@@ -140,6 +144,15 @@ class PiDBConnection:
             WHERE username = %s LIMIT 1;
         """
         return self._fetch_first_cell(query, (username,))
+
+    def update_user_login(self, username: str):
+        """Update the user login time to now.
+
+        Args:
+            username (str): the username whose last login time should be updated.
+        """
+        query = """UPDATE autopi.user SET last_login=NOW() WHERE username=%s;"""
+        self._commit(query, (username,))
 
     def is_admin(self, username: str) -> bool:
         """Check if user is an admin.
@@ -162,6 +175,33 @@ class PiDBConnection:
             return result
         raise ValueError("invalid username supplied")
 
+    def get_unique_alias(self, username: str) -> Optional[str]:
+        """Generate a unique alias for the Pi.
+
+        Args:
+            username (str): user to check uniqueness for.
+
+        Returns:
+            Optional[str]: alias or None if uniqueness check failed.
+        """
+        query = """SELECT alias FROM raspi WHERE username=%s;"""
+        aliases = [row[0] for row in self._fetchall(query, (username,))]
+        with open("/app/dictionaries/animals", "r") as fin:
+            animals = [line.strip() for line in fin.readlines()]
+        with open("/app/dictionaries/adjectives", "r") as fin:
+            adjectives = [line.strip() for line in fin.readlines()]
+
+        for i in range(1000):  # unlikely to fail this many times
+            animal = random.choice(animals)
+            adjective = random.choice(adjectives)
+            alias = adjective + "-" + animal
+
+            if alias in aliases:
+                continue
+
+            return alias
+        return None
+
     def add_raspi(self, username: str) -> str:
         """Add a new row to the raspi table for a given user.
 
@@ -172,11 +212,15 @@ class PiDBConnection:
             str: the new device's UUID.
         """
         query = """
-            INSERT INTO autopi.raspi (username)
-            VALUES (%s)
+            INSERT INTO autopi.raspi (username, alias)
+            VALUES (%s, %s)
             RETURNING device_id;
         """
-        return self._fetch_first_cell(query, (username,))
+        # TODO this alias generation is bad
+        alias = self.get_unique_alias(username)
+        # If no alias was obtained, get a random number
+        alias = alias if alias is not None else "ID: " + str(random.randint(0, 10000000))
+        return self._fetch_first_cell(query, (username, alias))
 
     def get_raspis(self, username: Optional[str] = None, registered_only=True) -> list[tuple]:
         """Return a list of Raspberry Pis.
@@ -216,7 +260,7 @@ class PiDBConnection:
         fetch_query = """SELECT device_id FROM autopi.raspi WHERE username=%s AND registered=false;"""
         result = self._fetch_first_cell(fetch_query, (username,))
         # TODO could check that only one id is unregistered, maybe log it
-        # TODO maybe determine that ID is not expired
+        # TODO expire unregistered device IDs after 2-3 days for improved security
         if result is not None:
             return result
 
@@ -230,13 +274,17 @@ class PiDBConnection:
             devid (str): the device ID.
 
         Returns:
-            bool: whether the device exists.
+            bool: whether the device exists (false if invalid ID).
         """
         query = """
             SELECT device_id FROM autopi.raspi WHERE device_id=%s;
         """
-        results = self._fetchall(query, (devid,))
-        return len(results)
+        try:
+            result = self._fetch_first_cell(query, (devid,))
+            return result is not None
+        except psycopg2.errors.InvalidTextRepresentation:
+            # Not a valid ID
+            return False
 
     def get_hardware_id(self, devid: str) -> str:
         """Get the hardware ID for a given device.
@@ -253,10 +301,10 @@ class PiDBConnection:
         query = """
             SELECT hardware_id FROM autopi.raspi WHERE device_id=%s LIMIT 1;
         """
-        results = self._fetch_first_cell(query, (devid,))
-        if results is None:
+        results = self._fetchall(query, (devid,))
+        if len(results) == 0:
             raise ValueError("device ID does not exist")
-        return results
+        return results[0][0]
 
     def update_status_general(self, status: StatusModel):
         """Update device row in database.
@@ -298,24 +346,6 @@ class PiDBConnection:
             WHERE device_id=%s;
         """
         self._commit(query, (status.hwid, status.devid))
-
-    def has_timed_out(self, devid: str) -> bool:
-        """Check if device ID entry has been updated in less than timeout period.
-
-        Args:
-            devid (str): device ID.
-
-        Returns:
-            bool: whether it has timed out.
-        """
-        TIMEOUT_DURATION = "2 minute 30 second"  # TODO maybe this shouldn't be defined here...
-        query = """
-            SELECT true FROM autopi.raspi
-            WHERE device_id=%s
-            AND updated_at + interval %s < now();
-        """  # TODO perhaps the timeout should not be handled by the database query
-        result = self._fetchall(query, (devid, TIMEOUT_DURATION))
-        return len(result) > 0
 
     def add_raspi_warning(self, devid: str, warning: str):
         """Add warning for specific device.
@@ -362,7 +392,7 @@ class PiDBConnection:
 
 
 @contextmanager
-def connect(credentials: list = default_credentials()) -> PiDBConnection:
+def connect(credentials: list = get_db_credentials()) -> PiDBConnection:
     """Create PIDBConnection instance for 'with' statement."""
     db = PiDBConnection(credentials)
     try:
