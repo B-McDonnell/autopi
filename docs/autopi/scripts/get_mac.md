@@ -1,8 +1,8 @@
 # Usage
-`get_mac.py [wlan0 | eth0]`
+`get_mac.py [interface]`
 
 - Script to retrieve ethernet or wireless MAC address.
-- Can be called with parameters (wlan0, eth0)
+
 ##Example
 - `get_mac.py wlan0` gets wireless MAC address
 
@@ -14,5 +14,4 @@
 - `autopi.util.network_info`
 
 # Technical considerations
-- Uses eth0 and wlan0 as interfaces for argv.
 - Looks for "wifi", "wireless", or "ethernet" as user input.

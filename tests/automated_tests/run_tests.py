@@ -111,9 +111,7 @@ def main():
         for i, module in enumerate(modules):
             # Run all unittest tests in each file
 
-            print_header(
-                "Running tests for script: " + testfiles[i].name, character="_"
-            )
+            print_header("Running tests for script: " + testfiles[i].name, character="_")
             t = TestLoader()
             tests = t.loadTestsFromModule(module)
             suite = TestSuite(tests)
