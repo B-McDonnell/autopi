@@ -12,3 +12,4 @@ Persistent (takes server down):
 2. Run `docker-compose down`
 3. Run `docker-compose up --build`
 
+Note that the original help age was generated using [mdtohtml](https://github.com/gomarkdown/mdtohtml).
