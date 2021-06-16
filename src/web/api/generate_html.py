@@ -184,7 +184,7 @@ def build_homepage_content(
     airium.h1(_t="Raspberry Pis")
     airium = build_table(airium, pi_rows)
     if len(admin_pi_rows) > 0:
-        airium.h1(_t="ALl Other Raspberry Pis")
+        airium.h1(_t="All Other Raspberry Pis")
         airium = build_table(airium, admin_pi_rows)
     return airium
 

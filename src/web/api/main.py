@@ -49,14 +49,14 @@ def root(uid: Optional[str] = Header(None)):
         ]
         body = build_homepage_content(raspi_rows, warning_rows)
     else:
-        owned_raspis = [raspi for raspi in raspis if raspi[-1] == username]
-        other_raspis = [raspi for raspi in raspis if raspi[-1] != username]
+        owned_raspis = [raspi for raspi in raspis if raspi[-2] == username]
+        other_raspis = [raspi for raspi in raspis if raspi[-2] != username]
         columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated"]
         raspi_rows = [
             construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids)
             for items in owned_raspis
         ]
-        columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated"]
+        columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated", "Username"]
         other_raspi_rows = [
             construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids)
             for items in other_raspis
