@@ -65,8 +65,8 @@ fi
 WRITE_MAC_COMMAND="$SCRIPTS_DIR/get_mac.py wlan0 > /boot/CSM_mac.txt"
 WRITE_MAC_CRON="@reboot $WRITE_MAC_COMMAND"
 crontab -l >/tmp/crontab_r 2>/dev/null
-grep -Fx "$WRITE_MAC_CRON" /tmp/crontab_r >/dev/null
-if grep -Fx "$WRITE_MAC_CRON" /tmp/crontab_r >/dev/null; then
+#grep -Fx "$WRITE_MAC_CRON" /tmp/crontab_r >/dev/null
+if ! grep -Fx "$WRITE_MAC_CRON" /tmp/crontab_r >/dev/null; then
     echo "$WRITE_MAC_CRON">>/tmp/crontab_r
 fi
 crontab /tmp/crontab_r
@@ -80,20 +80,11 @@ crontab /tmp/crontab_r
 
 # TODO: change reset command to copy a blank file to boot everytime
 ADD_NET_COMMAND="$SCRIPTS_DIR/add_network_from_txt.py"
-ADD_RESET_COMMAND="printf << EOF
-# No space after (=).
-# Priority is an int value 1,2, or 3 (3 being prioritized the most).
-# If no password/priority, leave empty.
-# This file will be reset after network is added.
-ssid=
-password=
-priority=
-EOF > /boot/CSM_new_network.txt"
-
+ADD_RESET_COMMAND="printf '# No space after (=).\n# Priority is an int value 1,2, or 3 (3 being prioritized the most).\n# If no password/priority, leave empty.\n# This file will be reset after network is added.\nssid=\npassword=\npriority=\n' > /boot/CSM_new_network.txt"
 
 ADD_NET_CRON="@reboot $ADD_NET_COMMAND; $ADD_RESET_COMMAND"
 crontab -l >/tmp/crontab_r 2>/dev/null
-if grep -Fx "$ADD_NET_CRON" /tmp/crontab_r >/dev/null; then
+if ! grep -Fx "$ADD_NET_CRON" /tmp/crontab_r >/dev/null; then
     echo "$ADD_NET_CRON">>/tmp/crontab_r
 fi
 crontab /tmp/crontab_r

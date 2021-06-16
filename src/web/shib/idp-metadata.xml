@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" entityID="https://idp.mines.edu/idp/shibboleth">
+
+    <IDPSSODescriptor protocolSupportEnumeration="urn:mace:shibboleth:1.0 urn:oasis:names:tc:SAML:1.1:protocol urn:oasis:names:tc:SAML:2.0:protocol">
+
+        <Extensions>
+            <shibmd:Scope regexp="false">mines.edu</shibmd:Scope>
+        </Extensions>
+
+        <KeyDescriptor>
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>
+MIIDIDCCAgigAwIBAgIVALrVjyviCwnipvwjtC7VXHNfQYsFMA0GCSqGSIb3DQEB
+BQUAMBgxFjAUBgNVBAMTDWlkcC5taW5lcy5lZHUwHhcNMTQwNDA3MjAzMTE4WhcN
+MzQwNDA3MjAzMTE4WjAYMRYwFAYDVQQDEw1pZHAubWluZXMuZWR1MIIBIjANBgkq
+hkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmypcCiTRtq+l22di6Wp200buqUJTdKZe
+pWQ7uOhe64ns1HbPyXBeCAnUI3yLeUduwrj/VDJEQsh5Sdpg/I8lkf3zUoDNEUeM
+tp8nZjRDCysLZcotlaT1nfFj5g/Yvk1BBb+09y+Orovcv3NLY9DE42qK5CrnWdqO
+6TWme1sgNtClkFBgxDbXGGQzNqHHvAUQooSiDVB716u4t0KlKREvDNdmx5KJ7jjO
+stlMOxw2L1xnGs7dScUDR9AYxWuZ2v7l5sgeTGVGY39DJbRk4jHi4vxsVYBlq18/
+WFoS94t4g32KpDYclxfZIlkgibU0E9Bw8wcnq5h9My1J0aKOS+366QIDAQABo2Ew
+XzA+BgNVHREENzA1gg1pZHAubWluZXMuZWR1hiRodHRwczovL2lkcC5taW5lcy5l
+ZHUvaWRwL3NoaWJib2xldGgwHQYDVR0OBBYEFNxq63HQJW8lr4dh/q1gtcJJ0bFg
+MA0GCSqGSIb3DQEBBQUAA4IBAQB2/aY7NYBtrztFTQeQjhUg76xuVzBskqvgIKfU
+4YeYjvK86VNEKlppGkylFHm817Sy2yeDozoKV2jS46GOlg9ZgE7NGiLdK1NP2vup
+S5KdtuOu7wnrrzkKQqY3zL4TDwK4qPZxOAFZcFSYdoPNGc+fKrhw7bo6S+ZSjFtm
+68I/MXFy+Q9iGYh6dPC5x3PRn0hn1TPTJ1GczhkNGFZLZqnE4Pb/gPXwbSx3jvyv
+pDZoqzjpdIxwH4osA5q6R8DkFUHxsOQlPHTZozbBtkIcKigYYG2sEmKmHUxmV9zu
+t6dBbef3d3Mj0qVgNOz7Nyvv1qrAUw8WUziVYMzIeS9tQJa1
+
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </KeyDescriptor>
+        
+        <ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding" Location="https://idp.mines.edu:8443/idp/profile/SAML1/SOAP/ArtifactResolution" index="1"/>
+
+        <ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://idp.mines.edu:8443/idp/profile/SAML2/SOAP/ArtifactResolution" index="2"/>
+        
+        <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://idp.mines.edu/idp/profile/SAML2/Redirect/SLO" />
+        
+        <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://idp.mines.edu/idp/profile/SAML2/POST/SLO" />
+        
+        <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://idp.mines.edu:8443/idp/profile/SAML2/SOAP/SLO" />
+                                   
+        <NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</NameIDFormat>
+        <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
+
+        <SingleSignOnService Binding="urn:mace:shibboleth:1.0:profiles:AuthnRequest" Location="https://idp.mines.edu/idp/profile/Shibboleth/SSO"/>
+        
+        <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://idp.mines.edu/idp/profile/SAML2/POST/SSO"/>
+
+        <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://idp.mines.edu/idp/profile/SAML2/POST-SimpleSign/SSO"/>
+        
+        <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://idp.mines.edu/idp/profile/SAML2/Redirect/SSO"/>
+    </IDPSSODescriptor>
+
+    <AttributeAuthorityDescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:1.1:protocol urn:oasis:names:tc:SAML:2.0:protocol">
+
+        <Extensions>
+            <shibmd:Scope regexp="false">mines.edu</shibmd:Scope>
+        </Extensions>
+
+        <KeyDescriptor>
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>
+MIIDIDCCAgigAwIBAgIVALrVjyviCwnipvwjtC7VXHNfQYsFMA0GCSqGSIb3DQEB
+BQUAMBgxFjAUBgNVBAMTDWlkcC5taW5lcy5lZHUwHhcNMTQwNDA3MjAzMTE4WhcN
+MzQwNDA3MjAzMTE4WjAYMRYwFAYDVQQDEw1pZHAubWluZXMuZWR1MIIBIjANBgkq
+hkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmypcCiTRtq+l22di6Wp200buqUJTdKZe
+pWQ7uOhe64ns1HbPyXBeCAnUI3yLeUduwrj/VDJEQsh5Sdpg/I8lkf3zUoDNEUeM
+tp8nZjRDCysLZcotlaT1nfFj5g/Yvk1BBb+09y+Orovcv3NLY9DE42qK5CrnWdqO
+6TWme1sgNtClkFBgxDbXGGQzNqHHvAUQooSiDVB716u4t0KlKREvDNdmx5KJ7jjO
+stlMOxw2L1xnGs7dScUDR9AYxWuZ2v7l5sgeTGVGY39DJbRk4jHi4vxsVYBlq18/
+WFoS94t4g32KpDYclxfZIlkgibU0E9Bw8wcnq5h9My1J0aKOS+366QIDAQABo2Ew
+XzA+BgNVHREENzA1gg1pZHAubWluZXMuZWR1hiRodHRwczovL2lkcC5taW5lcy5l
+ZHUvaWRwL3NoaWJib2xldGgwHQYDVR0OBBYEFNxq63HQJW8lr4dh/q1gtcJJ0bFg
+MA0GCSqGSIb3DQEBBQUAA4IBAQB2/aY7NYBtrztFTQeQjhUg76xuVzBskqvgIKfU
+4YeYjvK86VNEKlppGkylFHm817Sy2yeDozoKV2jS46GOlg9ZgE7NGiLdK1NP2vup
+S5KdtuOu7wnrrzkKQqY3zL4TDwK4qPZxOAFZcFSYdoPNGc+fKrhw7bo6S+ZSjFtm
+68I/MXFy+Q9iGYh6dPC5x3PRn0hn1TPTJ1GczhkNGFZLZqnE4Pb/gPXwbSx3jvyv
+pDZoqzjpdIxwH4osA5q6R8DkFUHxsOQlPHTZozbBtkIcKigYYG2sEmKmHUxmV9zu
+t6dBbef3d3Mj0qVgNOz7Nyvv1qrAUw8WUziVYMzIeS9tQJa1
+
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </KeyDescriptor>
+
+        <AttributeService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding" Location="https://idp.mines.edu:8443/idp/profile/SAML1/SOAP/AttributeQuery"/>
+        
+        <AttributeService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://idp.mines.edu:8443/idp/profile/SAML2/SOAP/AttributeQuery"/>
+        
+        <NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</NameIDFormat>
+        <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
+        
+    </AttributeAuthorityDescriptor>
+    
+</EntityDescriptor>

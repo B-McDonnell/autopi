@@ -1,0 +1,33 @@
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://autopi.mines.edu/shibboleth">
+  <md:SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol urn:oasis:names:tc:SAML:1.1:protocol">
+    <md:KeyDescriptor>
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>
+MIIC5DCCAcygAwIBAgIUff/BC82UZzrPNIniqs0g8muuoMgwDQYJKoZIhvcNAQEF
+BQAwETEPMA0GA1UEAxMGcG9wLW9zMB4XDTIxMDYxMTE3NDk1N1oXDTMxMDYwOTE3
+NDk1N1owETEPMA0GA1UEAxMGcG9wLW9zMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
+MIIBCgKCAQEArcEOA1Ee9vVIikATGm0WQyzCSS2ENtV9RqwkE11ajWqqaTB+fAcR
+UiiFT822acRsY41uEJbzmo6DutZj6KQDInwmhGhM2OE2U4Or1NpfiaI0l1ljfmLN
+OuW2hZkUKmawJtHPIDXiHJtKIYqivMAY1njG5fbS1MRJbHmlLBLDD+BS162P7ffy
+ynzmUH5p8d3fCNAxaeHS+1hxhL99N5ikFqIx1Zt6KuCvTinh+srGFE5GMoRtWkEZ
+BySw0klXqZreZInZwBbJSuOXbWtMIGVK/53JwtqzlKivXTrlVZLs09JW1fs7sSCp
+jpjz11Ltb2g/z8gjBGUKgUzQRIdCNjkT8wIDAQABozQwMjARBgNVHREECjAIggZw
+b3Atb3MwHQYDVR0OBBYEFP84f2IbMtXcQfkMO6O9GX5HVBxWMA0GCSqGSIb3DQEB
+BQUAA4IBAQAVfAjs8C3fvxwqG4imgb9EPYYXd4/maGQDqEKni6HVtbg8r30Q8+Bc
+rAXjKDQnnllrxHUnPKjkOF6iRzVEiZXui8lIQOrCXDBoAK96Ru3f+lxeTcJekvcM
+8/tbYnLLyJyNCB87tDMeXZ++W1JxLb733mdT25fi4NhInECisEpuUoQHAlIm3XE9
+K+5a4QyNTKNbVpFmTwIDwUkrcRyFFnUWaLEQ0/3fYHPqmYH4vDL47NV5SjAjYcS/
+iIBrd9Jefl5uuYnuvjqG2A88SdQa5pYlrQCgQt7C1F0gqPk4berNesWJCCjp6YAO
+DOlmaZLKxbYTfFTB45AFi1Gh58MT1h9R
+          </ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://autopi.mines.edu/Shibboleth.sso/SAML2/POST" index="1"/>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://autopi.mines.edu/Shibboleth.sso/SAML2/POST-SimpleSign" index="2"/>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:PAOS" Location="https://autopi.mines.edu/Shibboleth.sso/SAML2/ECP" index="3"/>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:1.0:profiles:browser-post" Location="https://autopi.mines.edu/Shibboleth.sso/SAML/POST" index="4"/>
+  </md:SPSSODescriptor>
+</md:EntityDescriptor>
+

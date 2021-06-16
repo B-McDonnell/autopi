@@ -44,7 +44,7 @@ def main():
         else:
             print(country)
     elif args.subparser == "update":
-        wpa.update_country(args.FILENAME, args.COUNTRY_CODE)
+        wpa.update_country(args.COUNTRY_CODE, args.FILENAME)
 
 
 if __name__ == "__main__":

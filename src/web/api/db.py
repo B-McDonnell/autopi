@@ -1,5 +1,7 @@
 """Test API server."""
 
+import os
+import random
 from contextlib import contextmanager
 from typing import Optional
 
@@ -8,21 +10,22 @@ import psycopg2
 from .core import StatusModel
 
 
-# FIXME plaintext credentials
-def default_credentials() -> dict:
-    """Return default credentials for connection."""
+def get_db_credentials() -> dict:
+    """Get db credentials from environment."""
+    with open(os.environ["POSTGRES_PASSWORD_FILE"], "r") as fin:
+        password = fin.read().strip()
     return {
-        "host": "autopi_db",
-        "database": "autopi",
-        "user": "autopi",
-        "password": "password",
+        "host": os.environ["POSTGRES_HOST"],
+        "database": os.environ["POSTGRES_DB"],
+        "user": os.environ["POSTGRES_USER"],
+        "password": password,
     }
 
 
 class PiDBConnection:
     """An object representing a single connection with the database, providing needed database queries."""
 
-    def __init__(self, credentials: dict = default_credentials()):
+    def __init__(self, credentials: dict = get_db_credentials()):
         """Initialize members and opens database connection.
 
         Args:
@@ -36,7 +39,7 @@ class PiDBConnection:
         if self._connection is not None and not self._connection.closed:
             self.close()
 
-    def connect(self, credentials: dict = default_credentials()):
+    def connect(self, credentials: dict = get_db_credentials()):
         """Open a new connection, closing the previouus connection if applicable.
 
         Args:
@@ -65,7 +68,7 @@ class PiDBConnection:
         """
         with self._connection:
             with self._connection.cursor() as cur:
-                if data is not None:
+                if data is None:
                     cur.execute(query)
                 else:
                     cur.execute(query, data)
@@ -89,7 +92,7 @@ class PiDBConnection:
                 else:
                     cur.execute(query, data)
                 result = cur.fetchone()
-                return result if result is None else result[0]
+                return result[0] if result is not None else None
 
     def _fetchall(self, query: str, data: Optional[tuple] = None) -> list[tuple]:
         """Execute query, returning query result.
@@ -111,7 +114,7 @@ class PiDBConnection:
                     cur.execute(query, data)
                 return cur.fetchall()
 
-    def add_user_query(self, username: str):
+    def add_user(self, username: str):
         """Add new user to database on first login.
 
         Args:
@@ -124,6 +127,7 @@ class PiDBConnection:
             INSERT INTO autopi.user (username)
             VALUES (%s);
         """
+        print(username)
         self._commit(query, (username,))
 
     def user_exists(self, username: str) -> bool:
@@ -140,6 +144,15 @@ class PiDBConnection:
             WHERE username = %s LIMIT 1;
         """
         return self._fetch_first_cell(query, (username,))
+
+    def update_user_login(self, username: str):
+        """Update the user login time to now.
+
+        Args:
+            username (str): the username whose last login time should be updated.
+        """
+        query = """UPDATE autopi.user SET last_login=NOW() WHERE username=%s;"""
+        self._commit(query, (username,))
 
     def is_admin(self, username: str) -> bool:
         """Check if user is an admin.
@@ -162,6 +175,33 @@ class PiDBConnection:
             return result
         raise ValueError("invalid username supplied")
 
+    def get_unique_alias(self, username: str) -> Optional[str]:
+        """Generate a unique alias for the Pi.
+
+        Args:
+            username (str): user to check uniqueness for.
+
+        Returns:
+            Optional[str]: alias or None if uniqueness check failed.
+        """
+        query = """SELECT alias FROM raspi WHERE username=%s;"""
+        aliases = [row[0] for row in self._fetchall(query, (username,))]
+        with open("/app/dictionaries/animals", "r") as fin:
+            animals = [line.strip() for line in fin.readlines()]
+        with open("/app/dictionaries/adjectives", "r") as fin:
+            adjectives = [line.strip() for line in fin.readlines()]
+
+        for i in range(1000):  # unlikely to fail this many times
+            animal = random.choice(animals)
+            adjective = random.choice(adjectives)
+            alias = adjective + "-" + animal
+
+            if alias in aliases:
+                continue
+
+            return alias
+        return None
+
     def add_raspi(self, username: str) -> str:
         """Add a new row to the raspi table for a given user.
 
@@ -172,11 +212,15 @@ class PiDBConnection:
             str: the new device's UUID.
         """
         query = """
-            INSERT INTO autopi.raspi (username)
-            VALUES (%s)
+            INSERT INTO autopi.raspi (username, alias)
+            VALUES (%s, %s)
             RETURNING device_id;
         """
-        return self._fetch_first_cell(query, (username,))
+        # TODO this alias generation is bad
+        alias = self.get_unique_alias(username)
+        # If no alias was obtained, get a random number
+        alias = alias if alias is not None else "ID: " + str(random.randint(0, 10000000))
+        return self._fetch_first_cell(query, (username, alias))
 
     def get_raspis(self, username: Optional[str] = None, registered_only=True) -> list[tuple]:
         """Return a list of Raspberry Pis.
@@ -186,7 +230,7 @@ class PiDBConnection:
             registered (bool, default: True): restrict list to those Pis that are registered.
 
         Returns:
-            list: Raspberry Pis (device_id: str, alias: str, ip_addrress: str, ssid: str, ssh: str, vnc: str, updated_at: datetime, power: str).
+            list: Raspberry Pis (device_id: str, alias: str, ip_addrress: str, ssid: str, ssh: str, vnc: str, updated_at: datetime, power: str, username: str).
         """
         # build query
         data = tuple()
@@ -199,7 +243,7 @@ class PiDBConnection:
         elif registered_only:
             condition = "WHERE registered = true"
         query = f"""
-            SELECT device_id, alias, ip_addr, ssid, ssh, vnc, updated_at, power FROM autopi.raspi {condition};
+            SELECT device_id, alias, ip_addr, ssid, ssh, vnc, updated_at, username, power FROM autopi.raspi {condition};
         """
         # execute query
         return self._fetchall(query, data)
@@ -216,7 +260,7 @@ class PiDBConnection:
         fetch_query = """SELECT device_id FROM autopi.raspi WHERE username=%s AND registered=false;"""
         result = self._fetch_first_cell(fetch_query, (username,))
         # TODO could check that only one id is unregistered, maybe log it
-        # TODO maybe determine that ID is not expired
+        # TODO expire unregistered device IDs after 2-3 days for improved security
         if result is not None:
             return result
 
@@ -230,13 +274,17 @@ class PiDBConnection:
             devid (str): the device ID.
 
         Returns:
-            bool: whether the device exists.
+            bool: whether the device exists (false if invalid ID).
         """
         query = """
             SELECT device_id FROM autopi.raspi WHERE device_id=%s;
         """
-        results = self._fetchall(query, (devid,))
-        return len(results)
+        try:
+            result = self._fetch_first_cell(query, (devid,))
+            return result is not None
+        except psycopg2.errors.InvalidTextRepresentation:
+            # Not a valid ID
+            return False
 
     def get_hardware_id(self, devid: str) -> str:
         """Get the hardware ID for a given device.
@@ -253,10 +301,10 @@ class PiDBConnection:
         query = """
             SELECT hardware_id FROM autopi.raspi WHERE device_id=%s LIMIT 1;
         """
-        results = self._fetch_first_cell(query, (devid,))
-        if results is None:
+        results = self._fetchall(query, (devid,))
+        if len(results) == 0:
             raise ValueError("device ID does not exist")
-        return results
+        return results[0][0]
 
     def update_status_general(self, status: StatusModel):
         """Update device row in database.
@@ -299,24 +347,6 @@ class PiDBConnection:
         """
         self._commit(query, (status.hwid, status.devid))
 
-    def has_timed_out(self, devid: str) -> bool:
-        """Check if device ID entry has been updated in less than timeout period.
-
-        Args:
-            devid (str): device ID.
-
-        Returns:
-            bool: whether it has timed out.
-        """
-        TIMEOUT_DURATION = "2 minute 30 second"  # TODO maybe this shouldn't be defined here...
-        query = """
-            SELECT true FROM autopi.raspi
-            WHERE device_id=%s
-            AND updated_at + interval %s < now();
-        """  # TODO perhaps the timeout should not be handled by the database query
-        result = self._fetchall(query, (devid, TIMEOUT_DURATION))
-        return len(result) > 0
-
     def add_raspi_warning(self, devid: str, warning: str):
         """Add warning for specific device.
 
@@ -331,37 +361,38 @@ class PiDBConnection:
         """
         self._commit(query, (devid, warning))
 
-    def get_device_warnings(self, devid: str) -> list:
+    def get_user_warnings(self, username: str, get_alias: bool = False, remove: bool = True) -> list:
         """Return list of warnings for a specific device.
 
         Args:
-            devid (str): device ID.
-
-        Returns:
-            list[(warning: str, added_at: datetime.datetime)]: the list of warnings if any
-        """
-        query = """
-            SELECT warning, added_at FROM autopi.raspi_warning
-            WHERE device_id=%s;
-        """
-        return self._fetchall(query, (devid,))
-
-    def get_user_warnings(self, username: str) -> list:
-        """Return list of warnings for a specific device.
+            username (str): username
+            get_alias (bool): get the device alias matching the warning's devid
+            remove (bool): delete warnings after retrieval
 
         Returns:
             list[(device_id: str, warning: str, added_at: datetime.datetime)]: the list of warnings if any
         """
-        query = """
-            SELECT w.device_id, w.warning, w.added_at
+        query = f"""
+            SELECT {"r.alias, " if get_alias else ""}w.device_id, w.warning, w.added_at
             FROM autopi.raspi_warning as w, autopi.raspi as r
             WHERE w.device_id = r.device_id AND r.username = %s;
         """
-        return self._fetchall(query, (username,))
+        remove_query = """
+            DELETE FROM autopi.raspi_warning w
+            WHERE w.device_id IN (
+                SELECT r.device_id
+                FROM autopi.raspi r
+                WHERE r.username = %s
+            );
+        """
+        warnings = self._fetchall(query, (username,))
+        if remove:
+            self._commit(remove_query, (username,))
+        return warnings
 
 
 @contextmanager
-def connect(credentials: list = default_credentials()) -> PiDBConnection:
+def connect(credentials: list = get_db_credentials()) -> PiDBConnection:
     """Create PIDBConnection instance for 'with' statement."""
     db = PiDBConnection(credentials)
     try:
