@@ -1,6 +1,7 @@
 """Test API server."""
 
 import os
+import random
 from contextlib import contextmanager
 from typing import Optional
 
@@ -165,6 +166,33 @@ class PiDBConnection:
             return result
         raise ValueError("invalid username supplied")
 
+    def get_unique_alias(self, username: str) -> Optional[str]:
+        """Generate a unique alias for the Pi.
+
+        Args:
+            username (str): user to check uniqueness for.
+
+        Returns:
+            Optional[str]: alias or None if uniqueness check failed.
+        """
+        query = """SELECT alias FROM raspi WHERE username=%s;"""
+        aliases = [row[0] for row in self._fetchall(query, (username,))]
+        with open("/app/dictionaries/animals", "r") as fin:
+            animals = [line for line in fin.readlines().strip()]
+        with open("/app/dictionaries/adjectives", "r") as fin:
+            adjectives = [line for line in fin.readlines().strip()]
+
+        for i in range(1000):  # unlikely to fail this many times
+            animal = random.choice(animals)
+            adjective = random.choice(adjectives)
+            alias = animal + "-" + adjective
+
+            if alias in aliases:
+                continue
+
+            return alias
+        return None
+
     def add_raspi(self, username: str) -> str:
         """Add a new row to the raspi table for a given user.
 
@@ -175,11 +203,15 @@ class PiDBConnection:
             str: the new device's UUID.
         """
         query = """
-            INSERT INTO autopi.raspi (username)
-            VALUES (%s)
+            INSERT INTO autopi.raspi (username, alias)
+            VALUES (%s, %s)
             RETURNING device_id;
         """
-        return self._fetch_first_cell(query, (username,))
+        # TODO this alias generation is bad
+        alias = self.get_unique_alias(username)
+        # If no alias was obtained, get a random number
+        alias = alias if alias is not None else "ID: " + str(random.randint(0, 10000000))
+        return self._fetch_first_cell(query, (username, alias))
 
     def get_raspis(self, username: Optional[str] = None, registered_only=True) -> list[tuple]:
         """Return a list of Raspberry Pis.
