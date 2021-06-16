@@ -31,7 +31,7 @@ services:
     restart: unless-stopped
     user: postgres:postgres
     volumes:
-        - ./bkp:/backups # EDIT ME
+        - /var/opt/pgbackups:/backups # EDIT ME
     links:
         - db
     depends_on:
@@ -105,4 +105,4 @@ volumes:
 
 secrets:
   db_password:
-    file: .db_password.secret
+    file: .db_password.secret # EDIT ME
