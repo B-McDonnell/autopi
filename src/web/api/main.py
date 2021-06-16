@@ -42,8 +42,6 @@ def root(uid: Optional[str] = Header(None)):
         for warning in warnings
     )
 
-    raspis = raspis[-1:]  # remove the power column
-
     columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated"]
     raspi_rows = [
         construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids) for items in raspis
@@ -98,7 +96,7 @@ def update_status(status: StatusModel):
             )  # TODO ascertain proper response to bad id; minimal information is preferable
 
         prev_hwid = db.get_hardware_id(status.devid)
-        if prev_hwid != status.hwid:
+        if prev_hwid != status.hwid and prev_hwid:
             # TODO message should maybe not be defined in code??
             msg = "The hardware of this device has changed. If this was not you, contact your instructor."
             db.add_raspi_warning(status.devid, msg)
