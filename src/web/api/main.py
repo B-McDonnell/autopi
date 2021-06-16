@@ -1,4 +1,4 @@
-"""Test API server."""
+"""API server."""
 
 from typing import Optional
 
