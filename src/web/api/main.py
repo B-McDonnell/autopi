@@ -59,14 +59,16 @@ def root(
     warning_rows = tuple(
         Row(
             items=(
-                RowItem("Name", warning[1], Klass.WARNING),
-                RowItem("Warning Description", warning[2], Klass.WARNING),
+                RowItem("Name", next(filter(lambda x: x[0] == warning[0], raspis), None)[1], Klass.WARNING),
+                RowItem("Warning Description", warning[1], Klass.WARNING),
             )
         )
         for warning in warnings
     )
 
-    columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated", "Power"]
+    raspis = raspis[-1:]  # remove the power column
+
+    columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated"]
     raspi_rows = [
         construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids) for items in raspis
     ]
