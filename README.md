@@ -73,6 +73,8 @@ If you *cannot* SSH into the Raspberry Pi:
 7. Turn on Raspberry Pi, and network settings will reconfigure.
 8. `CSM_new_network.txt` will be reset to blank parameters for adding additional networks.
 
+If neither of these methods work for your network setup, visit the [the official Raspberry Pi network configuration docs](https://www.raspberrypi.org/documentation/configuration/wireless/).
+
 ## Get IP/status information
 In order to see the IP and status information for the Raspberry Pi, do the following:
 
