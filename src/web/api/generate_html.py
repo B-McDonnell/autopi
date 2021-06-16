@@ -162,7 +162,9 @@ def build_table(a: Airium, rows: Iterable[Row]) -> Airium:
     return a
 
 
-def build_homepage_content(pi_rows: list[Row], warning_rows: list[Row], airium: Optional[Airium] = None) -> Airium:
+def build_homepage_content(
+    pi_rows: list[Row], warning_rows: list[Row], admin_pi_rows: list[Row] = [], airium: Optional[Airium] = None
+) -> Airium:
     """Construct the warning and raspi tables.
 
     Args:
@@ -181,6 +183,9 @@ def build_homepage_content(pi_rows: list[Row], warning_rows: list[Row], airium: 
         airium = build_table(airium, warning_rows)
     airium.h1(_t="Raspberry Pis")
     airium = build_table(airium, pi_rows)
+    if len(admin_pi_rows) > 0:
+        airium.h1(_t="ALl Other Raspberry Pis")
+        airium = build_table(airium, admin_pi_rows)
     return airium
 
 
