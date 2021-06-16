@@ -16,7 +16,8 @@ def user_login(db: PiDBConnection, username: str):
     """Perform user login tasks."""
     if not db.user_exists(username):
         db.add_user(username)
-    # else update login time
+    else:
+        db.update_user_login(username)
 
 
 @app.get("/", response_class=HTMLResponse)
