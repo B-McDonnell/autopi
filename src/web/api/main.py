@@ -7,69 +7,58 @@ from fastapi.responses import HTMLResponse
 
 from .core import StatusModel
 from .db import connect
+from .generate_html import Klass, Row, RowItem, build_homepage_content, build_page, construct_row
 
 app = FastAPI()
 
-
-def compose_homepage(username: str) -> str:  # TODO Temporary
-    """Return homepage."""
-
-    def add_pi_rows(pi_list: list):
-        table = "\n".join([str(pi) for pi in pi_list])
-        return table + "\n"
-
-    body = ""
-    with connect() as db:
-        if not db.user_exists(username):
-            db.add_user(username)
-
-        user_pis = db.get_raspis(username)
-        body += add_pi_rows(user_pis)
-
-        if db.is_admin(username):
-            other_pis = [pi for pi in db.get_raspis() if pi not in user_pis]
-            body += add_pi_rows(other_pis)
-
-    title = "RaspberryPi List"
-    content = f"""
-    <html>
-        <head>
-            <title>{title}</title>
-        </head>
-        <body>
-            {body}
-        </body>
-    </html>
-    """
-    return content
+def user_login(db: PiDBConnection, username: str):
+    if not db.user_exists(username):
+        db.add_user(username)
+    # else update login time
 
 
-# TODO it may simplify things to have Caddy/Apache guarantee that the user is authenticated before reaching this point
 @app.get("/", response_class=HTMLResponse)
 def root(uid: Optional[str] = Header(None)):
     """Serve raspi list."""
-    if uid is None:
-        raise HTTPException(
-            status_code=401, detail="Please log in..."
-        )  # TODO A redirect would probably be better
+    username = uid
+    if username is None:
+        raise HTTPException(status_code=401, detail="Not logged in")  # TODO A redirect would probably be better
 
-    content = compose_homepage(uid)  # TODO Temporary
+    with connect() as db:
+        user_login(db, username)
+        
+        raspis = db.get_raspis(username if not db.is_admin(username) else None)
+        warnings = db.get_user_warnings(username)
+    warning_ids = [warning[0] for warning in warnings]
+    warning_rows = tuple(
+        Row(
+            items=(
+                RowItem("Name", next(filter(lambda x: x[0] == warning[0], raspis), None)[1], Klass.WARNING),
+                RowItem("Warning Description", warning[1], Klass.WARNING),
+            )
+        )
+        for warning in warnings
+    )
+
+    raspis = raspis[-1:]  # remove the power column
+
+    columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated"]
+    raspi_rows = [
+        construct_row(zip(columns, items[1:]), items[0], hw_warning=items[0] in warning_ids) for items in raspis
+    ]
+
+    body = build_homepage_content(raspi_rows, warning_rows)
+    content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
 
 @app.get("/help", response_class=HTMLResponse)
 def help():
     """Serve help page."""
-    content = """
-    <html>
-        <head>
-            <title>Help page</title>
-        </head>
-        <body>
-            <h1>Hello world! This is the help page</h1>
-        </body>
-    </html>
-    """
+    with open("/app/help.html") as f:
+        content = f.read()
+
+    content = build_page(title="Autopi Help", body_content=content, style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
 
@@ -79,29 +68,23 @@ def register(
 ):  # FIXME this is probably not how the username cookie is passed, if that is how shibboleth works
     """Serve register page."""
     if uid is None:
-        raise HTTPException(
-            status_code=401, detail="Please log in..."
-        )  # TODO A redirect would probably be better
+        raise HTTPException(status_code=401, detail="Please log in...")  # TODO A redirect would probably be better
 
     username = uid
     devid = None
     with connect() as db:
+        user_login(db, username)
         devid = db.get_unregistered_devid(username)
 
     # FIXME Return a nicer page!
     # TODO The contents of the page have a baked in assumption about the device file name
     filename = "/boot/CSM_device_id.txt"
     content = f"""
-    <html>
-        <head>
-            <title>Register</title>
-        </head>
-        <body>
-            Enter the following ID in '{filename}'
-            <h1>{devid}</h1>
-        </body>
-    </html>
+        <p>Enter the following ID in '{filename}'. Visit the <a href="help">help page</a> for more in-depth instructions.</p>
+        <h1>{devid}</h1>
     """
+    content = build_page(title="Autopi Registration", body_content=content, style_file="/app/style.css")
+
     return HTMLResponse(content=content, status_code=200)
 
 
