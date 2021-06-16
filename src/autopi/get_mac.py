@@ -19,11 +19,7 @@ def user_input() -> str:
         "What is your connection type? (ethernet, wireless)",
         validator=lambda l: l.lower() in ("ethernet", "wifi", "wireless"),
     )
-    return (
-        Config.DEFAULT_WIRED_INTERFACE
-        if connection.lower() == "ethernet"
-        else Config.DEFAULT_WIRELESS_INTERFACE
-    )
+    return Config.DEFAULT_WIRED_INTERFACE if connection.lower() == "ethernet" else Config.DEFAULT_WIRELESS_INTERFACE
 
 
 def main() -> str:

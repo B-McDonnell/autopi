@@ -55,7 +55,6 @@ def set_home_network():
     else:
         priority = None
 
-
     wpa.add_network(network_config=wpa.make_network(ssid, password, priority))
     if wpa.get_country() is None:
         wpa.update_country(country=Config.DEFAULT_COUNTRY)
