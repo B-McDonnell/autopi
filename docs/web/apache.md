@@ -1,4 +1,4 @@
-There must exist a keys folder in the root for docker to copy the keys correctly. They must be named as follows.
+There must exist a keys folder in the project root for docker to copy the keys correctly. They must be named as follows.
 
 ```
 tls/
