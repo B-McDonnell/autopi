@@ -360,4 +360,6 @@ MigrationBackup/
 .Rhistory
 
 caddy_data/
+*.key
+*.pem
 *.secret
