@@ -32,17 +32,6 @@ def root(
         )
         for warning in warnings
     )
-    # warning_rows = tuple(
-    #     Row(
-    #         items=(
-    #             RowItem("Name", [name for devid, name, *_ in raspis if devid == warning[0]][0], Klass.WARNING),
-    #             RowItem("Warning Description", warning[1], Klass.WARNING),
-    #         )
-    #     )
-    #     for warning in warnings if warning is not None
-    # )
-
-    raspis = raspis[-1:]  # remove the power column
 
     columns = ["Name", "IP Address", "SSID", "SSH", "VNC", "Last Updated"]
     raspi_rows = [
