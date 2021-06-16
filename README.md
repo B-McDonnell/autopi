@@ -9,16 +9,94 @@ The table of contents can be accessed from the dropdown menu to the left of `REA
 4. Remove autopi project: `cd ..; rm -rf autopi`
 
 
-## Setup web server
-TODO: will be done via Docker compose.
-Server requirements: Docker, Docker Compose.
+## Setting up the web server
+The server is managed by Docker Compose. 
+While most of the server setup is internal to the container system and does not require setup on the host side, there are some important exceptions.
 
+### Database password
+Setting the database password requires two steps: creating the password file and updating `docker-compose.yaml` to the password file.
 
-## Migrate web server
-TODO: will be done via Docker volume management (the containers are ephemeral).
+1. Add a strong unique password to a password file. This is, by default, `.db_password.secret`. For a random password, the following command can be run:
+
+    `cat /dev/urandom | head --bytes 64 | sha256sum - | cut -d ' ' -f 1 | tee .db_password.secret`
+
+2. If you used a password file other than  `.db_password.secret`, that must be changed in `docker-compose.yaml`. If the respository is managed by Git, add the file to `.gitignore` (`.gitignore` already contains `*.secret`):
+
+    ```yaml
+    secrets:
+      db_password:
+        file: your_file_here
+      ```
+
+An alternative strategy is to use [Docker Swarm](https://docs.docker.com/engine/swarm/secrets/) instead of Docker Compose, so that secrets are stored in a vault, can be rotated, et cetera, but this is not how this project was developed.
+
+### Database backups
+Database backups are managed by the [prodrigestivill/postgres-backup-local](https://hub.docker.com/r/prodrigestivill/postgres-backup-local) image.
+
+Unlike other Docker data, the database backups are not kept in a named Docker volume, but instead in a bind mount. This prevents accidental backup deletion during Docker volume management (e.g. `docker-compose down --volume`) and can simplify remote backups if necessary.
+
+The bind must be configured:
+
+1. Create the directory. By default, `docker-compose.yaml` assumes `/var/opt/pgbackups` is used:
+
+    `sudo mkdir -p /var/opt/pgbackups && sudo chown -R 999:999 /var/opt/pgbackups`
+
+2. If you used a directory other than `/var/opt/pgbackups`, update `docker-compose.yaml`:
+
+    ```yaml
+    db_backup:
+      volumes:
+        - your_dir_here:/backups
+    ```
+
+Backup timings are set in the `db_backup.env` file. Currently, standard defaults are used:
+ - backups are made daily
+ - daily backups are kept 7 days
+ - weekly backups are kept 4 weeks
+ - monthly backups are kept 6 months
+
+### TLS certificates
+There are two sets of certificates needed. First, the actual autopi.mines.edu certificates are expected to be in a folder called 'tls', this folder should be in the same directory as 'docker-compose.yaml', that is the project root. There should be three files here:
+
+```
+tls/
+|
+| - autopi_chain.pem
+| - autopi_server.cer
+| - autopi_server.key
+```
+
+The chain file consists of the intermediate certificates. The cer file is a pem certificate with the actual autopi.mines.edu certificate. The key is the private key. These are not stored in the repository and must be supplied.
+
+Additionally, SHibboleth requires a key and certificate as well. These are very specific files, but they are not provided in the repo. When obtained, they should be placed in the folder `src/web/shib/` and should be called `sp-cert.pem` and `sp-key.pem` for the certificate and key respectively. Without these, MultiPass cannot function; the image will also fail to build.
+
+### Firewall rules
+The only port that must be exposed is port `:443`. Only the `proxy` service exposes external ports, and it only accepts `https` traffic; all other traffic are in segmented internally managed networks that cannot be accessed from outside the Docker service stack.
+
+## Migrating the web server
+Migration is simple, as the Docker containers are ephemeral. Migrating each volume ensures the server state remains constant.
+
+For each named volume (which can be found under the global `volumes` directive in `docker-compose.yaml`), follow the [official Docker documentation](https://docs.docker.com/storage/volumes/#backup-restore-or-migrate-data-volumes) on backing up, migrating, and restoring with named volumes.
+
+For the database backups, it is as simple as copying the contents of the backup directory from the old host machine to the new host machine
 
 
 # Usage instructions
+## Running the server
+The server is managed by Docker Compose and most images are built from local resources. Thus, there are two steps to running the server:
+
+1. `sudo docker-compose build` builds the necessary images.
+2. `sudo docker-compose up [--build] [-d]` starts the server. The `--build` flag combines steps 1 and 2. The `-d` flag runs the services as a daemon. `-d` is usually the desired behavior.
+
+See `docker-compose --help` for more details usage instructions.
+
+Other useful commands include `sudo docker-compose logs` to view the service logs and `sudo docker-compose down` to stop the server.
+
+## Database administration
+To access the database, `sudo docker-compose exec db psql -U autopi -d autopi` should be run. This will put you into `psql` inside the database service. Some useful administrative commands are described in `docs/web/database/admin.md`.
+
+For example, `INSERT INTO autopi.user (username, is_admin) VALUES ('minesusername', true);` will add an administrator.
+
 ## Setup
 There are two required setup steps. First, the Raspberry Pi must have its MAC address registered with the school so it can connect to the internet on `CSMwireless`. Second, the Raspberry Pi must be registered with the IP/Status discovery system. This registration can only occur once the Raspberry Pi is connected to the network (i.e. has performed network registration).
 
