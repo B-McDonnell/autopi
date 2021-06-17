@@ -243,7 +243,7 @@ class PiDBConnection:
         elif registered_only:
             condition = "WHERE registered = true"
         query = f"""
-            SELECT device_id, alias, ip_addr, ssid, ssh, vnc, updated_at, username, power FROM autopi.raspi {condition};
+            SELECT device_id, alias, ip_addr, ssid, ssh, vnc, updated_at, username, power FROM autopi.raspi {condition} ORDER BY alias;
         """
         # execute query
         return self._fetchall(query, data)
