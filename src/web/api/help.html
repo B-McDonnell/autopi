@@ -1,124 +1,10 @@
-<h1>Table of contents</h1>
-
-<p>The table of contents can be accessed from the dropdown menu to the left of <code>README.md</code>&rsquo;s title.</p>
-
-<h1>Installation instructions</h1>
-
-<h2>Build image</h2>
-
-<ol>
-<li><code>cd /path/to/autopi/</code></li>
-<li><code>chmod +x install</code></li>
-<li><code>./install</code></li>
-<li>Remove autopi project: <code>cd ..; rm -rf autopi</code></li>
-</ol>
-
-<h2>Setting up the web server</h2>
-
-<p>The server is managed by Docker Compose.
-While most of the server setup is internal to the container system and does not require setup on the host side, there are some important exceptions.</p>
-
-<h3>Database password</h3>
-
-<p>Setting the database password requires two steps: creating the password file and updating <code>docker-compose.yaml</code> to the password file.</p>
-
-<ol>
-<li><p>Add a strong unique password to a password file. This is, by default, <code>.db_password.secret</code>. For a random password, the following command can be run:</p>
-
-<p><code>cat /dev/urandom | head --bytes 64 | sha256sum - | cut -d ' ' -f 1 | tee .db_password.secret</code></p></li>
-
-<li><p>If you used a password file other than  <code>.db_password.secret</code>, that must be changed in <code>docker-compose.yaml</code>. If the respository is managed by Git, add the file to <code>.gitignore</code> (<code>.gitignore</code> already contains <code>*.secret</code>):</p>
-
-<pre><code class="language-yaml">secrets:
-  db_password:
-    file: your_file_here
-</code></pre></li>
-</ol>
-
-<p>An alternative strategy is to use <a href="https://docs.docker.com/engine/swarm/secrets/">Docker Swarm</a> instead of Docker Compose, so that secrets are stored in a vault, can be rotated, et cetera, but this is not how this project was developed.</p>
-
-<h3>Database backups</h3>
-
-<p>Database backups are managed by the <a href="https://hub.docker.com/r/prodrigestivill/postgres-backup-local">prodrigestivill/postgres-backup-local</a> image.</p>
-
-<p>Unlike other Docker data, the database backups are not kept in a named Docker volume, but instead in a bind mount. This prevents accidental backup deletion during Docker volume management (e.g. <code>docker-compose down --volume</code>) and can simplify remote backups if necessary.</p>
-
-<p>The bind must be configured:</p>
-
-<ol>
-<li><p>Create the directory. By default, <code>docker-compose.yaml</code> assumes <code>/var/opt/pgbackups</code> is used:</p>
-
-<p><code>sudo mkdir -p /var/opt/pgbackups &amp;&amp; sudo chown -R 999:999 /var/opt/pgbackups</code></p></li>
-
-<li><p>If you used a directory other than <code>/var/opt/pgbackups</code>, update <code>docker-compose.yaml</code>:</p>
-
-<pre><code class="language-yaml">db_backup:
-  volumes:
-    - your_dir_here:/backups
-</code></pre></li>
-</ol>
-
-<p>Backup timings are set in the <code>db_backup.env</code> file. Currently, standard defaults are used:
- - backups are made daily
- - daily backups are kept 7 days
- - weekly backups are kept 4 weeks
- - monthly backups are kept 6 months</p>
-
-<h3>TLS certificates</h3>
-
-<p>There are two sets of certificates needed. First, the actual autopi.mines.edu certificates are expected to be in a folder called &lsquo;tls&rsquo;, this folder should be in the same directory as &lsquo;docker-compose.yaml&rsquo;, that is the project root. There should be three files here:</p>
-
-<pre><code>tls/
-|
-| - autopi_chain.pem
-| - autopi_server.cer
-| - autopi_server.key
-</code></pre>
-
-<p>The chain file consists of the intermediate certificates. The cer file is a pem certificate with the actual autopi.mines.edu certificate. The key is the private key. These are not stored in the repository and must be supplied.</p>
-
-<p>Additionally, SHibboleth requires a key and certificate as well. These are very specific files, but they are not provided in the repo. When obtained, they should be placed in the folder <code>src/web/shib/</code> and should be called <code>sp-cert.pem</code> and <code>sp-key.pem</code> for the certificate and key respectively. Without these, MultiPass cannot function; the image will also fail to build.</p>
-
-<h3>Firewall rules</h3>
-
-<p>The only port that must be exposed is port <code>:443</code>. Only the <code>proxy</code> service exposes external ports, and it only accepts <code>https</code> traffic; all other traffic are in segmented internally managed networks that cannot be accessed from outside the Docker service stack.</p>
-
-<h2>Migrating the web server</h2>
-
-<p>Migration is simple, as the Docker containers are ephemeral. Migrating each volume ensures the server state remains constant.</p>
-
-<p>For each named volume (which can be found under the global <code>volumes</code> directive in <code>docker-compose.yaml</code>), follow the <a href="https://docs.docker.com/storage/volumes/#backup-restore-or-migrate-data-volumes">official Docker documentation</a> on backing up, migrating, and restoring with named volumes.</p>
-
-<p>For the database backups, it is as simple as copying the contents of the backup directory from the old host machine to the new host machine</p>
-
-<h1>Usage instructions</h1>
-
-<h2>Running the server</h2>
-
-<p>The server is managed by Docker Compose and most images are built from local resources. Thus, there are two steps to running the server:</p>
-
-<ol>
-<li><code>sudo docker-compose build</code> builds the necessary images.</li>
-<li><code>sudo docker-compose up [--build] [-d]</code> starts the server. The <code>--build</code> flag combines steps 1 and 2. The <code>-d</code> flag runs the services as a daemon. <code>-d</code> is usually the desired behavior.</li>
-</ol>
-
-<p>See <code>docker-compose --help</code> for more details usage instructions.</p>
-
-<p>Other useful commands include <code>sudo docker-compose logs</code> to view the service logs and <code>sudo docker-compose down</code> to stop the server.</p>
-
-<h2>Database administration</h2>
-
-<p>To access the database, <code>sudo docker-compose exec db psql -U autopi -d autopi</code> should be run. This will put you into <code>psql</code> inside the database service. Some useful administrative commands are described in <code>docs/web/database/admin.md</code>.</p>
-
-<p>For example, <code>INSERT INTO autopi.user (username, is_admin) VALUES ('minesusername', true);</code> will add an administrator.</p>
-
-<h2>Setup</h2>
+<h1>Setup</h1>
 
 <p>There are two required setup steps. First, the Raspberry Pi must have its MAC address registered with the school so it can connect to the internet on <code>CSMwireless</code>. Second, the Raspberry Pi must be registered with the IP/Status discovery system. This registration can only occur once the Raspberry Pi is connected to the network (i.e. has performed network registration).</p>
 
 <p>Custom networks can also be added to the Raspberry Pi.</p>
 
-<h3>Device and MAC Registration</h3>
+<h2>Device and MAC Registration</h2>
 
 <ol>
 <li><p>Insert the SD card into the Raspberry Pi.</p></li>
@@ -174,7 +60,7 @@ While most of the server setup is internal to the container system and does not 
 <li><p>To add additional networks, see <em>Home Network Registration</em> procedure.</p></li>
 </ol>
 
-<h3>Home Network Registration</h3>
+<h2>Home Network Registration</h2>
 
 <p>There are two methods for adding a Home network to the Raspberry Pi.</p>
 
@@ -201,7 +87,7 @@ While most of the server setup is internal to the container system and does not 
 
 <p>If neither of these methods work for your network setup, visit the <a href="https://www.raspberrypi.org/documentation/configuration/wireless/">the official Raspberry Pi network configuration docs</a>.</p>
 
-<h2>Get IP/status information</h2>
+<h1>Get IP/status information</h1>
 
 <p>In order to see the IP and status information for the Raspberry Pi, do the following:</p>
 
@@ -212,9 +98,3 @@ While most of the server setup is internal to the container system and does not 
 If you have multiple Raspberry Pi&rsquo;s, they will all be displayed.</li>
 <li>Note that Raspberry Pis highlighted in yellow are off or cannot be contacted for some other reason. If this occurs, try restarting the Raspberry Pi.</li>
 </ol>
-
-<h1>Development instructions</h1>
-
-<p>Run <code>pip3 install -r requirements.txt</code> and <code>pip3 install -r requirements-dev.txt</code>.
-Run <code>pre-commit install</code>.
-When <code>pre-commit</code> fails (and a hook states that files have changed), run <code>git add --update</code> to update the git staging area.</p>
