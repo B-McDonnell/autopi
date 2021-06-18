@@ -4,7 +4,9 @@ import enum
 from dataclasses import dataclass
 from typing import Iterable, List, Optional, Union
 
-from airium import Airium
+from airium import Airium, Tag
+
+Tag.ATTRIBUTE_NAME_SUBSTITUTES.update({"http_equiv": "http-equiv"})
 
 
 @enum.unique
@@ -189,13 +191,16 @@ def build_homepage_content(
     return airium
 
 
-def build_page(title: str, body_content: str, style_file: Optional[str] = None) -> str:
+def build_page(
+    title: str, body_content: str, style_file: Optional[str] = None, refresh_after: Optional[int] = None
+) -> str:
     """Construct a page with the navigation header and styling.
 
     Args:
         title (str): title of the page
         body_content (str): content of the page
         style_file (str | None, optional): path to a CSS style file. Defaults to None.
+        refresh_after (str | None, optional): seconds between automatic refreshes. No automatic refreshing if None. Defaults to None.
 
     Returns:
         str: string representation of the page's HTML
@@ -210,6 +215,8 @@ def build_page(title: str, body_content: str, style_file: Optional[str] = None) 
             if style_file is not None:
                 a.style(_t=style)
             a.meta(http_equiv="content-type", content="text/html", charset="utf-8")
+            if refresh_after is not None:
+                a.meta(http_equiv="refresh", content=f"{refresh_after}")
             a.title(_t=title)
         with a.body():
             with a.div(klass="topnav"):

@@ -64,7 +64,7 @@ def root(uid: Optional[str] = Header(None)):
         ]
         body = build_homepage_content(raspi_rows, warning_rows, other_raspi_rows)
 
-    content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css")
+    content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css", refresh_after=45)
     return HTMLResponse(content=content, status_code=200)
 
 
