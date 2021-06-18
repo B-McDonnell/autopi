@@ -113,7 +113,7 @@ Custom networks can also be added to the Raspberry Pi.
 6. Insert SD card into your computer.
 7. Open the SD card drive on your file explorer (named `boot`).
 8. Open the file `CSM_mac_address.txt`.
-9. Go to `netreg.mines.edu` while connected to `CSMwireless`.
+9. Go to [`netreg.mines.edu`](https://netreg.mines.edu) while connected to `CSMwireless`.
 10. Agree to the terms and conditions.
 11. On the next page, enter the MAC address from the file in step 7.
 12. Enter the rest of your information and click register.
@@ -121,7 +121,7 @@ Custom networks can also be added to the Raspberry Pi.
 14. The Raspberry Pi will be able to access internet in up to 5 minutes, meanwhile, continue steps.
 15. Reopen the SD card drive on your file explorer (named `boot`).
 16. Open the file `CSM_device_id.txt`.
-17. Go to [`https://autopi.mines.edu/`](https://autopi.mines.edu/). 
+17. Go to [`autopi.mines.edu`](https://autopi.mines.edu/). 
 18. Login with your Mines MultiPass.
 19. Click `Register` at the top of the page.
 20. Copy the `ID` into the file opened in step 16.
@@ -159,7 +159,7 @@ If neither of these methods work for your network setup, visit the [the official
 ## Get IP/status information
 In order to see the IP and status information for the Raspberry Pi, do the following:
 
-1. Go to [`https://autopi.mines.edu/`](https://autopi.mines.edu/). 
+1. Go to [`autopi.mines.edu`](https://autopi.mines.edu/). 
 2. Login with your Mines MultiPass.
 3. Your registered Raspberry Pi will be displayed with all corresponding IP, network, and status information.
    If you have multiple Raspberry Pi's, they will all be displayed.
