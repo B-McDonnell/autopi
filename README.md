@@ -121,14 +121,17 @@ Custom networks can also be added to the Raspberry Pi.
 14. The Raspberry Pi will be able to access internet in up to 5 minutes, meanwhile, continue steps.
 15. Reopen the SD card drive on your file explorer (named `boot`).
 16. Open the file `CSM_device_id.txt`.
-17. Go to `https://autopi.mines.edu/`. 
+17. Go to [`https://autopi.mines.edu/`](https://autopi.mines.edu/). 
 18. Login with your Mines MultiPass.
 19. Click `Register` at the top of the page.
 20. Copy the `ID` into the file opened in step 16.
 21. Save and close the file.
 22. Eject the SD card and plug it into the Raspberry Pi.
 23. Plug in the Raspberry Pi, lights will turn on.
-24. See *Get IP/status information* to confirm successful registration. 
+24. See *Get IP/status information* to confirm successful registration.
+
+    Note that it may take 1-2 minutes for the Raspberry Pi to boot and contact the server.
+
 25. To add additional networks, see *Home Network Registration* procedure.
 
 ### Home Network Registration
@@ -156,12 +159,11 @@ If neither of these methods work for your network setup, visit the [the official
 ## Get IP/status information
 In order to see the IP and status information for the Raspberry Pi, do the following:
 
-1. Go to `https://autopi.mines.edu/`. 
+1. Go to [`https://autopi.mines.edu/`](https://autopi.mines.edu/). 
 2. Login with your Mines MultiPass.
 3. Your registered Raspberry Pi will be displayed with all corresponding IP, network, and status information.
    If you have multiple Raspberry Pi's, they will all be displayed.
-4. Refresh page for status changes.
-5. Note that Raspberry Pis highlighted in yellow are off or cannot be contacted for some other reason. If this occurs, try restarting the Raspberry Pi.
+4. Note that Raspberry Pis highlighted in yellow are off or cannot be contacted for some other reason. If this occurs, try restarting the Raspberry Pi.
 
 # Development instructions
 Run `pip3 install -r requirements.txt` and `pip3 install -r requirements-dev.txt`.
