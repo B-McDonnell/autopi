@@ -1,4 +1,4 @@
-"""Test API server."""
+"""API-Database interface."""
 
 import os
 import random
