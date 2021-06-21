@@ -5,6 +5,7 @@ from typing import Optional
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import HTMLResponse
 
+from .config import Config
 from .core import StatusModel
 from .db import PiDBConnection, connect
 from .generate_html import Klass, Row, RowItem, build_homepage_content, build_page, construct_row
@@ -24,7 +25,7 @@ def user_login(db: PiDBConnection, username: str):
 def root(uid: Optional[str] = Header(None)):
     """Serve raspi list."""
     username = uid
-    if username is None:
+    if username is None or username == '':
         raise HTTPException(status_code=401, detail="Not logged in")  # TODO A redirect would probably be better
     with connect() as db:
         user_login(db, username)
@@ -64,7 +65,10 @@ def root(uid: Optional[str] = Header(None)):
         ]
         body = build_homepage_content(raspi_rows, warning_rows, other_raspi_rows)
 
-    content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css", refresh_after=30)
+    if Config.homepageAutoRefresh:
+        content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css", refresh_after=30)
+    else:
+        content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
 
 
@@ -81,7 +85,7 @@ def help():
 @app.get("/register", response_class=HTMLResponse)
 def register(uid: Optional[str] = Header(None)):
     """Serve register page."""
-    if uid is None:
+    if uid is None or uid == '':
         raise HTTPException(status_code=401, detail="Please log in...")  # TODO A redirect would probably be better
 
     username = uid
