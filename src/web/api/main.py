@@ -65,8 +65,8 @@ def root(uid: Optional[str] = Header(None)):
         ]
         body = build_homepage_content(raspi_rows, warning_rows, other_raspi_rows)
 
-    if Config.homepageAutoRefresh:
-        content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css", refresh_after=30)
+    if Config.homepageAutoRefresh and Config.homepageAutoRefreshTime > 0:
+        content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css", refresh_after=Config.homepageAutoRefreshTime)
     else:
         content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
