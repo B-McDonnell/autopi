@@ -25,7 +25,7 @@ def user_login(db: PiDBConnection, username: str):
 def root(uid: Optional[str] = Header(None)):
     """Serve raspi list."""
     username = uid
-    if username is None or username == '':
+    if username is None or username == "":
         raise HTTPException(status_code=401, detail="Not logged in")  # TODO A redirect would probably be better
     with connect() as db:
         user_login(db, username)
@@ -66,7 +66,12 @@ def root(uid: Optional[str] = Header(None)):
         body = build_homepage_content(raspi_rows, warning_rows, other_raspi_rows)
 
     if Config.homepageAutoRefresh and Config.homepageAutoRefreshTime > 0:
-        content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css", refresh_after=Config.homepageAutoRefreshTime)
+        content = build_page(
+            title="Autopi",
+            body_content=str(body),
+            style_file="/app/style.css",
+            refresh_after=Config.homepageAutoRefreshTime,
+        )
     else:
         content = build_page(title="Autopi", body_content=str(body), style_file="/app/style.css")
     return HTMLResponse(content=content, status_code=200)
@@ -85,7 +90,7 @@ def help():
 @app.get("/register", response_class=HTMLResponse)
 def register(uid: Optional[str] = Header(None)):
     """Serve register page."""
-    if uid is None or uid == '':
+    if uid is None or uid == "":
         raise HTTPException(status_code=401, detail="Please log in...")  # TODO A redirect would probably be better
 
     username = uid
