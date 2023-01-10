@@ -3,7 +3,7 @@
 `Autopi` is a secure web monitoring solution for Raspberry Pis or other Linux-based SBCs.
 It is deployed through Docker and custom Raspberry OS images and designed with authorization through Shibboleth.
 
-A full software design document can be found here: [docs/software-design-doc.pdf](docs/softrware-design-doc.pdf
+A full software design document can be found here: [docs/software-design-doc.pdf](docs/software-design-doc.pdf).
 
 # Installation instructions
 ## Build image
