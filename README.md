@@ -1,5 +1,9 @@
-# Table of contents
-The table of contents can be accessed from the dropdown menu to the left of `README.md`'s title.
+# What is Autopi?
+![image](https://user-images.githubusercontent.com/36059032/211445198-709ad301-d2d7-47c9-a872-1eaa488be004.png)
+`Autopi` is a secure web monitoring solution for Raspberry Pis or other Linux-based SBCs.
+It is deployed through Docker and custom Raspberry OS images and designed with authorization through Shibboleth.
+
+A full software design document can be found here: [docs/software-design-doc.pdf](docs/software-design-doc.pdf).
 
 # Installation instructions
 ## Build image
